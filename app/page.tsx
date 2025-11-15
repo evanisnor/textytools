@@ -26,6 +26,18 @@ export default function Home() {
             </p>
           </Link>
 
+          <Link
+            href="/case-converter"
+            className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors"
+          >
+            <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
+              Case Converter
+            </h2>
+            <p className="text-sm text-zinc-600 dark:text-zinc-400">
+              Transform text between different case formats instantly
+            </p>
+          </Link>
+
           {/* Placeholder for future tools */}
           <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors opacity-50">
             <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
