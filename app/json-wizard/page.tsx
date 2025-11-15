@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import Link from 'next/link';
 
 type ViewMode = 'pretty' | 'minified' | 'raw';
@@ -71,15 +71,6 @@ function unescapeJSON(text: string): string {
   }
 }
 
-function highlightSearchTerm(text: string, searchTerm: string): string {
-  if (!searchTerm || !text) return text;
-
-  const escapedTerm = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const regex = new RegExp(escapedTerm, 'gi');
-
-  return text.replace(regex, (match) => `⟪${match}⟫`);
-}
-
 function getJSONStats(text: string): { keys: number; depth: number; size: number } {
   try {
     const parsed = JSON.parse(text);
@@ -122,9 +113,49 @@ export default function JSONWizard() {
   const [indentSize, setIndentSize] = useState(2);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortKeys, setSortKeys] = useState(false);
+  const [currentMatchIndex, setCurrentMatchIndex] = useState(0);
+
+  const inputContainerRef = useRef<HTMLDivElement>(null);
+  const outputContainerRef = useRef<HTMLDivElement>(null);
 
   const validation = useMemo(() => validateJSON(input), [input]);
   const stats = useMemo(() => getJSONStats(input), [input]);
+
+  // Calculate search matches with their positions
+  const searchMatches = useMemo(() => {
+    if (!searchTerm || !input) return [];
+
+    const matches: { lineIndex: number; matchIndex: number; columnStart: number }[] = [];
+    const lines = input.split('\n');
+
+    lines.forEach((line, lineIndex) => {
+      let match;
+      const lineRegex = new RegExp(searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+      while ((match = lineRegex.exec(line)) !== null) {
+        matches.push({
+          lineIndex,
+          matchIndex: matches.length,
+          columnStart: match.index
+        });
+      }
+    });
+
+    return matches;
+  }, [searchTerm, input]);
+
+  const totalMatches = searchMatches.length;
+
+  // Create a map for quick lookup of match indices by line and column
+  const matchPositions = useMemo(() => {
+    const map = new Map<number, Map<number, number>>();
+    searchMatches.forEach(match => {
+      if (!map.has(match.lineIndex)) {
+        map.set(match.lineIndex, new Map());
+      }
+      map.get(match.lineIndex)!.set(match.columnStart, match.matchIndex);
+    });
+    return map;
+  }, [searchMatches]);
 
   const processedJSON = useMemo(() => {
     if (!input.trim() || !validation.isValid) return input;
@@ -161,20 +192,100 @@ export default function JSONWizard() {
           break;
       }
 
-      if (searchTerm) {
-        result = highlightSearchTerm(result, searchTerm);
-      }
-
       return result;
     } catch {
       return input;
     }
-  }, [input, viewMode, indentSize, searchTerm, sortKeys, validation.isValid]);
+  }, [input, viewMode, indentSize, sortKeys, validation.isValid]);
+
+  // Calculate search matches in the output JSON
+  const outputSearchMatches = useMemo(() => {
+    if (!searchTerm || !processedJSON) return [];
+
+    const matches: { lineIndex: number; matchIndex: number; columnStart: number }[] = [];
+    const lines = processedJSON.split('\n');
+
+    lines.forEach((line, lineIndex) => {
+      let match;
+      const lineRegex = new RegExp(searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+      while ((match = lineRegex.exec(line)) !== null) {
+        matches.push({
+          lineIndex,
+          matchIndex: matches.length,
+          columnStart: match.index
+        });
+      }
+    });
+
+    return matches;
+  }, [searchTerm, processedJSON]);
+
+  // Create a map for quick lookup of output match indices
+  const outputMatchPositions = useMemo(() => {
+    const map = new Map<number, Map<number, number>>();
+    outputSearchMatches.forEach(match => {
+      if (!map.has(match.lineIndex)) {
+        map.set(match.lineIndex, new Map());
+      }
+      map.get(match.lineIndex)!.set(match.columnStart, match.matchIndex);
+    });
+    return map;
+  }, [outputSearchMatches]);
+
+  // Scroll to error line when validation fails
+  useEffect(() => {
+    if (!validation.isValid && validation.lineNumber && inputContainerRef.current) {
+      const lineHeight = 20; // Approximate line height in pixels
+      const errorLine = validation.lineNumber - 1;
+      const scrollPosition = errorLine * lineHeight;
+
+      inputContainerRef.current.scrollTop = Math.max(0, scrollPosition - 100);
+    }
+  }, [validation]);
+
+  // Reset to first match when search term changes
+  useEffect(() => {
+    if (searchTerm) {
+      setCurrentMatchIndex(0);
+    }
+  }, [searchTerm]);
+
+  // Scroll to current match
+  useEffect(() => {
+    if (!searchTerm || searchMatches.length === 0) return;
+
+    const currentMatch = searchMatches[currentMatchIndex];
+    if (!currentMatch) return;
+
+    // Use setTimeout to ensure the DOM has updated with the new highlighted elements
+    setTimeout(() => {
+      // Scroll input to current match using scrollIntoView for accurate positioning
+      const inputMatchElement = document.getElementById(`input-match-${currentMatchIndex}`);
+      if (inputMatchElement) {
+        inputMatchElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+          inline: 'center'
+        });
+      }
+
+      // Scroll output to current match using scrollIntoView for accurate positioning
+      if (outputSearchMatches.length > 0) {
+        const outputMatchElement = document.getElementById(`output-match-${currentMatchIndex}`);
+        if (outputMatchElement) {
+          outputMatchElement.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+            inline: 'center'
+          });
+        }
+      }
+    }, 0);
+  }, [currentMatchIndex, searchMatches, outputSearchMatches, searchTerm]);
 
   const copyToClipboard = async () => {
     try {
-      const cleanText = processedJSON.replace(/⟪|⟫/g, '');
-      await navigator.clipboard.writeText(cleanText);
+      await navigator.clipboard.writeText(processedJSON);
     } catch (err) {
       console.error('Failed to copy:', err);
     }
@@ -190,25 +301,66 @@ export default function JSONWizard() {
     setInput(unescapeJSON(input));
   };
 
-  const renderOutput = () => {
-    if (!processedJSON) {
-      return <span className="text-zinc-400 dark:text-zinc-600">Formatted JSON will appear here...</span>;
+  const goToNextMatch = () => {
+    if (totalMatches > 0) {
+      setCurrentMatchIndex((prev) => (prev + 1) % totalMatches);
+    }
+  };
+
+  const goToPreviousMatch = () => {
+    if (totalMatches > 0) {
+      setCurrentMatchIndex((prev) => (prev - 1 + totalMatches) % totalMatches);
+    }
+  };
+
+  const renderHighlightedText = (text: string, lineIndex?: number, useOutputMatches = false) => {
+    if (!searchTerm || lineIndex === undefined) {
+      return text;
     }
 
-    if (!searchTerm) {
-      return processedJSON;
+    const positions = useOutputMatches ? outputMatchPositions : matchPositions;
+    const lineMatches = positions.get(lineIndex);
+    if (!lineMatches || lineMatches.size === 0) {
+      return text;
     }
 
-    const parts = processedJSON.split(/⟪|⟫/);
+    const regex = new RegExp(searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+    const parts: Array<{ text: string; isMatch: boolean; matchIndex: number }> = [];
+    let lastIndex = 0;
+    let match;
+
+    while ((match = regex.exec(text)) !== null) {
+      // Add text before match
+      if (match.index > lastIndex) {
+        parts.push({ text: text.substring(lastIndex, match.index), isMatch: false, matchIndex: -1 });
+      }
+      // Add match - look up the pre-calculated match index
+      const globalMatchIndex = lineMatches.get(match.index) ?? -1;
+      parts.push({ text: match[0], isMatch: true, matchIndex: globalMatchIndex });
+      lastIndex = match.index + match[0].length;
+    }
+
+    // Add remaining text
+    if (lastIndex < text.length) {
+      parts.push({ text: text.substring(lastIndex), isMatch: false, matchIndex: -1 });
+    }
+
     return parts.map((part, index) => {
-      if (index % 2 === 1) {
+      if (part.isMatch) {
+        const isCurrentMatch = part.matchIndex === currentMatchIndex;
         return (
-          <span key={index} className="bg-yellow-300 dark:bg-yellow-600 text-black">
-            {part}
+          <span
+            key={index}
+            id={isCurrentMatch ? (useOutputMatches ? `output-match-${part.matchIndex}` : `input-match-${part.matchIndex}`) : undefined}
+            className={isCurrentMatch
+              ? 'bg-green-300 dark:bg-green-600 text-black'
+              : 'bg-yellow-300 dark:bg-yellow-600 text-black'}
+          >
+            {part.text}
           </span>
         );
       }
-      return <span key={index}>{part}</span>;
+      return <span key={index}>{part.text}</span>;
     });
   };
 
@@ -226,7 +378,13 @@ export default function JSONWizard() {
           ))}
         </div>
         <div className="flex-1 pl-4 whitespace-pre">
-          {searchTerm ? renderOutput() : text}
+          {searchTerm ? (
+            lines.map((line, index) => (
+              <div key={index}>{renderHighlightedText(line, index, true)}</div>
+            ))
+          ) : (
+            text
+          )}
         </div>
       </div>
     );
@@ -300,17 +458,38 @@ export default function JSONWizard() {
                   </div>
                 )}
               </div>
-              <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4 h-64 overflow-auto relative">
+              <div ref={inputContainerRef} className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4 h-64 overflow-auto relative">
                 {input ? (
                   <div className="flex font-mono text-sm">
                     <div className="select-none text-zinc-400 dark:text-zinc-600 text-right pr-4 border-r border-zinc-200 dark:border-zinc-800" style={{ minWidth: `${String(input.split('\n').length).length + 2}ch` }}>
-                      {input.split('\n').map((_, index) => (
-                        <div key={index}>{index + 1}</div>
-                      ))}
+                      {input.split('\n').map((_, index) => {
+                        const lineNumber = index + 1;
+                        const isErrorLine = !validation.isValid && validation.lineNumber === lineNumber;
+                        return (
+                          <div
+                            key={index}
+                            className={isErrorLine ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 font-bold' : ''}
+                          >
+                            {lineNumber}
+                          </div>
+                        );
+                      })}
                     </div>
                     <div className="flex-1 pl-4 relative">
-                      <div className="absolute inset-0 whitespace-pre text-zinc-900 dark:text-zinc-50">
-                        {input}
+                      <div className="absolute inset-0 whitespace-pre">
+                        {input.split('\n').map((line, index) => {
+                          const lineNumber = index + 1;
+                          const isErrorLine = !validation.isValid && validation.lineNumber === lineNumber;
+                          const lineContent = searchTerm ? renderHighlightedText(line, index) : line;
+                          return (
+                            <div
+                              key={index}
+                              className={isErrorLine ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400' : 'text-zinc-900 dark:text-zinc-50'}
+                            >
+                              {lineContent}
+                            </div>
+                          );
+                        })}
                       </div>
                       <textarea
                         value={input}
@@ -348,7 +527,7 @@ export default function JSONWizard() {
                   </button>
                 )}
               </div>
-              <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4 h-64 overflow-auto">
+              <div ref={outputContainerRef} className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4 h-64 overflow-auto">
                 {processedJSON ? (
                   renderWithLineNumbers(processedJSON)
                 ) : (
@@ -362,6 +541,43 @@ export default function JSONWizard() {
 
           {/* Controls Panel */}
           <div className="space-y-4">
+            {/* Search */}
+            <div>
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                Search & Highlight
+              </label>
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search in JSON..."
+                disabled={!validation.isValid}
+                className="w-full p-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-50"
+              />
+
+              <div className="mt-2 flex items-center gap-2">
+                <button
+                  onClick={goToPreviousMatch}
+                  disabled={!searchTerm || totalMatches === 0}
+                  className="p-2 rounded border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Previous match"
+                >
+                  ←
+                </button>
+                <span className="text-xs text-zinc-600 dark:text-zinc-400 flex-1 text-center">
+                  {searchTerm && totalMatches > 0 ? `${currentMatchIndex + 1} / ${totalMatches}` : '0 / 0'}
+                </span>
+                <button
+                  onClick={goToNextMatch}
+                  disabled={!searchTerm || totalMatches === 0}
+                  className="p-2 rounded border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Next match"
+                >
+                  →
+                </button>
+              </div>
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-3">
                 View Mode
@@ -420,21 +636,6 @@ export default function JSONWizard() {
                 />
               </div>
             )}
-
-            {/* Search */}
-            <div>
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-                Search & Highlight
-              </label>
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search in JSON..."
-                disabled={!validation.isValid}
-                className="w-full p-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-50"
-              />
-            </div>
 
             {/* Options */}
             <div>
