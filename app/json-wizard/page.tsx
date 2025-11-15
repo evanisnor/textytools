@@ -121,27 +121,120 @@ export default function JSONWizard() {
   const validation = useMemo(() => validateJSON(input), [input]);
   const stats = useMemo(() => getJSONStats(input), [input]);
 
-  // Calculate search matches with their positions
+
+  // Get canonical JSON form (for semantic order comparison)
+  const canonicalJSON = useMemo(() => {
+    if (!validation.isValid || !input.trim()) return input;
+
+    try {
+      const parsed = JSON.parse(input);
+      // Sort keys recursively for canonical form
+      const sortObject = (obj: any): any => {
+        if (typeof obj !== 'object' || obj === null) return obj;
+        if (Array.isArray(obj)) return obj.map(sortObject);
+
+        const sorted: any = {};
+        Object.keys(obj)
+          .sort()
+          .forEach(key => {
+            sorted[key] = sortObject(obj[key]);
+          });
+        return sorted;
+      };
+      return JSON.stringify(sortObject(parsed));
+    } catch {
+      return input;
+    }
+  }, [input, validation.isValid]);
+
+  // Calculate search matches with their semantic order based on canonical form
   const searchMatches = useMemo(() => {
     if (!searchTerm || !input) return [];
 
-    const matches: { lineIndex: number; matchIndex: number; columnStart: number }[] = [];
+    const matches: { lineIndex: number; matchIndex: number; columnStart: number; semanticOrder: number }[] = [];
     const lines = input.split('\n');
+    const normalized = input.replace(/\s+/g, '');
+    const canonical = canonicalJSON.replace(/\s+/g, '');
 
+    // Build a map of all match positions in canonical form with their surrounding context
+    const canonicalContexts: { position: number; context: string; order: number }[] = [];
+    const canonicalRegex = new RegExp(searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+    let canonicalMatch;
+    let order = 0;
+    while ((canonicalMatch = canonicalRegex.exec(canonical)) !== null) {
+      const contextSize = 50;
+      const contextStart = Math.max(0, canonicalMatch.index - contextSize);
+      const contextEnd = Math.min(canonical.length, canonicalMatch.index + canonicalMatch[0].length + contextSize);
+      const context = canonical.substring(contextStart, contextEnd);
+
+      canonicalContexts.push({
+        position: canonicalMatch.index,
+        context,
+        order: order++
+      });
+    }
+
+    // Track which canonical contexts have been used
+    const usedCanonicalOrders = new Set<number>();
+
+    // Now find matches in the input and map them to canonical
     lines.forEach((line, lineIndex) => {
       let match;
       const lineRegex = new RegExp(searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
       while ((match = lineRegex.exec(line)) !== null) {
+        // Calculate position in normalized input
+        const linesBeforeCurrent = lines.slice(0, lineIndex);
+        const charsBeforeLine = linesBeforeCurrent.reduce((sum, l) => sum + l.length + 1, 0);
+        const absolutePosition = charsBeforeLine + match.index;
+        const beforeMatch = input.substring(0, absolutePosition).replace(/\s+/g, '');
+        const normalizedPosition = beforeMatch.length;
+
+        // Extract context around this match in normalized input
+        const contextSize = 50;
+        const contextStart = Math.max(0, normalizedPosition - contextSize);
+        const contextEnd = Math.min(normalized.length, normalizedPosition + match[0].length + contextSize);
+        const context = normalized.substring(contextStart, contextEnd);
+
+        // Find the matching context in canonical form
+        let semanticOrder = -1;
+
+        // Try exact context match first
+        for (let i = 0; i < canonicalContexts.length; i++) {
+          if (!usedCanonicalOrders.has(canonicalContexts[i].order) && canonicalContexts[i].context === context) {
+            semanticOrder = canonicalContexts[i].order;
+            usedCanonicalOrders.add(semanticOrder);
+            break;
+          }
+        }
+
+        // If no exact match, try to find by position in the sequence
+        if (semanticOrder === -1) {
+          // Fallback: use the next available order
+          for (let i = 0; i < canonicalContexts.length; i++) {
+            if (!usedCanonicalOrders.has(i)) {
+              semanticOrder = i;
+              usedCanonicalOrders.add(semanticOrder);
+              break;
+            }
+          }
+        }
+
+        // Last resort fallback
+        if (semanticOrder === -1) {
+          semanticOrder = matches.length;
+        }
+
         matches.push({
           lineIndex,
           matchIndex: matches.length,
-          columnStart: match.index
+          columnStart: match.index,
+          semanticOrder
         });
       }
     });
 
     return matches;
-  }, [searchTerm, input]);
+  }, [searchTerm, input, canonicalJSON]);
 
   const totalMatches = searchMatches.length;
 
@@ -198,27 +291,115 @@ export default function JSONWizard() {
     }
   }, [input, viewMode, indentSize, sortKeys, validation.isValid]);
 
-  // Calculate search matches in the output JSON
+  // Calculate search matches in the output JSON with semantic order based on canonical form
   const outputSearchMatches = useMemo(() => {
     if (!searchTerm || !processedJSON) return [];
 
-    const matches: { lineIndex: number; matchIndex: number; columnStart: number }[] = [];
+    const matches: { lineIndex: number; matchIndex: number; columnStart: number; semanticOrder: number }[] = [];
     const lines = processedJSON.split('\n');
+    const normalized = processedJSON.replace(/\s+/g, '');
+    const canonical = canonicalJSON.replace(/\s+/g, '');
 
+    // Build a map of all match positions in canonical form with their surrounding context
+    const canonicalContexts: { position: number; context: string; order: number }[] = [];
+    const canonicalRegex = new RegExp(searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+    let canonicalMatch;
+    let order = 0;
+    while ((canonicalMatch = canonicalRegex.exec(canonical)) !== null) {
+      const contextSize = 50;
+      const contextStart = Math.max(0, canonicalMatch.index - contextSize);
+      const contextEnd = Math.min(canonical.length, canonicalMatch.index + canonicalMatch[0].length + contextSize);
+      const context = canonical.substring(contextStart, contextEnd);
+
+      canonicalContexts.push({
+        position: canonicalMatch.index,
+        context,
+        order: order++
+      });
+    }
+
+    // Track which canonical contexts have been used
+    const usedCanonicalOrders = new Set<number>();
+
+    // Now find matches in the output and map them to canonical
     lines.forEach((line, lineIndex) => {
       let match;
       const lineRegex = new RegExp(searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
       while ((match = lineRegex.exec(line)) !== null) {
+        // Calculate position in normalized output
+        const linesBeforeCurrent = lines.slice(0, lineIndex);
+        const charsBeforeLine = linesBeforeCurrent.reduce((sum, l) => sum + l.length + 1, 0);
+        const absolutePosition = charsBeforeLine + match.index;
+        const beforeMatch = processedJSON.substring(0, absolutePosition).replace(/\s+/g, '');
+        const normalizedPosition = beforeMatch.length;
+
+        // Extract context around this match in normalized output
+        const contextSize = 50;
+        const contextStart = Math.max(0, normalizedPosition - contextSize);
+        const contextEnd = Math.min(normalized.length, normalizedPosition + match[0].length + contextSize);
+        const context = normalized.substring(contextStart, contextEnd);
+
+        // Find the matching context in canonical form
+        let semanticOrder = -1;
+
+        // Try exact context match first
+        for (let i = 0; i < canonicalContexts.length; i++) {
+          if (!usedCanonicalOrders.has(canonicalContexts[i].order) && canonicalContexts[i].context === context) {
+            semanticOrder = canonicalContexts[i].order;
+            usedCanonicalOrders.add(semanticOrder);
+            break;
+          }
+        }
+
+        // If no exact match, try to find by position in the sequence
+        if (semanticOrder === -1) {
+          // Fallback: use the next available order
+          for (let i = 0; i < canonicalContexts.length; i++) {
+            if (!usedCanonicalOrders.has(i)) {
+              semanticOrder = i;
+              usedCanonicalOrders.add(semanticOrder);
+              break;
+            }
+          }
+        }
+
+        // Last resort fallback
+        if (semanticOrder === -1) {
+          semanticOrder = matches.length;
+        }
+
         matches.push({
           lineIndex,
           matchIndex: matches.length,
-          columnStart: match.index
+          columnStart: match.index,
+          semanticOrder
         });
       }
     });
 
     return matches;
-  }, [searchTerm, processedJSON]);
+  }, [searchTerm, processedJSON, canonicalJSON]);
+
+  // Map input match indices to output match indices based on semantic order
+  const inputToOutputMatchMap = useMemo(() => {
+    const map = new Map<number, number>();
+
+    // Create a reverse lookup: semanticOrder -> matchIndex for output matches
+    const outputSemanticOrderToMatchIndex = new Map<number, number>();
+    outputSearchMatches.forEach((outputMatch) => {
+      outputSemanticOrderToMatchIndex.set(outputMatch.semanticOrder, outputMatch.matchIndex);
+    });
+
+    // Map each input match to the output match with the same semantic order
+    searchMatches.forEach((inputMatch) => {
+      const correspondingOutputMatchIndex = outputSemanticOrderToMatchIndex.get(inputMatch.semanticOrder);
+      if (correspondingOutputMatchIndex !== undefined) {
+        map.set(inputMatch.matchIndex, correspondingOutputMatchIndex);
+      }
+    });
+
+    return map;
+  }, [searchMatches, outputSearchMatches]);
 
   // Create a map for quick lookup of output match indices
   const outputMatchPositions = useMemo(() => {
@@ -243,13 +424,6 @@ export default function JSONWizard() {
     }
   }, [validation]);
 
-  // Reset to first match when search term changes
-  useEffect(() => {
-    if (searchTerm) {
-      setCurrentMatchIndex(0);
-    }
-  }, [searchTerm]);
-
   // Scroll to current match
   useEffect(() => {
     if (!searchTerm || searchMatches.length === 0) return;
@@ -269,19 +443,22 @@ export default function JSONWizard() {
         });
       }
 
-      // Scroll output to current match using scrollIntoView for accurate positioning
+      // Scroll output to the corresponding match using scrollIntoView for accurate positioning
       if (outputSearchMatches.length > 0) {
-        const outputMatchElement = document.getElementById(`output-match-${currentMatchIndex}`);
-        if (outputMatchElement) {
-          outputMatchElement.scrollIntoView({
-            behavior: 'smooth',
-            block: 'center',
-            inline: 'center'
-          });
+        const outputMatchIndex = inputToOutputMatchMap.get(currentMatchIndex);
+        if (outputMatchIndex !== undefined && outputMatchIndex >= 0) {
+          const outputMatchElement = document.getElementById(`output-match-${outputMatchIndex}`);
+          if (outputMatchElement) {
+            outputMatchElement.scrollIntoView({
+              behavior: 'smooth',
+              block: 'center',
+              inline: 'center'
+            });
+          }
         }
       }
     }, 0);
-  }, [currentMatchIndex, searchMatches, outputSearchMatches, searchTerm]);
+  }, [currentMatchIndex, searchMatches, outputSearchMatches, searchTerm, inputToOutputMatchMap]);
 
   const copyToClipboard = async () => {
     try {
@@ -313,7 +490,7 @@ export default function JSONWizard() {
     }
   };
 
-  const renderHighlightedText = (text: string, lineIndex?: number, useOutputMatches = false) => {
+  const renderHighlightedText = (text: string, lineIndex?: number, useOutputMatches = false, currentLocalMatchIndex?: number) => {
     if (!searchTerm || lineIndex === undefined) {
       return text;
     }
@@ -323,6 +500,12 @@ export default function JSONWizard() {
     if (!lineMatches || lineMatches.size === 0) {
       return text;
     }
+
+    // For output, use the provided mapped index, or currentMatchIndex for input
+    // If currentLocalMatchIndex is explicitly -1, it means no match found, so don't highlight
+    const matchIndexToHighlight = currentLocalMatchIndex !== undefined && currentLocalMatchIndex >= 0
+      ? currentLocalMatchIndex
+      : (currentLocalMatchIndex === undefined ? currentMatchIndex : -999);
 
     const regex = new RegExp(searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
     const parts: Array<{ text: string; isMatch: boolean; matchIndex: number }> = [];
@@ -347,11 +530,11 @@ export default function JSONWizard() {
 
     return parts.map((part, index) => {
       if (part.isMatch) {
-        const isCurrentMatch = part.matchIndex === currentMatchIndex;
+        const isCurrentMatch = part.matchIndex === matchIndexToHighlight;
         return (
           <span
             key={index}
-            id={isCurrentMatch ? (useOutputMatches ? `output-match-${part.matchIndex}` : `input-match-${part.matchIndex}`) : undefined}
+            id={useOutputMatches ? `output-match-${part.matchIndex}` : `input-match-${part.matchIndex}`}
             className={isCurrentMatch
               ? 'bg-green-300 dark:bg-green-600 text-black'
               : 'bg-yellow-300 dark:bg-yellow-600 text-black'}
@@ -370,6 +553,9 @@ export default function JSONWizard() {
     const lines = text.split('\n');
     const lineNumberWidth = String(lines.length).length;
 
+    // Get the corresponding output match index for the current input match
+    const outputMatchIndex = inputToOutputMatchMap.get(currentMatchIndex) ?? -1;
+
     return (
       <div className="flex font-mono text-sm">
         <div className="select-none text-zinc-400 dark:text-zinc-600 text-right pr-4 border-r border-zinc-200 dark:border-zinc-800" style={{ minWidth: `${lineNumberWidth + 2}ch` }}>
@@ -380,7 +566,7 @@ export default function JSONWizard() {
         <div className="flex-1 pl-4 whitespace-pre">
           {searchTerm ? (
             lines.map((line, index) => (
-              <div key={index}>{renderHighlightedText(line, index, true)}</div>
+              <div key={index}>{renderHighlightedText(line, index, true, outputMatchIndex)}</div>
             ))
           ) : (
             text
@@ -549,7 +735,10 @@ export default function JSONWizard() {
               <input
                 type="text"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setCurrentMatchIndex(0);
+                }}
                 placeholder="Search in JSON..."
                 disabled={!validation.isValid}
                 className="w-full p-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-50"
