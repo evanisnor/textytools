@@ -212,6 +212,26 @@ export default function JSONWizard() {
     });
   };
 
+  const renderWithLineNumbers = (text: string) => {
+    if (!text) return null;
+
+    const lines = text.split('\n');
+    const lineNumberWidth = String(lines.length).length;
+
+    return (
+      <div className="flex font-mono text-sm">
+        <div className="select-none text-zinc-400 dark:text-zinc-600 text-right pr-4 border-r border-zinc-200 dark:border-zinc-800" style={{ minWidth: `${lineNumberWidth + 2}ch` }}>
+          {lines.map((_, index) => (
+            <div key={index}>{index + 1}</div>
+          ))}
+        </div>
+        <div className="flex-1 pl-4 whitespace-pre">
+          {searchTerm ? renderOutput() : text}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 py-12 px-6">
       <div className="max-w-7xl mx-auto">
@@ -224,81 +244,92 @@ export default function JSONWizard() {
           </Link>
         </div>
 
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 mb-3">
-            JSON Wizard
-          </h1>
-          <p className="text-lg text-zinc-600 dark:text-zinc-400">
-            Validate, format, and manipulate JSON data with powerful tools.
-          </p>
-        </div>
+        <div className="mb-8 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+          <div>
+            <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 mb-3">
+              JSON Wizard
+            </h1>
+            <p className="text-lg text-zinc-600 dark:text-zinc-400">
+              Validate, format, and manipulate JSON data with powerful tools.
+            </p>
+          </div>
 
-        {/* Stats Bar */}
-        {validation.isValid && input.trim() && (
-          <div className="mb-6 grid grid-cols-3 md:grid-cols-3 gap-4">
+          {/* Stats Bar */}
+          <div className="grid grid-cols-3 gap-3 lg:min-w-[400px]">
             <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-3">
               <div className="text-xs text-zinc-600 dark:text-zinc-400">Total Keys</div>
               <div className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
-                {stats.keys.toLocaleString()}
+                {validation.isValid && input.trim() ? stats.keys.toLocaleString() : '—'}
               </div>
             </div>
             <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-3">
               <div className="text-xs text-zinc-600 dark:text-zinc-400">Max Depth</div>
               <div className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
-                {stats.depth}
+                {validation.isValid && input.trim() ? stats.depth : '—'}
               </div>
             </div>
             <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-3">
               <div className="text-xs text-zinc-600 dark:text-zinc-400">Size</div>
               <div className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
-                {stats.size.toLocaleString()} bytes
+                {validation.isValid && input.trim() ? `${stats.size.toLocaleString()} bytes` : '—'}
               </div>
             </div>
           </div>
-        )}
-
-        {/* Validation Status */}
-        {input.trim() && (
-          <div className={`mb-6 p-4 rounded-lg border ${
-            validation.isValid
-              ? 'bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800'
-              : 'bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800'
-          }`}>
-            <div className="flex items-center gap-2">
-              <div className={`text-sm font-medium ${
-                validation.isValid
-                  ? 'text-green-800 dark:text-green-200'
-                  : 'text-red-800 dark:text-red-200'
-              }`}>
-                {validation.isValid ? '✓ Valid JSON' : '✗ Invalid JSON'}
-              </div>
-              {!validation.isValid && validation.error && (
-                <div className="text-xs text-red-700 dark:text-red-300">
-                  {validation.error}
-                  {validation.lineNumber && validation.columnNumber && (
-                    <span> (Line {validation.lineNumber}, Column {validation.columnNumber})</span>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           <div className="lg:col-span-3 space-y-6">
             {/* Input */}
             <div>
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-                Input JSON
-              </label>
-              <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-1">
-                <textarea
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  placeholder='Paste your JSON here, e.g., {"key": "value"}'
-                  className="w-full h-64 p-4 bg-transparent text-zinc-900 dark:text-zinc-50 placeholder-zinc-400 dark:placeholder-zinc-600 resize-none focus:outline-none font-mono text-sm"
-                  spellCheck={false}
-                />
+              <div className="flex items-center justify-between mb-2 min-h-[28px]">
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  Input JSON
+                </label>
+                {input.trim() && (
+                  <div className={`flex items-center gap-2 px-3 py-1 rounded-md text-xs font-medium ${
+                    validation.isValid
+                      ? 'bg-green-50 dark:bg-green-950 text-green-800 dark:text-green-200'
+                      : 'bg-red-50 dark:bg-red-950 text-red-800 dark:text-red-200'
+                  }`}>
+                    {validation.isValid ? '✓ Valid JSON' : '✗ Invalid JSON'}
+                    {!validation.isValid && validation.lineNumber && validation.columnNumber && (
+                      <span className="text-red-700 dark:text-red-300">
+                        (Line {validation.lineNumber}, Col {validation.columnNumber})
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+              <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4 h-64 overflow-auto relative">
+                {input ? (
+                  <div className="flex font-mono text-sm">
+                    <div className="select-none text-zinc-400 dark:text-zinc-600 text-right pr-4 border-r border-zinc-200 dark:border-zinc-800" style={{ minWidth: `${String(input.split('\n').length).length + 2}ch` }}>
+                      {input.split('\n').map((_, index) => (
+                        <div key={index}>{index + 1}</div>
+                      ))}
+                    </div>
+                    <div className="flex-1 pl-4 relative">
+                      <div className="absolute inset-0 whitespace-pre text-zinc-900 dark:text-zinc-50">
+                        {input}
+                      </div>
+                      <textarea
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        placeholder=""
+                        className="absolute inset-0 bg-transparent text-transparent caret-zinc-900 dark:caret-zinc-50 resize-none focus:outline-none whitespace-pre"
+                        spellCheck={false}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <textarea
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    placeholder='Paste your JSON here, e.g., {"key": "value"}'
+                    className="w-full h-full bg-transparent text-zinc-900 dark:text-zinc-50 placeholder-zinc-400 dark:placeholder-zinc-600 resize-none focus:outline-none font-mono text-sm"
+                    spellCheck={false}
+                  />
+                )}
               </div>
             </div>
 
@@ -317,10 +348,14 @@ export default function JSONWizard() {
                   </button>
                 )}
               </div>
-              <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-1">
-                <div className="w-full h-64 p-4 overflow-auto font-mono text-sm text-zinc-900 dark:text-zinc-50 whitespace-pre">
-                  {renderOutput()}
-                </div>
+              <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4 h-64 overflow-auto">
+                {processedJSON ? (
+                  renderWithLineNumbers(processedJSON)
+                ) : (
+                  <div className="text-zinc-400 dark:text-zinc-600 font-mono text-sm">
+                    Formatted JSON will appear here...
+                  </div>
+                )}
               </div>
             </div>
           </div>
