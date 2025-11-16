@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { debounce } from "lodash";
 import { Tiktoken } from "js-tiktoken/lite";
 import cl100k_base from "js-tiktoken/ranks/cl100k_base";
 
@@ -11,6 +12,7 @@ export default function TextCounter() {
   const characterCount = text.length;
   const wordCount = text.trim() === "" ? 0 : text.trim().split(/\s+/).length;
   const lineCount = text === "" ? 0 : text.split("\n").length;
+  const [isTokenizing, setIsTokenizing] = useState(false);
   const [tokenCount, setTokenCount] = useState("0");
   const paragraphCount =
     text.trim() === ""
@@ -21,18 +23,20 @@ export default function TextCounter() {
           .filter((p) => p.trim().length > 0).length;
 
   useEffect(() => {
-    let isTokenizing = true;
-    tokenize();
-    return () => {
-      isTokenizing = false;
-    };
+    if (!isTokenizing) {
+      debounce(tokenize, 500)();
+    }
+    return;
 
     async function tokenize() {
-      if (!isTokenizing) {
+      if (isTokenizing) {
+        setTokenCount("...");
         return;
       } else if (text.trim() === "") {
         setTokenCount("0");
+        setIsTokenizing(false);
       } else {
+        setIsTokenizing(true);
         try {
           const encoding = new Tiktoken(cl100k_base);
           const tokens = encoding.encode(text);
@@ -40,11 +44,11 @@ export default function TextCounter() {
         } catch (error) {
           console.error("Error encoding tokens:", error);
           setTokenCount("ERR");
-          return;
         }
+        setIsTokenizing(false);
       }
     }
-  }, [text]);
+  }, [text, isTokenizing]);
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 py-12 px-6">
