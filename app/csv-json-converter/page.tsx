@@ -88,6 +88,12 @@ export default function CsvJsonConverter() {
   const inputEditableRef = React.useRef<HTMLDivElement>(null);
   const outputEditableRef = React.useRef<HTMLDivElement>(null);
 
+  const contentKey = React.useMemo(() => {
+    // Use line count of non-empty lines as key to force remount when rows are added/deleted
+    const lines = input.split("\n").filter((line) => line.trim());
+    return lines.length;
+  }, [input]);
+
   const result = useMemo(() => {
     if (!input.trim()) {
       return {
@@ -127,7 +133,7 @@ export default function CsvJsonConverter() {
       const range = selection.getRangeAt(0);
       const preCaretRange = range.cloneRange();
       preCaretRange.selectNodeContents(element);
-      preCaretRange.setEnd(range.endContainer, range.endOffset - 1);
+      preCaretRange.setEnd(range.endContainer, range.endOffset);
 
       return preCaretRange.toString().length;
     } catch (e) {
@@ -305,6 +311,7 @@ export default function CsvJsonConverter() {
               )}
               {result.detectedFormat === "csv" && input.trim() ? (
                 <div
+                  key={contentKey}
                   ref={inputEditableRef}
                   contentEditable
                   suppressContentEditableWarning
