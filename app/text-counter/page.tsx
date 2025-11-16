@@ -2,7 +2,8 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { encodingForModel } from "js-tiktoken";
+import { Tiktoken } from "js-tiktoken/lite";
+import cl100k_base from "js-tiktoken/ranks/cl100k_base";
 
 export default function TextCounter() {
   const [text, setText] = useState("");
@@ -22,9 +23,8 @@ export default function TextCounter() {
     if (text.trim() === "") return 0;
 
     try {
-      const encoding = encodingForModel("gpt-4");
+      const encoding = new Tiktoken(cl100k_base);
       const tokens = encoding.encode(text);
-      // encoding.free();
       return tokens.length;
     } catch (error) {
       console.error("Error encoding tokens:", error);
@@ -93,7 +93,7 @@ export default function TextCounter() {
 
           <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4">
             <div className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
-              Tokens (GPT-4)
+              Tokens (GPT-4+)
             </div>
             <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">
               {tokenCount.toLocaleString()}
