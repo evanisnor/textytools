@@ -217,9 +217,19 @@ export default function TextSanitizer() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
             <div>
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-                Input Text
-              </label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  Input Text
+                </label>
+                {text.trim() && (
+                  <button
+                    onClick={() => setText("")}
+                    className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors cursor-pointer"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
               <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-1">
                 <textarea
                   value={text}
@@ -245,7 +255,7 @@ export default function TextSanitizer() {
                 {sanitizedText && (
                   <button
                     onClick={copyToClipboard}
-                    className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
+                    className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors cursor-pointer"
                   >
                     Copy to clipboard
                   </button>
@@ -310,17 +320,6 @@ export default function TextSanitizer() {
             </div>
           </div>
         </div>
-
-        {text.length > 0 && (
-          <div className="mt-6 flex justify-end">
-            <button
-              onClick={() => setText("")}
-              className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
-            >
-              Clear text
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );

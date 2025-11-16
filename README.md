@@ -55,6 +55,19 @@ Bidirectional converter between CSV and JSON formats with proper data type parsi
   - Proper CSV escaping (quotes, delimiters, newlines)
   - Real-time validation and error reporting
 
+### Text Encoder
+
+Encode and decode text using 17 different encoding formats with support for common web, programming, and cryptographic standards.
+
+- **Location**: [/text-encoder](app/text-encoder/page.tsx)
+- **Features**:
+  - **Base Encodings**: Base64, Base58 (Bitcoin), Base91, ASCII85 (Adobe), Z85 (ZeroMQ)
+  - **Web Encodings**: URL encoding, HTML entities, Quoted-Printable (MIME)
+  - **Data Formats**: Hexadecimal, Binary, Unicode escape sequences
+  - **Ciphers**: ROT13, Morse code
+  - **Cryptographic Hashes**: MD5, SHA-1, SHA-256, SHA-512 (one-way only)
+- **Implementation**: Bidirectional encoding/decoding with toggle between modes, async hash function support, comprehensive error handling
+
 ## Project Structure
 
 ```
@@ -71,7 +84,9 @@ utility-apps/
 │   │   └── page.tsx
 │   ├── json-wizard/
 │   │   └── page.tsx
-│   └── csv-json-converter/
+│   ├── csv-json-converter/
+│   │   └── page.tsx
+│   └── text-encoder/
 │       └── page.tsx
 ├── public/                   # Static assets
 ├── package.json
@@ -324,8 +339,6 @@ All utilities run entirely in the browser with no backend dependencies. Modern b
 
 Potential additions to consider:
 
-- **Base64 Encoder/Decoder**: Convert text to/from base64
-- **URL Encoder/Decoder**: URL-safe string transformations
 - **Hash Generator**: MD5, SHA-256, etc.
 - **Diff Viewer**: Compare two text blocks
 - **Regex Tester**: Test regular expressions with highlighting

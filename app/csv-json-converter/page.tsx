@@ -292,7 +292,7 @@ export default function CsvJsonConverter() {
               </label>
               <button
                 onClick={() => setInput("")}
-                className="text-xs text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
+                className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors cursor-pointer"
               >
                 Clear
               </button>
@@ -343,9 +343,9 @@ export default function CsvJsonConverter() {
               {result.success && result.output && (
                 <button
                   onClick={() => navigator.clipboard.writeText(result.output)}
-                  className="text-xs text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
+                  className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors cursor-pointer"
                 >
-                  Copy
+                  Copy to clipboard
                 </button>
               )}
             </div>

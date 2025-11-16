@@ -101,26 +101,30 @@ export default function TextCounter() {
           </div>
         </div>
 
-        <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-1">
-          <textarea
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder="Paste or type your text here..."
-            className="w-full h-96 p-4 bg-transparent text-zinc-900 dark:text-zinc-50 placeholder-zinc-400 dark:placeholder-zinc-600 resize-none focus:outline-none font-mono text-sm"
-            spellCheck={false}
-          />
-        </div>
-
-        {text.length > 0 && (
-          <div className="mt-4 flex justify-end">
-            <button
-              onClick={() => setText("")}
-              className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
-            >
-              Clear text
-            </button>
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              Input Text
+            </label>
+            {text.trim() && (
+              <button
+                onClick={() => setText("")}
+                className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors cursor-pointer"
+              >
+                Clear
+              </button>
+            )}
           </div>
-        )}
+          <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-1">
+            <textarea
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              placeholder="Paste or type your text here..."
+              className="w-full h-96 p-4 bg-transparent text-zinc-900 dark:text-zinc-50 placeholder-zinc-400 dark:placeholder-zinc-600 resize-none focus:outline-none font-mono text-sm"
+              spellCheck={false}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
