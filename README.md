@@ -68,6 +68,21 @@ Encode and decode text using 17 different encoding formats with support for comm
   - **Cryptographic Hashes**: MD5, SHA-1, SHA-256, SHA-512 (one-way only)
 - **Implementation**: Bidirectional encoding/decoding with toggle between modes, async hash function support, comprehensive error handling
 
+### JWT Decoder
+
+Decode and inspect JSON Web Tokens (JWT) with syntax highlighting and automatic validation of standard claims.
+
+- **Location**: [/jwt-decoder](app/jwt-decoder/page.tsx)
+- **Features**:
+  - Decode JWT header, payload, and signature with color-coded highlighting
+  - Automatic validation of standard claims (exp, iat, nbf)
+  - Visual indicators for expired or not-yet-valid tokens
+  - Display algorithm, issued date, expiration date, and not-before date
+  - Toggle between formatted and raw JSON output
+  - Real-time decoding with error messages
+  - Copy decoded output to clipboard
+- **Implementation**: Client-side base64url decoding, RFC 7519 compliant parsing, no server communication for security
+
 ## Project Structure
 
 ```
@@ -86,7 +101,9 @@ utility-apps/
 │   │   └── page.tsx
 │   ├── csv-json-converter/
 │   │   └── page.tsx
-│   └── text-encoder/
+│   ├── text-encoder/
+│   │   └── page.tsx
+│   └── jwt-decoder/
 │       └── page.tsx
 ├── public/                   # Static assets
 ├── package.json
@@ -339,13 +356,11 @@ All utilities run entirely in the browser with no backend dependencies. Modern b
 
 Potential additions to consider:
 
-- **Hash Generator**: MD5, SHA-256, etc.
 - **Diff Viewer**: Compare two text blocks
 - **Regex Tester**: Test regular expressions with highlighting
 - **Markdown Previewer**: Live markdown rendering
 - **Color Converter**: HEX, RGB, HSL conversions
 - **UUID Generator**: Generate UUIDs with various versions
-- **JWT Decoder**: Decode and inspect JWT tokens
 
 ## License
 

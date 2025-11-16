@@ -1,0 +1,380 @@
+"use client";
+
+import { useState, useMemo } from "react";
+import Link from "next/link";
+
+interface JWTPayload {
+  [key: string]: unknown;
+}
+
+interface DecodedJWT {
+  header: JWTPayload;
+  payload: JWTPayload;
+  signature: string;
+  isValid: boolean;
+  algorithm?: string;
+  expiresAt?: Date;
+  issuedAt?: Date;
+  notBefore?: Date;
+}
+
+// Colors for JWT sections (header, payload, signature)
+const JWT_SECTION_COLORS = {
+  header: "bg-blue-200/60 dark:bg-blue-800/40",
+  payload: "bg-green-200/60 dark:bg-green-800/40",
+  signature: "bg-purple-200/60 dark:bg-purple-800/40",
+};
+
+function highlightJWT(jwt: string): JSX.Element {
+  const parts = jwt.split(".");
+  if (parts.length !== 3) {
+    return <>{jwt}</>;
+  }
+
+  return (
+    <>
+      <span className={`${JWT_SECTION_COLORS.header} px-0.5`}>{parts[0]}</span>
+      <span className="text-zinc-400">.</span>
+      <span className={`${JWT_SECTION_COLORS.payload} px-0.5`}>{parts[1]}</span>
+      <span className="text-zinc-400">.</span>
+      <span className={`${JWT_SECTION_COLORS.signature} px-0.5`}>
+        {parts[2]}
+      </span>
+    </>
+  );
+}
+
+function base64UrlDecode(str: string): string {
+  // Replace URL-safe characters
+  let base64 = str.replace(/-/g, "+").replace(/_/g, "/");
+  // Add padding if needed
+  const pad = base64.length % 4;
+  if (pad) {
+    if (pad === 1) {
+      throw new Error("Invalid base64url string");
+    }
+    base64 += new Array(5 - pad).join("=");
+  }
+  try {
+    return decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .join(""),
+    );
+  } catch {
+    throw new Error("Invalid base64url encoding");
+  }
+}
+
+function decodeJWT(token: string): DecodedJWT {
+  const parts = token.trim().split(".");
+
+  if (parts.length !== 3) {
+    throw new Error("Invalid JWT format. Expected 3 parts separated by dots.");
+  }
+
+  try {
+    const headerJson = base64UrlDecode(parts[0]);
+    const payloadJson = base64UrlDecode(parts[1]);
+
+    const header = JSON.parse(headerJson);
+    const payload = JSON.parse(payloadJson);
+
+    const result: DecodedJWT = {
+      header,
+      payload,
+      signature: parts[2],
+      isValid: true,
+      algorithm: header.alg,
+    };
+
+    // Parse standard claims
+    if (typeof payload.exp === "number") {
+      result.expiresAt = new Date(payload.exp * 1000);
+    }
+    if (typeof payload.iat === "number") {
+      result.issuedAt = new Date(payload.iat * 1000);
+    }
+    if (typeof payload.nbf === "number") {
+      result.notBefore = new Date(payload.nbf * 1000);
+    }
+
+    return result;
+  } catch (error) {
+    throw new Error(
+      error instanceof Error
+        ? `Decode error: ${error.message}`
+        : "Failed to decode JWT",
+    );
+  }
+}
+
+function formatDate(date: Date): string {
+  return date.toLocaleString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    timeZoneName: "short",
+  });
+}
+
+function isExpired(expiresAt: Date | undefined): boolean {
+  if (!expiresAt) return false;
+  return expiresAt < new Date();
+}
+
+function isNotYetValid(notBefore: Date | undefined): boolean {
+  if (!notBefore) return false;
+  return notBefore > new Date();
+}
+
+export default function JWTDecoder() {
+  const [input, setInput] = useState("");
+
+  const result = useMemo(() => {
+    if (!input.trim()) {
+      return {
+        success: true,
+        decoded: null,
+        error: null,
+      };
+    }
+
+    try {
+      const decoded = decodeJWT(input);
+      return {
+        success: true,
+        decoded,
+        error: null,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        decoded: null,
+        error: error instanceof Error ? error.message : "Decoding failed",
+      };
+    }
+  }, [input]);
+
+  const formattedOutput = useMemo(() => {
+    if (!result.decoded) return "";
+
+    return JSON.stringify(
+      {
+        header: result.decoded.header,
+        payload: result.decoded.payload,
+        signature: result.decoded.signature,
+      },
+      null,
+      2,
+    );
+  }, [result.decoded]);
+
+  const expired = result.decoded ? isExpired(result.decoded.expiresAt) : false;
+  const notYetValid = result.decoded
+    ? isNotYetValid(result.decoded.notBefore)
+    : false;
+
+  return (
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 py-12 px-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Back button */}
+        <div className="mb-8">
+          <Link
+            href="/"
+            className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
+          >
+            ← Back to home
+          </Link>
+        </div>
+
+        {/* Header */}
+        <div className="mb-8 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+          <div>
+            <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 mb-3">
+              JWT Decoder
+            </h1>
+            <p className="text-lg text-zinc-600 dark:text-zinc-400">
+              Decode and inspect JSON Web Tokens (JWT) with real-time validation
+            </p>
+          </div>
+
+          {/* Stats Bar */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:min-w-[600px]">
+            {/* Algorithm */}
+            <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-3">
+              <div className="text-xs text-zinc-600 dark:text-zinc-400 mb-1">
+                Algorithm
+              </div>
+              <div className="text-lg font-bold text-zinc-900 dark:text-zinc-50 font-mono">
+                {result.decoded?.algorithm || "—"}
+              </div>
+            </div>
+
+            {/* Issued At */}
+            <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-3">
+              <div className="text-xs text-zinc-600 dark:text-zinc-400 mb-1">
+                Issued At
+              </div>
+              <div className="text-xs font-medium text-zinc-900 dark:text-zinc-50">
+                {result.decoded?.issuedAt
+                  ? formatDate(result.decoded.issuedAt)
+                  : "—"}
+              </div>
+            </div>
+
+            {/* Expires At */}
+            <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-3">
+              <div className="text-xs text-zinc-600 dark:text-zinc-400 mb-1">
+                Expires At
+              </div>
+              <div
+                className={`text-xs font-medium ${
+                  result.decoded?.expiresAt
+                    ? expired
+                      ? "text-red-600 dark:text-red-400"
+                      : "text-green-600 dark:text-green-400"
+                    : "text-zinc-900 dark:text-zinc-50"
+                }`}
+              >
+                {result.decoded?.expiresAt ? (
+                  <>
+                    {formatDate(result.decoded.expiresAt)}
+                    {expired && (
+                      <span className="block text-xs mt-0.5">⚠️ Expired</span>
+                    )}
+                  </>
+                ) : (
+                  "—"
+                )}
+              </div>
+            </div>
+
+            {/* Not Before */}
+            <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-3">
+              <div className="text-xs text-zinc-600 dark:text-zinc-400 mb-1">
+                Not Before
+              </div>
+              <div
+                className={`text-xs font-medium ${
+                  result.decoded?.notBefore
+                    ? notYetValid
+                      ? "text-orange-600 dark:text-orange-400"
+                      : "text-zinc-900 dark:text-zinc-50"
+                    : "text-zinc-900 dark:text-zinc-50"
+                }`}
+              >
+                {result.decoded?.notBefore ? (
+                  <>
+                    {formatDate(result.decoded.notBefore)}
+                    {notYetValid && (
+                      <span className="block text-xs mt-0.5">
+                        ⚠️ Not yet valid
+                      </span>
+                    )}
+                  </>
+                ) : (
+                  "—"
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Input/Output Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          {/* Input */}
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <label className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
+                JWT Token
+              </label>
+              <button
+                onClick={() => setInput("")}
+                className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors cursor-pointer"
+              >
+                Clear
+              </button>
+            </div>
+            <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-1">
+              <div className="relative">
+                {input.trim() && !result.error ? (
+                  <div className="w-full h-[500px] p-4 bg-transparent overflow-auto font-mono text-sm text-zinc-900 dark:text-zinc-50 whitespace-pre-wrap break-all">
+                    {highlightJWT(input)}
+                  </div>
+                ) : (
+                  <textarea
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    placeholder="Paste a JWT token here...&#10;&#10;Example:&#10;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+                    className="w-full h-[500px] p-4 bg-transparent resize-none focus:outline-none font-mono text-sm text-zinc-900 dark:text-zinc-50 placeholder-zinc-400 dark:placeholder-zinc-600 whitespace-pre-wrap break-all"
+                    spellCheck={false}
+                  />
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Output */}
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <label className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
+                Decoded Token
+              </label>
+              {result.success && result.decoded && (
+                <button
+                  onClick={() => navigator.clipboard.writeText(formattedOutput)}
+                  className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors cursor-pointer"
+                >
+                  Copy
+                </button>
+              )}
+            </div>
+            <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-1">
+              <textarea
+                value={result.success ? formattedOutput : ""}
+                readOnly
+                placeholder={
+                  result.error ? "" : "Decoded JWT will appear here..."
+                }
+                className="w-full h-[500px] p-4 bg-transparent resize-none focus:outline-none font-mono text-sm text-zinc-900 dark:text-zinc-50 placeholder-zinc-400 dark:placeholder-zinc-600 whitespace-pre"
+                spellCheck={false}
+              />
+            </div>
+            {result.error && (
+              <div className="mt-2 text-sm text-red-600 dark:text-red-400">
+                Error: {result.error}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Info */}
+        <div className="mt-6 bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4">
+          <div className="text-sm text-zinc-600 dark:text-zinc-400 space-y-2">
+            <p>
+              <strong className="text-zinc-900 dark:text-zinc-50">
+                About JWT:
+              </strong>{" "}
+              JSON Web Tokens are an open, industry standard (RFC 7519) method
+              for representing claims securely between two parties. This tool
+              decodes and displays the contents without signature verification.
+            </p>
+            <p>
+              <strong className="text-zinc-900 dark:text-zinc-50">
+                Security Note:
+              </strong>{" "}
+              This decoder runs entirely in your browser. No tokens are sent to
+              any server. However, avoid pasting production tokens containing
+              sensitive data.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
