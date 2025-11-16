@@ -94,7 +94,17 @@ function getJSONStats(text: string): {
 }
 
 export default function JSONWizard() {
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState(() => {
+    // Initialize from localStorage on first render
+    if (typeof window !== "undefined") {
+      const storedInput = localStorage.getItem("json-wizard-input");
+      if (storedInput) {
+        localStorage.removeItem("json-wizard-input");
+        return storedInput;
+      }
+    }
+    return "";
+  });
   const [viewMode, setViewMode] = useState<ViewMode>("pretty");
   const [indentSize, setIndentSize] = useState(2);
   const [searchTerm, setSearchTerm] = useState("");
@@ -662,15 +672,28 @@ export default function JSONWizard() {
           <div className="lg:col-span-3 space-y-6">
             {/* Input */}
             <div>
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-2 min-h-[2.25rem]">
                 <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
                   Input JSON
                 </label>
                 {input.trim() && (
                   <button
                     onClick={() => setInput("")}
-                    className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors cursor-pointer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 active:bg-zinc-300 dark:active:bg-zinc-600 transition-colors"
                   >
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
                     Clear
                   </button>
                 )}
@@ -773,18 +796,64 @@ export default function JSONWizard() {
 
             {/* Output */}
             <div>
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-2 min-h-[2.25rem]">
                 <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
                   Output
                 </label>
-                {processedJSON && validation.isValid && (
-                  <button
-                    onClick={copyToClipboard}
-                    className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors cursor-pointer"
-                  >
-                    Copy to clipboard
-                  </button>
-                )}
+                <div className="flex items-center gap-2">
+                  {processedJSON &&
+                    validation.isValid &&
+                    viewMode !== "escaped" && (
+                      <Link
+                        href="/csv-json-converter"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          localStorage.setItem(
+                            "csv-json-converter-input",
+                            processedJSON,
+                          );
+                          window.location.href = "/csv-json-converter";
+                        }}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-900 dark:text-blue-100 rounded hover:bg-blue-200 dark:hover:bg-blue-900/50 active:bg-blue-300 dark:active:bg-blue-900/70 transition-colors"
+                      >
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M5 10l7-7m0 0l7 7m-7-7v18"
+                          />
+                        </svg>
+                        Convert to CSV
+                      </Link>
+                    )}
+                  {processedJSON && validation.isValid && (
+                    <button
+                      onClick={copyToClipboard}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 active:bg-zinc-300 dark:active:bg-zinc-600 transition-colors"
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                        />
+                      </svg>
+                      Copy
+                    </button>
+                  )}
+                </div>
               </div>
               <div
                 ref={outputContainerRef}
