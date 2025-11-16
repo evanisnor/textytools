@@ -9,7 +9,8 @@ export default function Home() {
             Utility Apps
           </h1>
           <p className="text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl">
-            A hub for lightweight productivity tools to support low-friction use cases.
+            A hub for lightweight productivity tools to support low-friction use
+            cases.
           </p>
         </div>
 
@@ -22,7 +23,8 @@ export default function Home() {
               Text Counter
             </h2>
             <p className="text-sm text-zinc-600 dark:text-zinc-400">
-              Count characters, words, lines, paragraphs and AI tokens in real-time
+              Count characters, words, lines, paragraphs and AI tokens in
+              real-time
             </p>
           </Link>
 

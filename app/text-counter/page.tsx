@@ -1,27 +1,33 @@
-'use client';
+"use client";
 
-import { useState, useMemo } from 'react';
-import Link from 'next/link';
-import { encoding_for_model } from 'tiktoken';
+import { useState, useMemo } from "react";
+import Link from "next/link";
+import { encoding_for_model } from "tiktoken";
 
 export default function TextCounter() {
-  const [text, setText] = useState('');
+  const [text, setText] = useState("");
 
   const characterCount = text.length;
-  const wordCount = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
-  const lineCount = text === '' ? 0 : text.split('\n').length;
-  const paragraphCount = text.trim() === '' ? 0 : text.trim().split(/\n\s*\n/).filter(p => p.trim().length > 0).length;
+  const wordCount = text.trim() === "" ? 0 : text.trim().split(/\s+/).length;
+  const lineCount = text === "" ? 0 : text.split("\n").length;
+  const paragraphCount =
+    text.trim() === ""
+      ? 0
+      : text
+          .trim()
+          .split(/\n\s*\n/)
+          .filter((p) => p.trim().length > 0).length;
 
   const tokenCount = useMemo(() => {
-    if (text.trim() === '') return 0;
+    if (text.trim() === "") return 0;
 
     try {
-      const encoding = encoding_for_model('gpt-4');
+      const encoding = encoding_for_model("gpt-4");
       const tokens = encoding.encode(text);
       encoding.free();
       return tokens.length;
     } catch (error) {
-      console.error('Error encoding tokens:', error);
+      console.error("Error encoding tokens:", error);
       return 0;
     }
   }, [text]);
@@ -43,41 +49,52 @@ export default function TextCounter() {
             Text Counter
           </h1>
           <p className="text-lg text-zinc-600 dark:text-zinc-400">
-            Paste or type text below to see character, word, line, paragraph, and AI token counts in real-time.
+            Paste or type text below to see character, word, line, paragraph,
+            and AI token counts in real-time.
           </p>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
           <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4">
-            <div className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">Characters</div>
+            <div className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
+              Characters
+            </div>
             <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">
               {characterCount.toLocaleString()}
             </div>
           </div>
 
           <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4">
-            <div className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">Words</div>
+            <div className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
+              Words
+            </div>
             <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">
               {wordCount.toLocaleString()}
             </div>
           </div>
 
           <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4">
-            <div className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">Lines</div>
+            <div className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
+              Lines
+            </div>
             <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">
               {lineCount.toLocaleString()}
             </div>
           </div>
 
           <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4">
-            <div className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">Paragraphs</div>
+            <div className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
+              Paragraphs
+            </div>
             <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">
               {paragraphCount.toLocaleString()}
             </div>
           </div>
 
           <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4">
-            <div className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">Tokens (GPT-4)</div>
+            <div className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
+              Tokens (GPT-4)
+            </div>
             <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">
               {tokenCount.toLocaleString()}
             </div>
@@ -97,7 +114,7 @@ export default function TextCounter() {
         {text.length > 0 && (
           <div className="mt-4 flex justify-end">
             <button
-              onClick={() => setText('')}
+              onClick={() => setText("")}
               className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
             >
               Clear text

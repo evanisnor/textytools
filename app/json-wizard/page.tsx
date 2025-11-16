@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useState, useMemo, useRef, useEffect } from 'react';
-import Link from 'next/link';
+import { useState, useMemo, useRef, useEffect } from "react";
+import Link from "next/link";
 
-type ViewMode = 'pretty' | 'minified' | 'raw';
+type ViewMode = "pretty" | "minified" | "raw";
 
 interface ValidationResult {
   isValid: boolean;
@@ -26,7 +26,7 @@ function validateJSON(text: string): ValidationResult {
       const position = match ? parseInt(match[1]) : undefined;
 
       if (position !== undefined) {
-        const lines = text.substring(0, position).split('\n');
+        const lines = text.substring(0, position).split("\n");
         const lineNumber = lines.length;
         const columnNumber = lines[lines.length - 1].length + 1;
 
@@ -45,7 +45,7 @@ function validateJSON(text: string): ValidationResult {
     }
     return {
       isValid: false,
-      error: 'Unknown parsing error',
+      error: "Unknown parsing error",
     };
   }
 }
@@ -62,7 +62,7 @@ function escapeJSON(text: string): string {
 function unescapeJSON(text: string): string {
   try {
     const unescaped = JSON.parse(text);
-    if (typeof unescaped === 'string') {
+    if (typeof unescaped === "string") {
       return unescaped;
     }
     return text;
@@ -71,27 +71,34 @@ function unescapeJSON(text: string): string {
   }
 }
 
-function getJSONStats(text: string): { keys: number; depth: number; size: number } {
+function getJSONStats(text: string): {
+  keys: number;
+  depth: number;
+  size: number;
+} {
   try {
     const parsed = JSON.parse(text);
 
-    const countKeys = (obj: any): number => {
-      if (typeof obj !== 'object' || obj === null) return 0;
+    const countKeys = (obj: unknown): number => {
+      if (typeof obj !== "object" || obj === null) return 0;
 
       let count = 0;
       for (const key in obj) {
         count++;
-        count += countKeys(obj[key]);
+        count += countKeys((obj as Record<string, unknown>)[key]);
       }
       return count;
     };
 
-    const getDepth = (obj: any, current = 1): number => {
-      if (typeof obj !== 'object' || obj === null) return current;
+    const getDepth = (obj: unknown, current = 1): number => {
+      if (typeof obj !== "object" || obj === null) return current;
 
       let maxDepth = current;
       for (const key in obj) {
-        const depth = getDepth(obj[key], current + 1);
+        const depth = getDepth(
+          (obj as Record<string, unknown>)[key],
+          current + 1,
+        );
         maxDepth = Math.max(maxDepth, depth);
       }
       return maxDepth;
@@ -108,10 +115,10 @@ function getJSONStats(text: string): { keys: number; depth: number; size: number
 }
 
 export default function JSONWizard() {
-  const [input, setInput] = useState('');
-  const [viewMode, setViewMode] = useState<ViewMode>('pretty');
+  const [input, setInput] = useState("");
+  const [viewMode, setViewMode] = useState<ViewMode>("pretty");
   const [indentSize, setIndentSize] = useState(2);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [sortKeys, setSortKeys] = useState(false);
   const [currentMatchIndex, setCurrentMatchIndex] = useState(0);
 
@@ -128,17 +135,20 @@ export default function JSONWizard() {
     try {
       const parsed = JSON.parse(input);
       const paths: string[] = [];
-      const regex = new RegExp(searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+      const regex = new RegExp(
+        searchTerm.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+        "gi",
+      );
 
       const traverse = (obj: unknown, path: string[] = []): void => {
-        if (typeof obj === 'object' && obj !== null) {
+        if (typeof obj === "object" && obj !== null) {
           if (Array.isArray(obj)) {
             obj.forEach((item, index) => {
               traverse(item, [...path, `[${index}]`]);
             });
           } else {
             // Keys appear in the order they are in the input JSON
-            Object.keys(obj).forEach(key => {
+            Object.keys(obj).forEach((key) => {
               traverse((obj as Record<string, unknown>)[key], [...path, key]);
             });
           }
@@ -149,7 +159,7 @@ export default function JSONWizard() {
           if (matches) {
             // Add the path once for each match in this value
             for (let i = 0; i < matches.length; i++) {
-              paths.push(path.join('.'));
+              paths.push(path.join("."));
             }
           }
         }
@@ -166,19 +176,27 @@ export default function JSONWizard() {
   const searchMatches = useMemo(() => {
     if (!searchTerm || !input) return [];
 
-    const matches: { lineIndex: number; matchIndex: number; columnStart: number; jsonPath?: string }[] = [];
-    const lines = input.split('\n');
+    const matches: {
+      lineIndex: number;
+      matchIndex: number;
+      columnStart: number;
+      jsonPath?: string;
+    }[] = [];
+    const lines = input.split("\n");
 
     lines.forEach((line, lineIndex) => {
       let match;
-      const lineRegex = new RegExp(searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+      const lineRegex = new RegExp(
+        searchTerm.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+        "gi",
+      );
       while ((match = lineRegex.exec(line)) !== null) {
         const jsonPath = inputMatchPaths[matches.length];
         matches.push({
           lineIndex,
           matchIndex: matches.length,
           columnStart: match.index,
-          jsonPath
+          jsonPath,
         });
       }
     });
@@ -191,7 +209,7 @@ export default function JSONWizard() {
   // Create a map for quick lookup of match indices by line and column
   const matchPositions = useMemo(() => {
     const map = new Map<number, Map<number, number>>();
-    searchMatches.forEach(match => {
+    searchMatches.forEach((match) => {
       if (!map.has(match.lineIndex)) {
         map.set(match.lineIndex, new Map());
       }
@@ -207,15 +225,15 @@ export default function JSONWizard() {
       let parsed = JSON.parse(input);
 
       if (sortKeys) {
-        const sortObject = (obj: any): any => {
-          if (typeof obj !== 'object' || obj === null) return obj;
+        const sortObject = (obj: unknown): unknown => {
+          if (typeof obj !== "object" || obj === null) return obj;
           if (Array.isArray(obj)) return obj.map(sortObject);
 
-          const sorted: any = {};
-          Object.keys(obj)
+          const sorted: Record<string, unknown> = {};
+          Object.keys(obj as Record<string, unknown>)
             .sort()
-            .forEach(key => {
-              sorted[key] = sortObject(obj[key]);
+            .forEach((key) => {
+              sorted[key] = sortObject((obj as Record<string, unknown>)[key]);
             });
           return sorted;
         };
@@ -224,13 +242,13 @@ export default function JSONWizard() {
 
       let result: string;
       switch (viewMode) {
-        case 'pretty':
+        case "pretty":
           result = JSON.stringify(parsed, null, indentSize);
           break;
-        case 'minified':
+        case "minified":
           result = JSON.stringify(parsed);
           break;
-        case 'raw':
+        case "raw":
           result = input;
           break;
       }
@@ -248,10 +266,13 @@ export default function JSONWizard() {
     try {
       const parsed = JSON.parse(processedJSON);
       const paths: string[] = [];
-      const regex = new RegExp(searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+      const regex = new RegExp(
+        searchTerm.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+        "gi",
+      );
 
       const traverse = (obj: unknown, path: string[] = []): void => {
-        if (typeof obj === 'object' && obj !== null) {
+        if (typeof obj === "object" && obj !== null) {
           if (Array.isArray(obj)) {
             obj.forEach((item, index) => {
               traverse(item, [...path, `[${index}]`]);
@@ -259,7 +280,7 @@ export default function JSONWizard() {
           } else {
             // When sortKeys is enabled, Object.keys() returns keys in alphabetical order
             // Otherwise, it preserves document order
-            Object.keys(obj).forEach(key => {
+            Object.keys(obj).forEach((key) => {
               traverse((obj as Record<string, unknown>)[key], [...path, key]);
             });
           }
@@ -270,7 +291,7 @@ export default function JSONWizard() {
           if (matches) {
             // Add the path once for each match in this value
             for (let i = 0; i < matches.length; i++) {
-              paths.push(path.join('.'));
+              paths.push(path.join("."));
             }
           }
         }
@@ -287,19 +308,27 @@ export default function JSONWizard() {
   const outputSearchMatches = useMemo(() => {
     if (!searchTerm || !processedJSON) return [];
 
-    const matches: { lineIndex: number; matchIndex: number; columnStart: number; jsonPath?: string }[] = [];
-    const lines = processedJSON.split('\n');
+    const matches: {
+      lineIndex: number;
+      matchIndex: number;
+      columnStart: number;
+      jsonPath?: string;
+    }[] = [];
+    const lines = processedJSON.split("\n");
 
     lines.forEach((line, lineIndex) => {
       let match;
-      const lineRegex = new RegExp(searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+      const lineRegex = new RegExp(
+        searchTerm.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+        "gi",
+      );
       while ((match = lineRegex.exec(line)) !== null) {
         const jsonPath = outputMatchPaths[matches.length];
         matches.push({
           lineIndex,
           matchIndex: matches.length,
           columnStart: match.index,
-          jsonPath
+          jsonPath,
         });
       }
     });
@@ -318,7 +347,9 @@ export default function JSONWizard() {
         if (!pathToOutputIndices.has(outputMatch.jsonPath)) {
           pathToOutputIndices.set(outputMatch.jsonPath, []);
         }
-        pathToOutputIndices.get(outputMatch.jsonPath)!.push(outputMatch.matchIndex);
+        pathToOutputIndices
+          .get(outputMatch.jsonPath)!
+          .push(outputMatch.matchIndex);
       }
     });
 
@@ -331,7 +362,8 @@ export default function JSONWizard() {
         const outputIndices = pathToOutputIndices.get(inputMatch.jsonPath);
         if (outputIndices && outputIndices.length > 0) {
           const usageCount = pathUsageCount.get(inputMatch.jsonPath) || 0;
-          const outputIndex = outputIndices[Math.min(usageCount, outputIndices.length - 1)];
+          const outputIndex =
+            outputIndices[Math.min(usageCount, outputIndices.length - 1)];
           map.set(inputMatch.matchIndex, outputIndex);
           pathUsageCount.set(inputMatch.jsonPath, usageCount + 1);
         }
@@ -349,7 +381,7 @@ export default function JSONWizard() {
   // Create a map for quick lookup of output match indices
   const outputMatchPositions = useMemo(() => {
     const map = new Map<number, Map<number, number>>();
-    outputSearchMatches.forEach(match => {
+    outputSearchMatches.forEach((match) => {
       if (!map.has(match.lineIndex)) {
         map.set(match.lineIndex, new Map());
       }
@@ -360,7 +392,11 @@ export default function JSONWizard() {
 
   // Scroll to error line when validation fails
   useEffect(() => {
-    if (!validation.isValid && validation.lineNumber && inputContainerRef.current) {
+    if (
+      !validation.isValid &&
+      validation.lineNumber &&
+      inputContainerRef.current
+    ) {
       const lineHeight = 20; // Approximate line height in pixels
       const errorLine = validation.lineNumber - 1;
       const scrollPosition = errorLine * lineHeight;
@@ -379,12 +415,14 @@ export default function JSONWizard() {
     // Use setTimeout to ensure the DOM has updated with the new highlighted elements
     setTimeout(() => {
       // Scroll input to current match using scrollIntoView for accurate positioning
-      const inputMatchElement = document.getElementById(`input-match-${currentMatchIndex}`);
+      const inputMatchElement = document.getElementById(
+        `input-match-${currentMatchIndex}`,
+      );
       if (inputMatchElement) {
         inputMatchElement.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center',
-          inline: 'center'
+          behavior: "smooth",
+          block: "center",
+          inline: "center",
         });
       }
 
@@ -392,24 +430,32 @@ export default function JSONWizard() {
       if (outputSearchMatches.length > 0) {
         const outputMatchIndex = inputToOutputMatchMap.get(currentMatchIndex);
         if (outputMatchIndex !== undefined && outputMatchIndex >= 0) {
-          const outputMatchElement = document.getElementById(`output-match-${outputMatchIndex}`);
+          const outputMatchElement = document.getElementById(
+            `output-match-${outputMatchIndex}`,
+          );
           if (outputMatchElement) {
             outputMatchElement.scrollIntoView({
-              behavior: 'smooth',
-              block: 'center',
-              inline: 'center'
+              behavior: "smooth",
+              block: "center",
+              inline: "center",
             });
           }
         }
       }
     }, 0);
-  }, [currentMatchIndex, searchMatches, outputSearchMatches, searchTerm, inputToOutputMatchMap]);
+  }, [
+    currentMatchIndex,
+    searchMatches,
+    outputSearchMatches,
+    searchTerm,
+    inputToOutputMatchMap,
+  ]);
 
   const copyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(processedJSON);
     } catch (err) {
-      console.error('Failed to copy:', err);
+      console.error("Failed to copy:", err);
     }
   };
 
@@ -435,7 +481,12 @@ export default function JSONWizard() {
     }
   };
 
-  const renderHighlightedText = (text: string, lineIndex?: number, useOutputMatches = false, currentLocalMatchIndex?: number) => {
+  const renderHighlightedText = (
+    text: string,
+    lineIndex?: number,
+    useOutputMatches = false,
+    currentLocalMatchIndex?: number,
+  ) => {
     if (!searchTerm || lineIndex === undefined) {
       return text;
     }
@@ -448,29 +499,48 @@ export default function JSONWizard() {
 
     // For output, use the provided mapped index, or currentMatchIndex for input
     // If currentLocalMatchIndex is explicitly -1, it means no match found, so don't highlight
-    const matchIndexToHighlight = currentLocalMatchIndex !== undefined && currentLocalMatchIndex >= 0
-      ? currentLocalMatchIndex
-      : (currentLocalMatchIndex === undefined ? currentMatchIndex : -999);
+    const matchIndexToHighlight =
+      currentLocalMatchIndex !== undefined && currentLocalMatchIndex >= 0
+        ? currentLocalMatchIndex
+        : currentLocalMatchIndex === undefined
+          ? currentMatchIndex
+          : -999;
 
-    const regex = new RegExp(searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
-    const parts: Array<{ text: string; isMatch: boolean; matchIndex: number }> = [];
+    const regex = new RegExp(
+      searchTerm.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+      "gi",
+    );
+    const parts: Array<{ text: string; isMatch: boolean; matchIndex: number }> =
+      [];
     let lastIndex = 0;
     let match;
 
     while ((match = regex.exec(text)) !== null) {
       // Add text before match
       if (match.index > lastIndex) {
-        parts.push({ text: text.substring(lastIndex, match.index), isMatch: false, matchIndex: -1 });
+        parts.push({
+          text: text.substring(lastIndex, match.index),
+          isMatch: false,
+          matchIndex: -1,
+        });
       }
       // Add match - look up the pre-calculated match index
       const globalMatchIndex = lineMatches.get(match.index) ?? -1;
-      parts.push({ text: match[0], isMatch: true, matchIndex: globalMatchIndex });
+      parts.push({
+        text: match[0],
+        isMatch: true,
+        matchIndex: globalMatchIndex,
+      });
       lastIndex = match.index + match[0].length;
     }
 
     // Add remaining text
     if (lastIndex < text.length) {
-      parts.push({ text: text.substring(lastIndex), isMatch: false, matchIndex: -1 });
+      parts.push({
+        text: text.substring(lastIndex),
+        isMatch: false,
+        matchIndex: -1,
+      });
     }
 
     return parts.map((part, index) => {
@@ -479,10 +549,16 @@ export default function JSONWizard() {
         return (
           <span
             key={index}
-            id={useOutputMatches ? `output-match-${part.matchIndex}` : `input-match-${part.matchIndex}`}
-            className={isCurrentMatch
-              ? 'bg-green-300 dark:bg-green-600 text-black'
-              : 'bg-yellow-300 dark:bg-yellow-600 text-black'}
+            id={
+              useOutputMatches
+                ? `output-match-${part.matchIndex}`
+                : `input-match-${part.matchIndex}`
+            }
+            className={
+              isCurrentMatch
+                ? "bg-green-300 dark:bg-green-600 text-black"
+                : "bg-yellow-300 dark:bg-yellow-600 text-black"
+            }
           >
             {part.text}
           </span>
@@ -495,7 +571,7 @@ export default function JSONWizard() {
   const renderWithLineNumbers = (text: string) => {
     if (!text) return null;
 
-    const lines = text.split('\n');
+    const lines = text.split("\n");
     const lineNumberWidth = String(lines.length).length;
 
     // Get the corresponding output match index for the current input match
@@ -503,19 +579,22 @@ export default function JSONWizard() {
 
     return (
       <div className="flex font-mono text-sm">
-        <div className="select-none text-zinc-400 dark:text-zinc-600 text-right pr-4 border-r border-zinc-200 dark:border-zinc-800" style={{ minWidth: `${lineNumberWidth + 2}ch` }}>
+        <div
+          className="select-none text-zinc-400 dark:text-zinc-600 text-right pr-4 border-r border-zinc-200 dark:border-zinc-800"
+          style={{ minWidth: `${lineNumberWidth + 2}ch` }}
+        >
           {lines.map((_, index) => (
             <div key={index}>{index + 1}</div>
           ))}
         </div>
         <div className="flex-1 pl-4 whitespace-pre">
-          {searchTerm ? (
-            lines.map((line, index) => (
-              <div key={index}>{renderHighlightedText(line, index, true, outputMatchIndex)}</div>
-            ))
-          ) : (
-            text
-          )}
+          {searchTerm
+            ? lines.map((line, index) => (
+                <div key={index}>
+                  {renderHighlightedText(line, index, true, outputMatchIndex)}
+                </div>
+              ))
+            : text}
         </div>
       </div>
     );
@@ -546,21 +625,31 @@ export default function JSONWizard() {
           {/* Stats Bar */}
           <div className="grid grid-cols-3 gap-3 lg:min-w-[400px]">
             <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-3">
-              <div className="text-xs text-zinc-600 dark:text-zinc-400">Total Keys</div>
+              <div className="text-xs text-zinc-600 dark:text-zinc-400">
+                Total Keys
+              </div>
               <div className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
-                {validation.isValid && input.trim() ? stats.keys.toLocaleString() : '—'}
+                {validation.isValid && input.trim()
+                  ? stats.keys.toLocaleString()
+                  : "—"}
               </div>
             </div>
             <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-3">
-              <div className="text-xs text-zinc-600 dark:text-zinc-400">Max Depth</div>
+              <div className="text-xs text-zinc-600 dark:text-zinc-400">
+                Max Depth
+              </div>
               <div className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
-                {validation.isValid && input.trim() ? stats.depth : '—'}
+                {validation.isValid && input.trim() ? stats.depth : "—"}
               </div>
             </div>
             <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-3">
-              <div className="text-xs text-zinc-600 dark:text-zinc-400">Size</div>
+              <div className="text-xs text-zinc-600 dark:text-zinc-400">
+                Size
+              </div>
               <div className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
-                {validation.isValid && input.trim() ? `${stats.size.toLocaleString()} bytes` : '—'}
+                {validation.isValid && input.trim()
+                  ? `${stats.size.toLocaleString()} bytes`
+                  : "—"}
               </div>
             </div>
           </div>
@@ -575,31 +664,50 @@ export default function JSONWizard() {
                   Input JSON
                 </label>
                 {input.trim() && (
-                  <div className={`flex items-center gap-2 px-3 py-1 rounded-md text-xs font-medium ${
-                    validation.isValid
-                      ? 'bg-green-50 dark:bg-green-950 text-green-800 dark:text-green-200'
-                      : 'bg-red-50 dark:bg-red-950 text-red-800 dark:text-red-200'
-                  }`}>
-                    {validation.isValid ? '✓ Valid JSON' : '✗ Invalid JSON'}
-                    {!validation.isValid && validation.lineNumber && validation.columnNumber && (
-                      <span className="text-red-700 dark:text-red-300">
-                        (Line {validation.lineNumber}, Col {validation.columnNumber})
-                      </span>
-                    )}
+                  <div
+                    className={`flex items-center gap-2 px-3 py-1 rounded-md text-xs font-medium ${
+                      validation.isValid
+                        ? "bg-green-50 dark:bg-green-950 text-green-800 dark:text-green-200"
+                        : "bg-red-50 dark:bg-red-950 text-red-800 dark:text-red-200"
+                    }`}
+                  >
+                    {validation.isValid ? "✓ Valid JSON" : "✗ Invalid JSON"}
+                    {!validation.isValid &&
+                      validation.lineNumber &&
+                      validation.columnNumber && (
+                        <span className="text-red-700 dark:text-red-300">
+                          (Line {validation.lineNumber}, Col{" "}
+                          {validation.columnNumber})
+                        </span>
+                      )}
                   </div>
                 )}
               </div>
-              <div ref={inputContainerRef} className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4 h-64 overflow-auto relative">
+              <div
+                ref={inputContainerRef}
+                className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4 h-64 overflow-auto relative"
+              >
                 {input ? (
                   <div className="flex font-mono text-sm">
-                    <div className="select-none text-zinc-400 dark:text-zinc-600 text-right pr-4 border-r border-zinc-200 dark:border-zinc-800" style={{ minWidth: `${String(input.split('\n').length).length + 2}ch` }}>
-                      {input.split('\n').map((_, index) => {
+                    <div
+                      className="select-none text-zinc-400 dark:text-zinc-600 text-right pr-4 border-r border-zinc-200 dark:border-zinc-800"
+                      style={{
+                        minWidth: `${String(input.split("\n").length).length + 2}ch`,
+                      }}
+                    >
+                      {input.split("\n").map((_, index) => {
                         const lineNumber = index + 1;
-                        const isErrorLine = !validation.isValid && validation.lineNumber === lineNumber;
+                        const isErrorLine =
+                          !validation.isValid &&
+                          validation.lineNumber === lineNumber;
                         return (
                           <div
                             key={index}
-                            className={isErrorLine ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 font-bold' : ''}
+                            className={
+                              isErrorLine
+                                ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 font-bold"
+                                : ""
+                            }
                           >
                             {lineNumber}
                           </div>
@@ -608,14 +716,22 @@ export default function JSONWizard() {
                     </div>
                     <div className="flex-1 pl-4 relative">
                       <div className="absolute inset-0 whitespace-pre">
-                        {input.split('\n').map((line, index) => {
+                        {input.split("\n").map((line, index) => {
                           const lineNumber = index + 1;
-                          const isErrorLine = !validation.isValid && validation.lineNumber === lineNumber;
-                          const lineContent = searchTerm ? renderHighlightedText(line, index) : line;
+                          const isErrorLine =
+                            !validation.isValid &&
+                            validation.lineNumber === lineNumber;
+                          const lineContent = searchTerm
+                            ? renderHighlightedText(line, index)
+                            : line;
                           return (
                             <div
                               key={index}
-                              className={isErrorLine ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400' : 'text-zinc-900 dark:text-zinc-50'}
+                              className={
+                                isErrorLine
+                                  ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
+                                  : "text-zinc-900 dark:text-zinc-50"
+                              }
                             >
                               {lineContent}
                             </div>
@@ -658,7 +774,10 @@ export default function JSONWizard() {
                   </button>
                 )}
               </div>
-              <div ref={outputContainerRef} className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4 h-64 overflow-auto">
+              <div
+                ref={outputContainerRef}
+                className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4 h-64 overflow-auto"
+              >
                 {processedJSON ? (
                   renderWithLineNumbers(processedJSON)
                 ) : (
@@ -699,7 +818,9 @@ export default function JSONWizard() {
                   ←
                 </button>
                 <span className="text-xs text-zinc-600 dark:text-zinc-400 flex-1 text-center">
-                  {searchTerm && totalMatches > 0 ? `${currentMatchIndex + 1} / ${totalMatches}` : '0 / 0'}
+                  {searchTerm && totalMatches > 0
+                    ? `${currentMatchIndex + 1} / ${totalMatches}`
+                    : "0 / 0"}
                 </span>
                 <button
                   onClick={goToNextMatch}
@@ -718,42 +839,48 @@ export default function JSONWizard() {
               </label>
               <div className="space-y-2">
                 <button
-                  onClick={() => setViewMode('pretty')}
+                  onClick={() => setViewMode("pretty")}
                   disabled={!validation.isValid}
                   className={`w-full text-left p-3 rounded-lg border transition-colors ${
-                    viewMode === 'pretty'
-                      ? 'border-zinc-900 dark:border-zinc-50 bg-zinc-100 dark:bg-zinc-800'
-                      : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-zinc-300 dark:hover:border-zinc-700'
-                  } ${!validation.isValid ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    viewMode === "pretty"
+                      ? "border-zinc-900 dark:border-zinc-50 bg-zinc-100 dark:bg-zinc-800"
+                      : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-zinc-300 dark:hover:border-zinc-700"
+                  } ${!validation.isValid ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
-                  <div className="font-medium text-sm text-zinc-900 dark:text-zinc-50">Pretty Print</div>
+                  <div className="font-medium text-sm text-zinc-900 dark:text-zinc-50">
+                    Pretty Print
+                  </div>
                 </button>
                 <button
-                  onClick={() => setViewMode('minified')}
+                  onClick={() => setViewMode("minified")}
                   disabled={!validation.isValid}
                   className={`w-full text-left p-3 rounded-lg border transition-colors ${
-                    viewMode === 'minified'
-                      ? 'border-zinc-900 dark:border-zinc-50 bg-zinc-100 dark:bg-zinc-800'
-                      : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-zinc-300 dark:hover:border-zinc-700'
-                  } ${!validation.isValid ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    viewMode === "minified"
+                      ? "border-zinc-900 dark:border-zinc-50 bg-zinc-100 dark:bg-zinc-800"
+                      : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-zinc-300 dark:hover:border-zinc-700"
+                  } ${!validation.isValid ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
-                  <div className="font-medium text-sm text-zinc-900 dark:text-zinc-50">Minified</div>
+                  <div className="font-medium text-sm text-zinc-900 dark:text-zinc-50">
+                    Minified
+                  </div>
                 </button>
                 <button
-                  onClick={() => setViewMode('raw')}
+                  onClick={() => setViewMode("raw")}
                   className={`w-full text-left p-3 rounded-lg border transition-colors ${
-                    viewMode === 'raw'
-                      ? 'border-zinc-900 dark:border-zinc-50 bg-zinc-100 dark:bg-zinc-800'
-                      : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-zinc-300 dark:hover:border-zinc-700'
+                    viewMode === "raw"
+                      ? "border-zinc-900 dark:border-zinc-50 bg-zinc-100 dark:bg-zinc-800"
+                      : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-zinc-300 dark:hover:border-zinc-700"
                   }`}
                 >
-                  <div className="font-medium text-sm text-zinc-900 dark:text-zinc-50">Raw</div>
+                  <div className="font-medium text-sm text-zinc-900 dark:text-zinc-50">
+                    Raw
+                  </div>
                 </button>
               </div>
             </div>
 
             {/* Indent Size */}
-            {viewMode === 'pretty' && (
+            {viewMode === "pretty" && (
               <div>
                 <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                   Indent Size: {indentSize}
@@ -784,7 +911,9 @@ export default function JSONWizard() {
                   disabled={!validation.isValid}
                   className="h-4 w-4 rounded border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-50 focus:ring-zinc-900 dark:focus:ring-zinc-50"
                 />
-                <span className="text-sm text-zinc-900 dark:text-zinc-50">Sort Keys</span>
+                <span className="text-sm text-zinc-900 dark:text-zinc-50">
+                  Sort Keys
+                </span>
               </label>
             </div>
 
@@ -809,7 +938,7 @@ export default function JSONWizard() {
                   Unescape JSON
                 </button>
                 <button
-                  onClick={() => setInput('')}
+                  onClick={() => setInput("")}
                   disabled={!input.trim()}
                   className="w-full p-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-zinc-900 dark:text-zinc-50 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
