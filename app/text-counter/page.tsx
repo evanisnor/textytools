@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { Tiktoken } from "js-tiktoken/lite";
 import cl100k_base from "js-tiktoken/ranks/cl100k_base";
@@ -11,6 +11,7 @@ export default function TextCounter() {
   const characterCount = text.length;
   const wordCount = text.trim() === "" ? 0 : text.trim().split(/\s+/).length;
   const lineCount = text === "" ? 0 : text.split("\n").length;
+  const [tokenCount, setTokenCount] = useState("0");
   const paragraphCount =
     text.trim() === ""
       ? 0
@@ -19,16 +20,29 @@ export default function TextCounter() {
           .split(/\n\s*\n/)
           .filter((p) => p.trim().length > 0).length;
 
-  const tokenCount = useMemo(() => {
-    if (text.trim() === "") return 0;
+  useEffect(() => {
+    let isTokenizing = true;
+    tokenize();
+    return () => {
+      isTokenizing = false;
+    };
 
-    try {
-      const encoding = new Tiktoken(cl100k_base);
-      const tokens = encoding.encode(text);
-      return tokens.length;
-    } catch (error) {
-      console.error("Error encoding tokens:", error);
-      return 0;
+    async function tokenize() {
+      if (!isTokenizing) {
+        return;
+      } else if (text.trim() === "") {
+        setTokenCount("0");
+      } else {
+        try {
+          const encoding = new Tiktoken(cl100k_base);
+          const tokens = encoding.encode(text);
+          setTokenCount(tokens.length.toLocaleString());
+        } catch (error) {
+          console.error("Error encoding tokens:", error);
+          setTokenCount("ERR");
+          return;
+        }
+      }
     }
   }, [text]);
 
@@ -96,7 +110,7 @@ export default function TextCounter() {
               Tokens (GPT-4+)
             </div>
             <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">
-              {tokenCount.toLocaleString()}
+              {tokenCount}
             </div>
           </div>
         </div>
