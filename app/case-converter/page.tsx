@@ -257,7 +257,7 @@ export default function CaseConverter() {
             <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-3">
               Select Case Format
             </label>
-            <div className="space-y-2">
+            <div className="space-y-2 max-h-[600px] overflow-y-auto pr-2">
               {caseOptions.map((option) => (
                 <button
                   key={option.id}

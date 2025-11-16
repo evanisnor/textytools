@@ -17,7 +17,7 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <Link
             href="/text-counter"
-            className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors"
+            className="flex flex-col rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors min-h-[140px]"
           >
             <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
               Text Counter
@@ -30,7 +30,7 @@ export default function Home() {
 
           <Link
             href="/case-converter"
-            className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors"
+            className="flex flex-col rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors min-h-[140px]"
           >
             <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
               Case Converter
@@ -42,7 +42,7 @@ export default function Home() {
 
           <Link
             href="/text-sanitizer"
-            className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors"
+            className="flex flex-col rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors min-h-[140px]"
           >
             <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
               Text Sanitizer
@@ -54,7 +54,7 @@ export default function Home() {
 
           <Link
             href="/json-wizard"
-            className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors"
+            className="flex flex-col rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors min-h-[140px]"
           >
             <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
               JSON Wizard
@@ -66,7 +66,7 @@ export default function Home() {
 
           <Link
             href="/csv-json-converter"
-            className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors"
+            className="flex flex-col rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors min-h-[140px]"
           >
             <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
               CSV / JSON Converter
@@ -78,7 +78,7 @@ export default function Home() {
 
           <Link
             href="/text-encoder"
-            className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors"
+            className="flex flex-col rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors min-h-[140px]"
           >
             <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
               Text Encoder
@@ -90,7 +90,7 @@ export default function Home() {
 
           <Link
             href="/jwt-decoder"
-            className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors"
+            className="flex flex-col rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors min-h-[140px]"
           >
             <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
               JWT Decoder
@@ -101,7 +101,7 @@ export default function Home() {
           </Link>
 
           {/* Placeholder for future tools */}
-          <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors opacity-50">
+          <div className="flex flex-col rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors opacity-50 min-h-[140px]">
             <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
               Coming Soon
             </h2>
