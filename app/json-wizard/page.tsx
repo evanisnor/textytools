@@ -119,6 +119,7 @@ export default function JSONWizard() {
   const [viewMode, setViewMode] = useState<ViewMode>("pretty");
   const [indentSize, setIndentSize] = useState(2);
   const [searchTerm, setSearchTerm] = useState("");
+  const [caseSensitive, setCaseSensitive] = useState(false);
   const [sortKeys, setSortKeys] = useState(false);
   const [currentMatchIndex, setCurrentMatchIndex] = useState(0);
 
@@ -137,7 +138,7 @@ export default function JSONWizard() {
       const paths: string[] = [];
       const regex = new RegExp(
         searchTerm.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
-        "gi",
+        caseSensitive ? "g" : "gi",
       );
 
       const traverse = (obj: unknown, path: string[] = []): void => {
@@ -170,7 +171,7 @@ export default function JSONWizard() {
     } catch {
       return [];
     }
-  }, [searchTerm, input, validation.isValid]);
+  }, [searchTerm, caseSensitive, input, validation.isValid]);
 
   // Calculate search matches in input
   const searchMatches = useMemo(() => {
@@ -188,7 +189,7 @@ export default function JSONWizard() {
       let match;
       const lineRegex = new RegExp(
         searchTerm.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
-        "gi",
+        caseSensitive ? "g" : "gi",
       );
       while ((match = lineRegex.exec(line)) !== null) {
         const jsonPath = inputMatchPaths[matches.length];
@@ -202,7 +203,7 @@ export default function JSONWizard() {
     });
 
     return matches;
-  }, [searchTerm, input, inputMatchPaths]);
+  }, [searchTerm, caseSensitive, input, inputMatchPaths]);
 
   const totalMatches = searchMatches.length;
 
@@ -268,7 +269,7 @@ export default function JSONWizard() {
       const paths: string[] = [];
       const regex = new RegExp(
         searchTerm.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
-        "gi",
+        caseSensitive ? "g" : "gi",
       );
 
       const traverse = (obj: unknown, path: string[] = []): void => {
@@ -302,7 +303,7 @@ export default function JSONWizard() {
     } catch {
       return [];
     }
-  }, [searchTerm, processedJSON, validation.isValid]);
+  }, [searchTerm, caseSensitive, processedJSON, validation.isValid]);
 
   // Calculate search matches in the output JSON
   const outputSearchMatches = useMemo(() => {
@@ -320,7 +321,7 @@ export default function JSONWizard() {
       let match;
       const lineRegex = new RegExp(
         searchTerm.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
-        "gi",
+        caseSensitive ? "g" : "gi",
       );
       while ((match = lineRegex.exec(line)) !== null) {
         const jsonPath = outputMatchPaths[matches.length];
@@ -334,7 +335,7 @@ export default function JSONWizard() {
     });
 
     return matches;
-  }, [searchTerm, processedJSON, outputMatchPaths]);
+  }, [searchTerm, caseSensitive, processedJSON, outputMatchPaths]);
 
   // Map input match indices to output match indices based on JSON structural paths
   const inputToOutputMatchMap = useMemo(() => {
@@ -508,7 +509,7 @@ export default function JSONWizard() {
 
     const regex = new RegExp(
       searchTerm.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
-      "gi",
+      caseSensitive ? "g" : "gi",
     );
     const parts: Array<{ text: string; isMatch: boolean; matchIndex: number }> =
       [];
@@ -794,42 +795,62 @@ export default function JSONWizard() {
             {/* Search */}
             <div>
               <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-                Search & Highlight
+                Search
               </label>
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => {
-                  setSearchTerm(e.target.value);
-                  setCurrentMatchIndex(0);
-                }}
-                placeholder="Search in JSON..."
-                disabled={!validation.isValid}
-                className="w-full p-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-50"
-              />
+              <div className="space-y-2">
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setCurrentMatchIndex(0);
+                  }}
+                  placeholder="Search in JSON..."
+                  disabled={!validation.isValid}
+                  className="w-full p-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-50"
+                />
 
-              <div className="mt-2 flex items-center gap-2">
-                <button
-                  onClick={goToPreviousMatch}
-                  disabled={!searchTerm || totalMatches === 0}
-                  className="p-2 rounded border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                  title="Previous match"
-                >
-                  ←
-                </button>
-                <span className="text-xs text-zinc-600 dark:text-zinc-400 flex-1 text-center">
-                  {searchTerm && totalMatches > 0
-                    ? `${currentMatchIndex + 1} / ${totalMatches}`
-                    : "0 / 0"}
-                </span>
-                <button
-                  onClick={goToNextMatch}
-                  disabled={!searchTerm || totalMatches === 0}
-                  className="p-2 rounded border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                  title="Next match"
-                >
-                  →
-                </button>
+                <div className="flex items-center justify-between gap-2">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={caseSensitive}
+                      onChange={(e) => {
+                        setCaseSensitive(e.target.checked);
+                        setCurrentMatchIndex(0);
+                      }}
+                      disabled={!validation.isValid}
+                      className="h-4 w-4 rounded border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-50 focus:ring-zinc-900 dark:focus:ring-zinc-50"
+                    />
+                    <span className="text-sm text-zinc-600 dark:text-zinc-400">
+                      Case Sensitive
+                    </span>
+                  </label>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={goToPreviousMatch}
+                      disabled={!searchTerm || totalMatches === 0}
+                      className="p-2 rounded border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Previous match"
+                    >
+                      ←
+                    </button>
+                    <span className="text-xs text-zinc-600 dark:text-zinc-400 min-w-[60px] text-center">
+                      {searchTerm && totalMatches > 0
+                        ? `${currentMatchIndex + 1} / ${totalMatches}`
+                        : "0 / 0"}
+                    </span>
+                    <button
+                      onClick={goToNextMatch}
+                      disabled={!searchTerm || totalMatches === 0}
+                      className="p-2 rounded border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Next match"
+                    >
+                      →
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
 
