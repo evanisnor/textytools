@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useToast } from "@/components/Toast";
 
 interface SanitizationOption {
   id: string;
@@ -163,6 +164,7 @@ function sanitizeText(text: string, options: SanitizationOption[]): string {
 export default function TextSanitizer() {
   const [text, setText] = useState("");
   const [options, setOptions] = useState<SanitizationOption[]>(defaultOptions);
+  const { showToast, ToastComponent } = useToast();
 
   const sanitizedText = sanitizeText(text, options);
 
@@ -185,6 +187,7 @@ export default function TextSanitizer() {
   const copyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(sanitizedText);
+      showToast("Copied to clipboard");
     } catch (err) {
       console.error("Failed to copy:", err);
     }
@@ -347,6 +350,7 @@ export default function TextSanitizer() {
           </div>
         </div>
       </div>
+      {ToastComponent}
     </div>
   );
 }

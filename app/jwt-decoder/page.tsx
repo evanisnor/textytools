@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useMemo, JSX } from "react";
+import { useState, useMemo, useEffect, JSX } from "react";
 import Link from "next/link";
+import { useToast } from "@/components/Toast";
 
 interface JWTPayload {
   [key: string]: unknown;
@@ -134,6 +135,17 @@ function isNotYetValid(notBefore: Date | undefined): boolean {
 
 export default function JWTDecoder() {
   const [input, setInput] = useState("");
+  const { showToast, ToastComponent } = useToast();
+
+  useEffect(() => {
+    // Load from localStorage after mount to avoid hydration mismatch
+    const storedInput = localStorage.getItem("jwt-decoder-input");
+    if (storedInput) {
+      localStorage.removeItem("jwt-decoder-input");
+      // Use setTimeout to avoid synchronous setState in effect
+      setTimeout(() => setInput(storedInput), 0);
+    }
+  }, []);
 
   const result = useMemo(() => {
     if (!input.trim()) {
@@ -293,25 +305,27 @@ export default function JWTDecoder() {
               <label className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
                 JWT Token
               </label>
-              <button
-                onClick={() => setInput("")}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 active:bg-zinc-300 dark:active:bg-zinc-600 transition-colors"
-              >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+              {input.trim() && (
+                <button
+                  onClick={() => setInput("")}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 active:bg-zinc-300 dark:active:bg-zinc-600 transition-colors"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-                Clear
-              </button>
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                  Clear
+                </button>
+              )}
             </div>
             <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-1">
               <div className="relative">
@@ -326,6 +340,7 @@ export default function JWTDecoder() {
                     placeholder="Paste a JWT token here...&#10;&#10;Example:&#10;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
                     className="w-full h-[500px] p-4 bg-transparent resize-none focus:outline-none font-mono text-sm text-zinc-900 dark:text-zinc-50 placeholder-zinc-400 dark:placeholder-zinc-600 whitespace-pre-wrap break-all"
                     spellCheck={false}
+                    autoComplete="off"
                   />
                 )}
               </div>
@@ -370,9 +385,10 @@ export default function JWTDecoder() {
                 )}
                 {result.success && result.decoded && (
                   <button
-                    onClick={() =>
-                      navigator.clipboard.writeText(formattedOutput)
-                    }
+                    onClick={() => {
+                      navigator.clipboard.writeText(formattedOutput);
+                      showToast("Copied to clipboard");
+                    }}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 active:bg-zinc-300 dark:active:bg-zinc-600 transition-colors"
                   >
                     <svg
@@ -434,6 +450,7 @@ export default function JWTDecoder() {
           </div>
         </div>
       </div>
+      {ToastComponent}
     </div>
   );
 }

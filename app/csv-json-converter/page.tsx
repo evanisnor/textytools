@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, JSX } from "react";
 import Link from "next/link";
+import { useToast } from "@/components/Toast";
 
 interface JsonObject {
   [key: string]: unknown;
@@ -82,21 +83,22 @@ function detectInputFormat(input: string): "json" | "csv" {
 }
 
 export default function CsvJsonConverter() {
-  const [input, setInput] = useState(() => {
-    // Initialize from localStorage on first render
-    if (typeof window !== "undefined") {
-      const storedInput = localStorage.getItem("csv-json-converter-input");
-      if (storedInput) {
-        localStorage.removeItem("csv-json-converter-input");
-        return storedInput;
-      }
-    }
-    return "";
-  });
+  const [input, setInput] = useState("");
   const [delimiter, setDelimiter] = useState(",");
   const [includeHeaders, setIncludeHeaders] = useState(true);
   const inputEditableRef = React.useRef<HTMLDivElement>(null);
   const outputEditableRef = React.useRef<HTMLDivElement>(null);
+  const { showToast, ToastComponent } = useToast();
+
+  React.useEffect(() => {
+    // Load from localStorage after mount to avoid hydration mismatch
+    const storedInput = localStorage.getItem("csv-json-converter-input");
+    if (storedInput) {
+      localStorage.removeItem("csv-json-converter-input");
+      // Use setTimeout to avoid synchronous setState in effect
+      setTimeout(() => setInput(storedInput), 0);
+    }
+  }, []);
 
   const contentKey = React.useMemo(() => {
     // Use line count of non-empty lines as key to force remount when rows are added/deleted
@@ -397,7 +399,10 @@ export default function CsvJsonConverter() {
                   )}
                 {result.success && result.output && (
                   <button
-                    onClick={() => navigator.clipboard.writeText(result.output)}
+                    onClick={() => {
+                      navigator.clipboard.writeText(result.output);
+                      showToast("Copied to clipboard");
+                    }}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 active:bg-zinc-300 dark:active:bg-zinc-600 transition-colors"
                   >
                     <svg
@@ -462,6 +467,7 @@ export default function CsvJsonConverter() {
           </div>
         </div>
       </div>
+      {ToastComponent}
     </div>
   );
 }

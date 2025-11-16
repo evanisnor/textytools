@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import bs58 from "bs58";
+import { useToast } from "@/components/Toast";
 
 type EncodingType =
   | "base64"
@@ -962,6 +963,7 @@ export default function TextEncoderPage() {
     useState<EncodingType>("base64");
   const [mode, setMode] = useState<"encode" | "decode">("encode");
   const [outputText, setOutputText] = useState("");
+  const { showToast, ToastComponent } = useToast();
 
   const handleModeChange = (newMode: "encode" | "decode") => {
     setMode(newMode);
@@ -989,6 +991,7 @@ export default function TextEncoderPage() {
   const copyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(outputText);
+      showToast("Copied to clipboard");
     } catch (err) {
       console.error("Failed to copy:", err);
     }
@@ -1173,6 +1176,7 @@ export default function TextEncoderPage() {
           </div>
         </div>
       </div>
+      {ToastComponent}
     </div>
   );
 }

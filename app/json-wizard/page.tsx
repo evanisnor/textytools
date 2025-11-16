@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useRef, useEffect } from "react";
 import Link from "next/link";
+import { useToast } from "@/components/Toast";
 
 type ViewMode = "pretty" | "minified" | "escaped";
 
@@ -94,17 +95,7 @@ function getJSONStats(text: string): {
 }
 
 export default function JSONWizard() {
-  const [input, setInput] = useState(() => {
-    // Initialize from localStorage on first render
-    if (typeof window !== "undefined") {
-      const storedInput = localStorage.getItem("json-wizard-input");
-      if (storedInput) {
-        localStorage.removeItem("json-wizard-input");
-        return storedInput;
-      }
-    }
-    return "";
-  });
+  const [input, setInput] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("pretty");
   const [indentSize, setIndentSize] = useState(2);
   const [searchTerm, setSearchTerm] = useState("");
@@ -114,6 +105,22 @@ export default function JSONWizard() {
 
   const inputContainerRef = useRef<HTMLDivElement>(null);
   const outputContainerRef = useRef<HTMLDivElement>(null);
+  const { showToast, ToastComponent } = useToast();
+
+  // Track if component has mounted to avoid hydration mismatches
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    // Use setTimeout to avoid synchronous setState in effect
+    setTimeout(() => {
+      setMounted(true);
+      const storedInput = localStorage.getItem("json-wizard-input");
+      if (storedInput) {
+        localStorage.removeItem("json-wizard-input");
+        setInput(storedInput);
+      }
+    }, 0);
+  }, []);
 
   const validation = useMemo(() => validateJSON(input), [input]);
   const stats = useMemo(() => getJSONStats(input), [input]);
@@ -477,6 +484,7 @@ export default function JSONWizard() {
   const copyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(processedJSON);
+      showToast("Copied to clipboard");
     } catch (err) {
       console.error("Failed to copy:", err);
     }
@@ -642,7 +650,7 @@ export default function JSONWizard() {
                 Total Keys
               </div>
               <div className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
-                {validation.isValid && input.trim()
+                {mounted && validation.isValid && input.trim()
                   ? stats.keys.toLocaleString()
                   : "—"}
               </div>
@@ -652,7 +660,9 @@ export default function JSONWizard() {
                 Max Depth
               </div>
               <div className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
-                {validation.isValid && input.trim() ? stats.depth : "—"}
+                {mounted && validation.isValid && input.trim()
+                  ? stats.depth
+                  : "—"}
               </div>
             </div>
             <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-3">
@@ -660,7 +670,7 @@ export default function JSONWizard() {
                 Size
               </div>
               <div className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
-                {validation.isValid && input.trim()
+                {mounted && validation.isValid && input.trim()
                   ? `${stats.size.toLocaleString()} bytes`
                   : "—"}
               </div>
@@ -1021,6 +1031,7 @@ export default function JSONWizard() {
           </div>
         </div>
       </div>
+      {ToastComponent}
     </div>
   );
 }

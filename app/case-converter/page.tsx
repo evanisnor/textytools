@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useToast } from "@/components/Toast";
 
 type CaseType =
   | "upper"
@@ -168,12 +169,14 @@ function convertCase(text: string, caseType: CaseType): string {
 export default function CaseConverter() {
   const [text, setText] = useState("");
   const [selectedCase, setSelectedCase] = useState<CaseType>("upper");
+  const { showToast, ToastComponent } = useToast();
 
   const convertedText = convertCase(text, selectedCase);
 
   const copyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(convertedText);
+      showToast("Copied to clipboard");
     } catch (err) {
       console.error("Failed to copy:", err);
     }
@@ -306,6 +309,7 @@ export default function CaseConverter() {
           </div>
         </div>
       </div>
+      {ToastComponent}
     </div>
   );
 }
