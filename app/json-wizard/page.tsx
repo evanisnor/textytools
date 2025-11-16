@@ -121,120 +121,70 @@ export default function JSONWizard() {
   const validation = useMemo(() => validateJSON(input), [input]);
   const stats = useMemo(() => getJSONStats(input), [input]);
 
-
-  // Get canonical JSON form (for semantic order comparison)
-  const canonicalJSON = useMemo(() => {
-    if (!validation.isValid || !input.trim()) return input;
+  // Build ordered list of JSON paths where matches occur in input (in document order)
+  const inputMatchPaths = useMemo(() => {
+    if (!searchTerm || !validation.isValid || !input.trim()) return [];
 
     try {
       const parsed = JSON.parse(input);
-      // Sort keys recursively for canonical form
-      const sortObject = (obj: any): any => {
-        if (typeof obj !== 'object' || obj === null) return obj;
-        if (Array.isArray(obj)) return obj.map(sortObject);
+      const paths: string[] = [];
+      const regex = new RegExp(searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
 
-        const sorted: any = {};
-        Object.keys(obj)
-          .sort()
-          .forEach(key => {
-            sorted[key] = sortObject(obj[key]);
-          });
-        return sorted;
+      const traverse = (obj: unknown, path: string[] = []): void => {
+        if (typeof obj === 'object' && obj !== null) {
+          if (Array.isArray(obj)) {
+            obj.forEach((item, index) => {
+              traverse(item, [...path, `[${index}]`]);
+            });
+          } else {
+            // Keys appear in the order they are in the input JSON
+            Object.keys(obj).forEach(key => {
+              traverse((obj as Record<string, unknown>)[key], [...path, key]);
+            });
+          }
+        } else {
+          // Check if this value contains matches
+          const valueStr = String(obj);
+          const matches = valueStr.match(regex);
+          if (matches) {
+            // Add the path once for each match in this value
+            for (let i = 0; i < matches.length; i++) {
+              paths.push(path.join('.'));
+            }
+          }
+        }
       };
-      return JSON.stringify(sortObject(parsed));
-    } catch {
-      return input;
-    }
-  }, [input, validation.isValid]);
 
-  // Calculate search matches with their semantic order based on canonical form
+      traverse(parsed);
+      return paths;
+    } catch {
+      return [];
+    }
+  }, [searchTerm, input, validation.isValid]);
+
+  // Calculate search matches in input
   const searchMatches = useMemo(() => {
     if (!searchTerm || !input) return [];
 
-    const matches: { lineIndex: number; matchIndex: number; columnStart: number; semanticOrder: number }[] = [];
+    const matches: { lineIndex: number; matchIndex: number; columnStart: number; jsonPath?: string }[] = [];
     const lines = input.split('\n');
-    const normalized = input.replace(/\s+/g, '');
-    const canonical = canonicalJSON.replace(/\s+/g, '');
 
-    // Build a map of all match positions in canonical form with their surrounding context
-    const canonicalContexts: { position: number; context: string; order: number }[] = [];
-    const canonicalRegex = new RegExp(searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
-    let canonicalMatch;
-    let order = 0;
-    while ((canonicalMatch = canonicalRegex.exec(canonical)) !== null) {
-      const contextSize = 50;
-      const contextStart = Math.max(0, canonicalMatch.index - contextSize);
-      const contextEnd = Math.min(canonical.length, canonicalMatch.index + canonicalMatch[0].length + contextSize);
-      const context = canonical.substring(contextStart, contextEnd);
-
-      canonicalContexts.push({
-        position: canonicalMatch.index,
-        context,
-        order: order++
-      });
-    }
-
-    // Track which canonical contexts have been used
-    const usedCanonicalOrders = new Set<number>();
-
-    // Now find matches in the input and map them to canonical
     lines.forEach((line, lineIndex) => {
       let match;
       const lineRegex = new RegExp(searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
       while ((match = lineRegex.exec(line)) !== null) {
-        // Calculate position in normalized input
-        const linesBeforeCurrent = lines.slice(0, lineIndex);
-        const charsBeforeLine = linesBeforeCurrent.reduce((sum, l) => sum + l.length + 1, 0);
-        const absolutePosition = charsBeforeLine + match.index;
-        const beforeMatch = input.substring(0, absolutePosition).replace(/\s+/g, '');
-        const normalizedPosition = beforeMatch.length;
-
-        // Extract context around this match in normalized input
-        const contextSize = 50;
-        const contextStart = Math.max(0, normalizedPosition - contextSize);
-        const contextEnd = Math.min(normalized.length, normalizedPosition + match[0].length + contextSize);
-        const context = normalized.substring(contextStart, contextEnd);
-
-        // Find the matching context in canonical form
-        let semanticOrder = -1;
-
-        // Try exact context match first
-        for (let i = 0; i < canonicalContexts.length; i++) {
-          if (!usedCanonicalOrders.has(canonicalContexts[i].order) && canonicalContexts[i].context === context) {
-            semanticOrder = canonicalContexts[i].order;
-            usedCanonicalOrders.add(semanticOrder);
-            break;
-          }
-        }
-
-        // If no exact match, try to find by position in the sequence
-        if (semanticOrder === -1) {
-          // Fallback: use the next available order
-          for (let i = 0; i < canonicalContexts.length; i++) {
-            if (!usedCanonicalOrders.has(i)) {
-              semanticOrder = i;
-              usedCanonicalOrders.add(semanticOrder);
-              break;
-            }
-          }
-        }
-
-        // Last resort fallback
-        if (semanticOrder === -1) {
-          semanticOrder = matches.length;
-        }
-
+        const jsonPath = inputMatchPaths[matches.length];
         matches.push({
           lineIndex,
           matchIndex: matches.length,
           columnStart: match.index,
-          semanticOrder
+          jsonPath
         });
       }
     });
 
     return matches;
-  }, [searchTerm, input, canonicalJSON]);
+  }, [searchTerm, input, inputMatchPaths]);
 
   const totalMatches = searchMatches.length;
 
@@ -291,110 +241,105 @@ export default function JSONWizard() {
     }
   }, [input, viewMode, indentSize, sortKeys, validation.isValid]);
 
-  // Calculate search matches in the output JSON with semantic order based on canonical form
+  // Build ordered list of JSON paths where matches occur in output (in sort order if enabled)
+  const outputMatchPaths = useMemo(() => {
+    if (!searchTerm || !validation.isValid || !processedJSON.trim()) return [];
+
+    try {
+      const parsed = JSON.parse(processedJSON);
+      const paths: string[] = [];
+      const regex = new RegExp(searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+
+      const traverse = (obj: unknown, path: string[] = []): void => {
+        if (typeof obj === 'object' && obj !== null) {
+          if (Array.isArray(obj)) {
+            obj.forEach((item, index) => {
+              traverse(item, [...path, `[${index}]`]);
+            });
+          } else {
+            // When sortKeys is enabled, Object.keys() returns keys in alphabetical order
+            // Otherwise, it preserves document order
+            Object.keys(obj).forEach(key => {
+              traverse((obj as Record<string, unknown>)[key], [...path, key]);
+            });
+          }
+        } else {
+          // Check if this value contains matches
+          const valueStr = String(obj);
+          const matches = valueStr.match(regex);
+          if (matches) {
+            // Add the path once for each match in this value
+            for (let i = 0; i < matches.length; i++) {
+              paths.push(path.join('.'));
+            }
+          }
+        }
+      };
+
+      traverse(parsed);
+      return paths;
+    } catch {
+      return [];
+    }
+  }, [searchTerm, processedJSON, validation.isValid]);
+
+  // Calculate search matches in the output JSON
   const outputSearchMatches = useMemo(() => {
     if (!searchTerm || !processedJSON) return [];
 
-    const matches: { lineIndex: number; matchIndex: number; columnStart: number; semanticOrder: number }[] = [];
+    const matches: { lineIndex: number; matchIndex: number; columnStart: number; jsonPath?: string }[] = [];
     const lines = processedJSON.split('\n');
-    const normalized = processedJSON.replace(/\s+/g, '');
-    const canonical = canonicalJSON.replace(/\s+/g, '');
 
-    // Build a map of all match positions in canonical form with their surrounding context
-    const canonicalContexts: { position: number; context: string; order: number }[] = [];
-    const canonicalRegex = new RegExp(searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
-    let canonicalMatch;
-    let order = 0;
-    while ((canonicalMatch = canonicalRegex.exec(canonical)) !== null) {
-      const contextSize = 50;
-      const contextStart = Math.max(0, canonicalMatch.index - contextSize);
-      const contextEnd = Math.min(canonical.length, canonicalMatch.index + canonicalMatch[0].length + contextSize);
-      const context = canonical.substring(contextStart, contextEnd);
-
-      canonicalContexts.push({
-        position: canonicalMatch.index,
-        context,
-        order: order++
-      });
-    }
-
-    // Track which canonical contexts have been used
-    const usedCanonicalOrders = new Set<number>();
-
-    // Now find matches in the output and map them to canonical
     lines.forEach((line, lineIndex) => {
       let match;
       const lineRegex = new RegExp(searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
       while ((match = lineRegex.exec(line)) !== null) {
-        // Calculate position in normalized output
-        const linesBeforeCurrent = lines.slice(0, lineIndex);
-        const charsBeforeLine = linesBeforeCurrent.reduce((sum, l) => sum + l.length + 1, 0);
-        const absolutePosition = charsBeforeLine + match.index;
-        const beforeMatch = processedJSON.substring(0, absolutePosition).replace(/\s+/g, '');
-        const normalizedPosition = beforeMatch.length;
-
-        // Extract context around this match in normalized output
-        const contextSize = 50;
-        const contextStart = Math.max(0, normalizedPosition - contextSize);
-        const contextEnd = Math.min(normalized.length, normalizedPosition + match[0].length + contextSize);
-        const context = normalized.substring(contextStart, contextEnd);
-
-        // Find the matching context in canonical form
-        let semanticOrder = -1;
-
-        // Try exact context match first
-        for (let i = 0; i < canonicalContexts.length; i++) {
-          if (!usedCanonicalOrders.has(canonicalContexts[i].order) && canonicalContexts[i].context === context) {
-            semanticOrder = canonicalContexts[i].order;
-            usedCanonicalOrders.add(semanticOrder);
-            break;
-          }
-        }
-
-        // If no exact match, try to find by position in the sequence
-        if (semanticOrder === -1) {
-          // Fallback: use the next available order
-          for (let i = 0; i < canonicalContexts.length; i++) {
-            if (!usedCanonicalOrders.has(i)) {
-              semanticOrder = i;
-              usedCanonicalOrders.add(semanticOrder);
-              break;
-            }
-          }
-        }
-
-        // Last resort fallback
-        if (semanticOrder === -1) {
-          semanticOrder = matches.length;
-        }
-
+        const jsonPath = outputMatchPaths[matches.length];
         matches.push({
           lineIndex,
           matchIndex: matches.length,
           columnStart: match.index,
-          semanticOrder
+          jsonPath
         });
       }
     });
 
     return matches;
-  }, [searchTerm, processedJSON, canonicalJSON]);
+  }, [searchTerm, processedJSON, outputMatchPaths]);
 
-  // Map input match indices to output match indices based on semantic order
+  // Map input match indices to output match indices based on JSON structural paths
   const inputToOutputMatchMap = useMemo(() => {
     const map = new Map<number, number>();
 
-    // Create a reverse lookup: semanticOrder -> matchIndex for output matches
-    const outputSemanticOrderToMatchIndex = new Map<number, number>();
+    // Build a queue of output match indices for each path
+    const pathToOutputIndices = new Map<string, number[]>();
     outputSearchMatches.forEach((outputMatch) => {
-      outputSemanticOrderToMatchIndex.set(outputMatch.semanticOrder, outputMatch.matchIndex);
+      if (outputMatch.jsonPath !== undefined) {
+        if (!pathToOutputIndices.has(outputMatch.jsonPath)) {
+          pathToOutputIndices.set(outputMatch.jsonPath, []);
+        }
+        pathToOutputIndices.get(outputMatch.jsonPath)!.push(outputMatch.matchIndex);
+      }
     });
 
-    // Map each input match to the output match with the same semantic order
+    // Track how many times we've used each path from input side
+    const pathUsageCount = new Map<string, number>();
+
+    // Map each input match to the corresponding output match via structural path
     searchMatches.forEach((inputMatch) => {
-      const correspondingOutputMatchIndex = outputSemanticOrderToMatchIndex.get(inputMatch.semanticOrder);
-      if (correspondingOutputMatchIndex !== undefined) {
-        map.set(inputMatch.matchIndex, correspondingOutputMatchIndex);
+      if (inputMatch.jsonPath !== undefined) {
+        const outputIndices = pathToOutputIndices.get(inputMatch.jsonPath);
+        if (outputIndices && outputIndices.length > 0) {
+          const usageCount = pathUsageCount.get(inputMatch.jsonPath) || 0;
+          const outputIndex = outputIndices[Math.min(usageCount, outputIndices.length - 1)];
+          map.set(inputMatch.matchIndex, outputIndex);
+          pathUsageCount.set(inputMatch.jsonPath, usageCount + 1);
+        }
+      } else {
+        // Fallback to sequential for invalid JSON
+        if (inputMatch.matchIndex < outputSearchMatches.length) {
+          map.set(inputMatch.matchIndex, inputMatch.matchIndex);
+        }
       }
     });
 
