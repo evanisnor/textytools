@@ -242,7 +242,13 @@ export default function JWTDecoder() {
             {/* Expires At */}
             <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-3">
               <div className="text-xs text-zinc-600 dark:text-zinc-400 mb-1">
-                Expires At
+                {expired ? (
+                  <span className="block text-xs mt-0.5 text-red-600 dark:text-red-400">
+                    ⚠️ Expired
+                  </span>
+                ) : (
+                  "Expires At"
+                )}
               </div>
               <div
                 className={`text-xs font-medium ${
@@ -254,12 +260,7 @@ export default function JWTDecoder() {
                 }`}
               >
                 {result.decoded?.expiresAt ? (
-                  <>
-                    {formatDate(result.decoded.expiresAt)}
-                    {expired && (
-                      <span className="block text-xs mt-0.5">⚠️ Expired</span>
-                    )}
-                  </>
+                  <>{formatDate(result.decoded.expiresAt)}</>
                 ) : (
                   "—"
                 )}
@@ -269,7 +270,13 @@ export default function JWTDecoder() {
             {/* Not Before */}
             <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-3">
               <div className="text-xs text-zinc-600 dark:text-zinc-400 mb-1">
-                Not Before
+                {notYetValid ? (
+                  <span className="block text-xs mt-0.5 text-orange-600 dark:text-orange-400">
+                    ⚠️ Not yet valid
+                  </span>
+                ) : (
+                  "Not Before"
+                )}
               </div>
               <div
                 className={`text-xs font-medium ${
@@ -281,14 +288,7 @@ export default function JWTDecoder() {
                 }`}
               >
                 {result.decoded?.notBefore ? (
-                  <>
-                    {formatDate(result.decoded.notBefore)}
-                    {notYetValid && (
-                      <span className="block text-xs mt-0.5">
-                        ⚠️ Not yet valid
-                      </span>
-                    )}
-                  </>
+                  <>{formatDate(result.decoded.notBefore)}</>
                 ) : (
                   "—"
                 )}
