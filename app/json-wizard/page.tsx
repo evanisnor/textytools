@@ -3,7 +3,7 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import Link from "next/link";
 
-type ViewMode = "pretty" | "minified" | "raw";
+type ViewMode = "pretty" | "minified" | "raw" | "escaped" | "unescaped";
 
 interface ValidationResult {
   isValid: boolean;
@@ -252,6 +252,12 @@ export default function JSONWizard() {
         case "raw":
           result = input;
           break;
+        case "escaped":
+          result = escapeJSON(input);
+          break;
+        case "unescaped":
+          result = unescapeJSON(input);
+          break;
       }
 
       return result;
@@ -462,12 +468,12 @@ export default function JSONWizard() {
 
   const handleEscape = () => {
     if (validation.isValid && input.trim()) {
-      setInput(escapeJSON(input));
+      setViewMode("escaped");
     }
   };
 
   const handleUnescape = () => {
-    setInput(unescapeJSON(input));
+    setViewMode("unescaped");
   };
 
   const goToNextMatch = () => {
