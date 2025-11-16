@@ -42,6 +42,19 @@ Validate, format, search, and manipulate JSON data with advanced tooling.
   - Sort keys alphabetically
   - Customizable indentation (2-8 spaces)
 
+### CSV / JSON Converter
+
+Bidirectional converter between CSV and JSON formats with proper data type parsing and nested object support.
+
+- **Location**: [/csv-json-converter](app/csv-json-converter/page.tsx)
+- **Features**:
+  - JSON to CSV: Flattens nested objects with dot notation, handles arrays
+  - CSV to JSON: Auto-detects types (numbers, booleans, null), creates nested objects from dot notation
+  - Configurable delimiters (comma, semicolon, tab, pipe)
+  - Optional header row handling
+  - Proper CSV escaping (quotes, delimiters, newlines)
+  - Real-time validation and error reporting
+
 ## Project Structure
 
 ```
@@ -56,7 +69,9 @@ utility-apps/
 │   │   └── page.tsx
 │   ├── text-sanitizer/
 │   │   └── page.tsx
-│   └── json-wizard/
+│   ├── json-wizard/
+│   │   └── page.tsx
+│   └── csv-json-converter/
 │       └── page.tsx
 ├── public/                   # Static assets
 ├── package.json
@@ -318,7 +333,6 @@ Potential additions to consider:
 - **Color Converter**: HEX, RGB, HSL conversions
 - **UUID Generator**: Generate UUIDs with various versions
 - **JWT Decoder**: Decode and inspect JWT tokens
-- **CSV to JSON**: Convert between data formats
 
 ## License
 
