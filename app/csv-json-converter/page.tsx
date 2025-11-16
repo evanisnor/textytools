@@ -136,7 +136,7 @@ export default function CsvJsonConverter() {
       preCaretRange.setEnd(range.endContainer, range.endOffset);
 
       return preCaretRange.toString().length;
-    } catch (e) {
+    } catch {
       // If we can't get cursor position (e.g., during DOM mutations), return 0
       return 0;
     }
@@ -160,7 +160,7 @@ export default function CsvJsonConverter() {
             selection.removeAllRanges();
             selection.addRange(range);
             return true;
-          } catch (e) {
+          } catch {
             // If range creation fails, continue searching
             return false;
           }
@@ -186,7 +186,7 @@ export default function CsvJsonConverter() {
         range.collapse(false);
         selection.removeAllRanges();
         selection.addRange(range);
-      } catch (e) {
+      } catch {
         // Silently fail if we can't set cursor position
       }
     }
