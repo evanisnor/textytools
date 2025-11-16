@@ -3,7 +3,7 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import Link from "next/link";
 
-type ViewMode = "pretty" | "minified" | "raw" | "escaped" | "unescaped";
+type ViewMode = "pretty" | "minified" | "escaped";
 
 interface ValidationResult {
   isValid: boolean;
@@ -47,27 +47,6 @@ function validateJSON(text: string): ValidationResult {
       isValid: false,
       error: "Unknown parsing error",
     };
-  }
-}
-
-function escapeJSON(text: string): string {
-  try {
-    const parsed = JSON.parse(text);
-    return JSON.stringify(JSON.stringify(parsed));
-  } catch {
-    return text;
-  }
-}
-
-function unescapeJSON(text: string): string {
-  try {
-    const unescaped = JSON.parse(text);
-    if (typeof unescaped === "string") {
-      return unescaped;
-    }
-    return text;
-  } catch {
-    return text;
   }
 }
 
@@ -128,6 +107,26 @@ export default function JSONWizard() {
 
   const validation = useMemo(() => validateJSON(input), [input]);
   const stats = useMemo(() => getJSONStats(input), [input]);
+
+  // Check if input is an escaped JSON string (valid JSON that is a string containing JSON)
+  const isEscapedString = useMemo(() => {
+    if (!validation.isValid || !input.trim()) return false;
+    try {
+      const parsed = JSON.parse(input);
+      if (typeof parsed === "string") {
+        // Check if the string itself is valid JSON
+        try {
+          JSON.parse(parsed);
+          return true;
+        } catch {
+          return false;
+        }
+      }
+      return false;
+    } catch {
+      return false;
+    }
+  }, [input, validation.isValid]);
 
   // Build ordered list of JSON paths where matches occur in input (in document order)
   const inputMatchPaths = useMemo(() => {
@@ -220,10 +219,16 @@ export default function JSONWizard() {
   }, [searchMatches]);
 
   const processedJSON = useMemo(() => {
-    if (!input.trim() || !validation.isValid) return input;
+    if (!input.trim()) return input;
+    if (!validation.isValid) return input;
 
     try {
       let parsed = JSON.parse(input);
+
+      // Auto-unescape: If the parsed result is an escaped JSON string, unescape it
+      if (isEscapedString && typeof parsed === "string") {
+        parsed = JSON.parse(parsed);
+      }
 
       if (sortKeys) {
         const sortObject = (obj: unknown): unknown => {
@@ -249,14 +254,8 @@ export default function JSONWizard() {
         case "minified":
           result = JSON.stringify(parsed);
           break;
-        case "raw":
-          result = input;
-          break;
         case "escaped":
-          result = escapeJSON(input);
-          break;
-        case "unescaped":
-          result = unescapeJSON(input);
+          result = JSON.stringify(JSON.stringify(parsed));
           break;
       }
 
@@ -264,7 +263,14 @@ export default function JSONWizard() {
     } catch {
       return input;
     }
-  }, [input, viewMode, indentSize, sortKeys, validation.isValid]);
+  }, [
+    input,
+    viewMode,
+    indentSize,
+    sortKeys,
+    validation.isValid,
+    isEscapedString,
+  ]);
 
   // Build ordered list of JSON paths where matches occur in output (in sort order if enabled)
   const outputMatchPaths = useMemo(() => {
@@ -466,16 +472,6 @@ export default function JSONWizard() {
     }
   };
 
-  const handleEscape = () => {
-    if (validation.isValid && input.trim()) {
-      setViewMode("escaped");
-    }
-  };
-
-  const handleUnescape = () => {
-    setViewMode("unescaped");
-  };
-
   const goToNextMatch = () => {
     if (totalMatches > 0) {
       setCurrentMatchIndex((prev) => (prev + 1) % totalMatches);
@@ -625,7 +621,7 @@ export default function JSONWizard() {
               JSON Wizard
             </h1>
             <p className="text-lg text-zinc-600 dark:text-zinc-400">
-              Validate, format, and manipulate JSON data with powerful tools.
+              Format, validate, and search JSON with real-time feedback.
             </p>
           </div>
 
@@ -666,103 +662,112 @@ export default function JSONWizard() {
           <div className="lg:col-span-3 space-y-6">
             {/* Input */}
             <div>
-              <div className="flex items-center justify-between mb-2 min-h-[28px]">
+              <div className="flex items-center justify-between mb-2">
                 <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
                   Input JSON
                 </label>
                 {input.trim() && (
-                  <div
-                    className={`flex items-center gap-2 px-3 py-1 rounded-md text-xs font-medium ${
-                      validation.isValid
-                        ? "bg-green-50 dark:bg-green-950 text-green-800 dark:text-green-200"
-                        : "bg-red-50 dark:bg-red-950 text-red-800 dark:text-red-200"
-                    }`}
+                  <button
+                    onClick={() => setInput("")}
+                    className="text-xs text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
                   >
-                    {validation.isValid ? "✓ Valid JSON" : "✗ Invalid JSON"}
-                    {!validation.isValid &&
-                      validation.lineNumber &&
-                      validation.columnNumber && (
-                        <span className="text-red-700 dark:text-red-300">
-                          (Line {validation.lineNumber}, Col{" "}
-                          {validation.columnNumber})
-                        </span>
-                      )}
-                  </div>
+                    Clear
+                  </button>
                 )}
               </div>
-              <div
-                ref={inputContainerRef}
-                className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4 h-64 overflow-auto relative"
-              >
-                {input ? (
-                  <div className="flex font-mono text-sm">
+              <div className="relative bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4 h-64 overflow-auto">
+                {input.trim() && (
+                  <div className="absolute top-3 right-3 z-10">
                     <div
-                      className="select-none text-zinc-400 dark:text-zinc-600 text-right pr-4 border-r border-zinc-200 dark:border-zinc-800"
-                      style={{
-                        minWidth: `${String(input.split("\n").length).length + 2}ch`,
-                      }}
+                      className={`flex items-center gap-2 px-2 py-1 rounded border text-xs font-medium ${
+                        validation.isValid
+                          ? "bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800 text-green-800 dark:text-green-200"
+                          : "bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200"
+                      }`}
                     >
-                      {input.split("\n").map((_, index) => {
-                        const lineNumber = index + 1;
-                        const isErrorLine =
-                          !validation.isValid &&
-                          validation.lineNumber === lineNumber;
-                        return (
-                          <div
-                            key={index}
-                            className={
-                              isErrorLine
-                                ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 font-bold"
-                                : ""
-                            }
-                          >
-                            {lineNumber}
-                          </div>
-                        );
-                      })}
+                      {validation.isValid ? "✓ Valid JSON" : "✗ Invalid JSON"}
+                      {!validation.isValid &&
+                        validation.lineNumber &&
+                        validation.columnNumber && (
+                          <span className="text-red-700 dark:text-red-300">
+                            (Line {validation.lineNumber}, Col{" "}
+                            {validation.columnNumber})
+                          </span>
+                        )}
                     </div>
-                    <div className="flex-1 pl-4 relative">
-                      <div className="absolute inset-0 whitespace-pre">
-                        {input.split("\n").map((line, index) => {
+                  </div>
+                )}
+                <div ref={inputContainerRef} className="h-full overflow-auto">
+                  {input ? (
+                    <div className="flex font-mono text-sm">
+                      <div
+                        className="select-none text-zinc-400 dark:text-zinc-600 text-right pr-4 border-r border-zinc-200 dark:border-zinc-800"
+                        style={{
+                          minWidth: `${String(input.split("\n").length).length + 2}ch`,
+                        }}
+                      >
+                        {input.split("\n").map((_, index) => {
                           const lineNumber = index + 1;
                           const isErrorLine =
                             !validation.isValid &&
                             validation.lineNumber === lineNumber;
-                          const lineContent = searchTerm
-                            ? renderHighlightedText(line, index)
-                            : line;
                           return (
                             <div
                               key={index}
                               className={
                                 isErrorLine
-                                  ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
-                                  : "text-zinc-900 dark:text-zinc-50"
+                                  ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 font-bold"
+                                  : ""
                               }
                             >
-                              {lineContent}
+                              {lineNumber}
                             </div>
                           );
                         })}
                       </div>
-                      <textarea
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        placeholder=""
-                        className="absolute inset-0 bg-transparent text-transparent caret-zinc-900 dark:caret-zinc-50 resize-none focus:outline-none whitespace-pre"
-                        spellCheck={false}
-                      />
+                      <div className="flex-1 pl-4 relative">
+                        <div className="absolute inset-0 whitespace-pre">
+                          {input.split("\n").map((line, index) => {
+                            const lineNumber = index + 1;
+                            const isErrorLine =
+                              !validation.isValid &&
+                              validation.lineNumber === lineNumber;
+                            const lineContent = searchTerm
+                              ? renderHighlightedText(line, index)
+                              : line;
+                            return (
+                              <div
+                                key={index}
+                                className={
+                                  isErrorLine
+                                    ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
+                                    : "text-zinc-900 dark:text-zinc-50"
+                                }
+                              >
+                                {lineContent}
+                              </div>
+                            );
+                          })}
+                        </div>
+                        <textarea
+                          value={input}
+                          onChange={(e) => setInput(e.target.value)}
+                          placeholder=""
+                          className="absolute inset-0 bg-transparent text-transparent caret-zinc-900 dark:caret-zinc-50 resize-none focus:outline-none whitespace-pre"
+                          spellCheck={false}
+                        />
+                      </div>
                     </div>
-                  </div>
-                ) : (
-                  <textarea
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    placeholder='Paste your JSON here, e.g., {"key": "value"}'
-                    className="w-full h-full bg-transparent text-zinc-900 dark:text-zinc-50 placeholder-zinc-400 dark:placeholder-zinc-600 resize-none focus:outline-none font-mono text-sm"
-                    spellCheck={false}
-                  />
-                )}
+                  ) : (
+                    <textarea
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      placeholder='Paste your JSON here, e.g., {"key": "value"}'
+                      className="w-full h-full bg-transparent text-zinc-900 dark:text-zinc-50 placeholder-zinc-400 dark:placeholder-zinc-600 resize-none focus:outline-none font-mono text-sm"
+                      spellCheck={false}
+                    />
+                  )}
+                </div>
               </div>
             </div>
 
@@ -862,7 +867,7 @@ export default function JSONWizard() {
 
             <div>
               <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-3">
-                View Mode
+                Modify
               </label>
               <div className="space-y-2">
                 <button
@@ -892,85 +897,56 @@ export default function JSONWizard() {
                   </div>
                 </button>
                 <button
-                  onClick={() => setViewMode("raw")}
+                  onClick={() => setViewMode("escaped")}
+                  disabled={!validation.isValid || !input.trim()}
                   className={`w-full text-left p-3 rounded-lg border transition-colors ${
-                    viewMode === "raw"
+                    viewMode === "escaped"
                       ? "border-zinc-900 dark:border-zinc-50 bg-zinc-100 dark:bg-zinc-800"
                       : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-zinc-300 dark:hover:border-zinc-700"
-                  }`}
+                  } ${!validation.isValid || !input.trim() ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
                   <div className="font-medium text-sm text-zinc-900 dark:text-zinc-50">
-                    Raw
+                    Escaped
                   </div>
                 </button>
               </div>
             </div>
-
-            {/* Indent Size */}
-            {viewMode === "pretty" && (
-              <div>
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-                  Indent Size: {indentSize}
-                </label>
-                <input
-                  type="range"
-                  min="2"
-                  max="8"
-                  step="2"
-                  value={indentSize}
-                  onChange={(e) => setIndentSize(Number(e.target.value))}
-                  disabled={!validation.isValid}
-                  className="w-full"
-                />
-              </div>
-            )}
 
             {/* Options */}
             <div>
               <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                 Options
               </label>
-              <label className="flex items-center gap-2 p-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={sortKeys}
-                  onChange={(e) => setSortKeys(e.target.checked)}
-                  disabled={!validation.isValid}
-                  className="h-4 w-4 rounded border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-50 focus:ring-zinc-900 dark:focus:ring-zinc-50"
-                />
-                <span className="text-sm text-zinc-900 dark:text-zinc-50">
-                  Sort Keys
-                </span>
-              </label>
-            </div>
+              <div className="space-y-3">
+                <label className="flex items-center gap-2 p-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={sortKeys}
+                    onChange={(e) => setSortKeys(e.target.checked)}
+                    disabled={!validation.isValid}
+                    className="h-4 w-4 rounded border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-50 focus:ring-zinc-900 dark:focus:ring-zinc-50"
+                  />
+                  <span className="text-sm text-zinc-900 dark:text-zinc-50">
+                    Sort Keys
+                  </span>
+                </label>
 
-            {/* Actions */}
-            <div>
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-                Actions
-              </label>
-              <div className="space-y-2">
-                <button
-                  onClick={handleEscape}
-                  disabled={!validation.isValid || !input.trim()}
-                  className="w-full p-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-zinc-900 dark:text-zinc-50 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Escape JSON
-                </button>
-                <button
-                  onClick={handleUnescape}
-                  disabled={!input.trim()}
-                  className="w-full p-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-zinc-900 dark:text-zinc-50 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Unescape JSON
-                </button>
-                <button
-                  onClick={() => setInput("")}
-                  disabled={!input.trim()}
-                  className="w-full p-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-zinc-900 dark:text-zinc-50 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Clear All
-                </button>
+                {/* Indent Size */}
+                <div className="p-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+                  <label className="block text-sm text-zinc-900 dark:text-zinc-50 mb-2">
+                    Indent Size: {indentSize}
+                  </label>
+                  <input
+                    type="range"
+                    min="2"
+                    max="8"
+                    step="2"
+                    value={indentSize}
+                    onChange={(e) => setIndentSize(Number(e.target.value))}
+                    disabled={viewMode !== "pretty" || !validation.isValid}
+                    className="w-full"
+                  />
+                </div>
               </div>
             </div>
           </div>

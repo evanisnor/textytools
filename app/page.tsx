@@ -60,7 +60,7 @@ export default function Home() {
               JSON Wizard
             </h2>
             <p className="text-sm text-zinc-600 dark:text-zinc-400">
-              Validate, format, and manipulate JSON data with powerful tools
+              Format, validate, and search JSON with real-time feedback
             </p>
           </Link>
 
