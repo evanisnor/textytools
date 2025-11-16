@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, JSX } from "react";
 import Link from "next/link";
 
 interface JsonObject {

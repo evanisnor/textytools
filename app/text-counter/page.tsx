@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { encoding_for_model } from "tiktoken";
+import { encodingForModel } from "js-tiktoken";
 
 export default function TextCounter() {
   const [text, setText] = useState("");
@@ -22,9 +22,9 @@ export default function TextCounter() {
     if (text.trim() === "") return 0;
 
     try {
-      const encoding = encoding_for_model("gpt-4");
+      const encoding = encodingForModel("gpt-4");
       const tokens = encoding.encode(text);
-      encoding.free();
+      // encoding.free();
       return tokens.length;
     } catch (error) {
       console.error("Error encoding tokens:", error);
