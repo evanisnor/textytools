@@ -206,7 +206,7 @@ export default function CaseConverter() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
             <div>
-              <div className="flex items-center justify-between mb-2 min-h-[2.25rem]">
+              <div className="flex items-center justify-between mb-2 min-h-9">
                 <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
                   Input Text
                 </label>
@@ -244,7 +244,7 @@ export default function CaseConverter() {
             </div>
 
             <div>
-              <div className="flex items-center justify-between mb-2 min-h-[2.25rem]">
+              <div className="flex items-center justify-between mb-2 min-h-9">
                 <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
                   Converted Text
                 </label>

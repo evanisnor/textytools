@@ -298,7 +298,7 @@ export default function CsvJsonConverter() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Input */}
           <div>
-            <div className="mb-2 flex items-center justify-between min-h-[2.25rem]">
+            <div className="mb-2 flex items-center justify-between min-h-9">
               <label className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
                 Input
               </label>
@@ -361,7 +361,7 @@ export default function CsvJsonConverter() {
 
           {/* Output */}
           <div>
-            <div className="mb-2 flex items-center justify-between min-h-[2.25rem]">
+            <div className="mb-2 flex items-center justify-between min-h-9">
               <label className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
                 Output
               </label>

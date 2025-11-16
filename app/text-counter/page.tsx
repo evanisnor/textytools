@@ -140,7 +140,7 @@ export default function TextCounter() {
         </div>
 
         <div>
-          <div className="flex items-center justify-between mb-2 min-h-[2.25rem]">
+          <div className="flex items-center justify-between mb-2 min-h-9">
             <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
               Input Text
             </label>

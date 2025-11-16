@@ -682,7 +682,7 @@ export default function JSONWizard() {
           <div className="lg:col-span-3 space-y-6">
             {/* Input */}
             <div>
-              <div className="flex items-center justify-between mb-2 min-h-[2.25rem]">
+              <div className="flex items-center justify-between mb-2 min-h-9">
                 <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
                   Input JSON
                 </label>
@@ -806,7 +806,7 @@ export default function JSONWizard() {
 
             {/* Output */}
             <div>
-              <div className="flex items-center justify-between mb-2 min-h-[2.25rem]">
+              <div className="flex items-center justify-between mb-2 min-h-9">
                 <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
                   Output
                 </label>

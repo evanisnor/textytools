@@ -301,7 +301,7 @@ export default function JWTDecoder() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           {/* Input */}
           <div>
-            <div className="mb-2 flex items-center justify-between min-h-[2.25rem]">
+            <div className="mb-2 flex items-center justify-between min-h-9">
               <label className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
                 JWT Token
               </label>
@@ -349,7 +349,7 @@ export default function JWTDecoder() {
 
           {/* Output */}
           <div>
-            <div className="mb-2 flex items-center justify-between min-h-[2.25rem]">
+            <div className="mb-2 flex items-center justify-between min-h-9">
               <label className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
                 Decoded Token
               </label>
