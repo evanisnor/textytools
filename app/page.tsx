@@ -6,11 +6,10 @@ export default function Home() {
       <main className="flex w-full max-w-4xl flex-col gap-12 py-16 px-6">
         <div className="flex flex-col gap-4">
           <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-            Utility Apps
+            textytools.dev
           </h1>
           <p className="text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl">
-            A hub for lightweight productivity tools to support low-friction use
-            cases.
+            Fast, browser-based productivity tools for developers.
           </p>
         </div>
 
