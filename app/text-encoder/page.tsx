@@ -1086,7 +1086,7 @@ export default function TextEncoderPage() {
               </div>
               <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-1">
                 <div
-                  className={`w-full h-48 p-4 overflow-auto font-mono text-sm whitespace-pre-wrap break-words ${
+                  className={`w-full h-48 p-4 overflow-auto font-mono text-sm whitespace-pre-wrap wrap-break-word ${
                     outputText.startsWith("Error:")
                       ? "text-red-600 dark:text-red-400"
                       : "text-zinc-900 dark:text-zinc-50"
