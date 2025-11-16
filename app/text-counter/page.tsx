@@ -8,23 +8,43 @@ import cl100k_base from "js-tiktoken/ranks/cl100k_base";
 
 export default function TextCounter() {
   const [text, setText] = useState("");
+  const [textTrimmed, setTextTrimmed] = useState("");
+  useEffect(() => {
+    setTextTrimmed(text.trim());
+  }, [text]);
 
   const characterCount = text.length;
-  const wordCount = text.trim() === "" ? 0 : text.trim().split(/\s+/).length;
   const lineCount = text === "" ? 0 : text.split("\n").length;
+  const [wordCount, setWordCount] = useState("0");
+  const [paragraphCount, setParagraphCount] = useState("0");
   const [isTokenizing, setIsTokenizing] = useState(false);
   const [tokenCount, setTokenCount] = useState("0");
-  const paragraphCount =
-    text.trim() === ""
-      ? 0
-      : text
-          .trim()
-          .split(/\n\s*\n/)
-          .filter((p) => p.trim().length > 0).length;
 
+  // Word Counting
+  useEffect(() => {
+    if (textTrimmed === "") {
+      setWordCount("0");
+    } else {
+      setWordCount(textTrimmed.split(/\s+/).length.toLocaleString());
+    }
+  }, [textTrimmed]);
+
+  // Paragraph Counting
+  useEffect(() => {
+    if (textTrimmed === "") {
+      setParagraphCount("0");
+    } else {
+      const count = textTrimmed
+        .split(/\n\s*\n/)
+        .filter((p) => p.trim().length > 0).length;
+      setParagraphCount(count.toLocaleString());
+    }
+  }, [textTrimmed]);
+
+  // Token Counting
   useEffect(() => {
     if (!isTokenizing) {
-      debounce(tokenize, 500)();
+      debounce(tokenize, 100)();
     }
     return;
 
@@ -32,14 +52,14 @@ export default function TextCounter() {
       if (isTokenizing) {
         setTokenCount("...");
         return;
-      } else if (text.trim() === "") {
+      } else if (textTrimmed === "") {
         setTokenCount("0");
         setIsTokenizing(false);
       } else {
         setIsTokenizing(true);
         try {
           const encoding = new Tiktoken(cl100k_base);
-          const tokens = encoding.encode(text);
+          const tokens = encoding.encode(textTrimmed);
           setTokenCount(tokens.length.toLocaleString());
         } catch (error) {
           console.error("Error encoding tokens:", error);
@@ -48,7 +68,7 @@ export default function TextCounter() {
         setIsTokenizing(false);
       }
     }
-  }, [text, isTokenizing]);
+  }, [textTrimmed, isTokenizing]);
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 py-12 px-6">
@@ -87,7 +107,7 @@ export default function TextCounter() {
               Words
             </div>
             <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">
-              {wordCount.toLocaleString()}
+              {wordCount}
             </div>
           </div>
 
@@ -105,7 +125,7 @@ export default function TextCounter() {
               Paragraphs
             </div>
             <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">
-              {paragraphCount.toLocaleString()}
+              {paragraphCount}
             </div>
           </div>
 
