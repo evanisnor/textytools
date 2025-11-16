@@ -818,6 +818,9 @@ export default function JSONWizard() {
                         href="/csv-json-converter"
                         onClick={(e) => {
                           e.preventDefault();
+                          // Save current JSON input for restoration on back navigation
+                          localStorage.setItem("json-wizard-input", input);
+                          // Save processed JSON for CSV Converter
                           localStorage.setItem(
                             "csv-json-converter-input",
                             processedJSON,

@@ -359,6 +359,9 @@ export default function JWTDecoder() {
                     href="/json-wizard"
                     onClick={(e) => {
                       e.preventDefault();
+                      // Save current JWT input for restoration on back navigation
+                      localStorage.setItem("jwt-decoder-input", input);
+                      // Save formatted output for JSON Wizard
                       localStorage.setItem(
                         "json-wizard-input",
                         formattedOutput,
