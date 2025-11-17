@@ -291,7 +291,7 @@ export default function TextSanitizer() {
                 )}
               </div>
               <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-1">
-                <div className="w-full h-64 p-4 overflow-auto font-mono text-sm text-zinc-900 dark:text-zinc-50 whitespace-pre-wrap break-words">
+                <div className="w-full h-64 p-4 overflow-auto font-mono text-sm text-zinc-900 dark:text-zinc-50 whitespace-pre-wrap wrap-break-word">
                   {sanitizedText || (
                     <span className="text-zinc-400 dark:text-zinc-600">
                       Sanitized text will appear here...
