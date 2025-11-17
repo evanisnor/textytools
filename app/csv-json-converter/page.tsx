@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, JSX } from "react";
 import Link from "next/link";
-import { useToast } from "@/components/Toast";
+import { useToast } from "@/app/components/Toast";
 
 interface JsonObject {
   [key: string]: unknown;

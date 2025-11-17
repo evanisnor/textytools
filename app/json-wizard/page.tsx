@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useRef, useEffect } from "react";
 import Link from "next/link";
-import { useToast } from "@/components/Toast";
+import { useToast } from "@/app/components/Toast";
 
 type ViewMode = "pretty" | "minified" | "escaped";
 

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import bs58 from "bs58";
-import { useToast } from "@/components/Toast";
+import { useToast } from "@/app/components/Toast";
 
 type EncodingType =
   | "base64"
