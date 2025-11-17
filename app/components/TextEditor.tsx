@@ -11,6 +11,22 @@ export interface TextEditorProps {
   renderLineContent?: (line: string, lineIndex: number) => React.ReactNode;
   highlightLine?: (lineNumber: number) => boolean;
   lineClassName?: (lineNumber: number) => string;
+  /**
+   * Custom render function for the entire content.
+   * When provided, this takes precedence over renderLineContent.
+   * Use this for syntax highlighting or custom formatting that spans multiple lines.
+   */
+  renderContent?: (content: string) => React.ReactNode;
+  /**
+   * Whether to show line numbers
+   * @default true
+   */
+  showLineNumbers?: boolean;
+  /**
+   * Enable word wrap
+   * @default false
+   */
+  wrap?: boolean;
 }
 
 export interface TextEditorRef {
@@ -48,6 +64,9 @@ export const TextEditor = forwardRef<TextEditorRef, TextEditorProps>(
       renderLineContent,
       highlightLine,
       lineClassName,
+      renderContent,
+      showLineNumbers = true,
+      wrap = false,
     },
     ref,
   ) => {
@@ -97,15 +116,15 @@ export const TextEditor = forwardRef<TextEditorRef, TextEditorProps>(
       };
     }, [readOnly]);
 
-    if (!value) {
-      // Show simple textarea when empty (no line numbers needed)
+    // Show simple textarea only when empty and no custom rendering
+    if (!value && !renderContent && !renderLineContent) {
       return (
         <textarea
           value={value}
           onChange={onChange ? (e) => onChange(e.target.value) : undefined}
           placeholder={placeholder}
           readOnly={readOnly}
-          className={`w-full h-full bg-transparent text-zinc-900 dark:text-zinc-50 placeholder-zinc-400 dark:placeholder-zinc-600 resize-none focus:outline-none font-mono text-sm ${className}`}
+          className={`w-full h-full bg-transparent text-zinc-900 dark:text-zinc-50 placeholder-zinc-400 dark:placeholder-zinc-600 resize-none focus:outline-none font-mono text-sm ${wrap ? "whitespace-pre-wrap break-all" : "whitespace-pre"} ${className}`}
           spellCheck={false}
         />
       );
@@ -117,73 +136,85 @@ export const TextEditor = forwardRef<TextEditorRef, TextEditorProps>(
     return (
       <div ref={containerRef} className={`flex font-mono text-sm ${className}`}>
         {/* Line numbers */}
-        <div
-          className="select-none text-zinc-400 dark:text-zinc-600 text-right pr-4 border-r border-zinc-200 dark:border-zinc-800"
-          style={{ minWidth: `${lineNumberWidth + 2}ch` }}
-        >
-          {lines.map((_, index) => {
-            const lineNumber = index + 1;
-            const isHighlighted = highlightLine?.(lineNumber);
-            const customClassName = lineClassName?.(lineNumber);
-            return (
-              <div
-                key={index}
-                className={
-                  customClassName ||
-                  (isHighlighted
-                    ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 font-bold"
-                    : "")
-                }
-              >
-                {lineNumber}
-              </div>
-            );
-          })}
-        </div>
+        {showLineNumbers && (
+          <div
+            className="select-none text-zinc-400 dark:text-zinc-600 text-right pr-4 border-r border-zinc-200 dark:border-zinc-800"
+            style={{ minWidth: `${lineNumberWidth + 2}ch` }}
+          >
+            {lines.map((_, index) => {
+              const lineNumber = index + 1;
+              const isHighlighted = highlightLine?.(lineNumber);
+              const customClassName = lineClassName?.(lineNumber);
+              return (
+                <div
+                  key={index}
+                  className={
+                    customClassName ||
+                    (isHighlighted
+                      ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 font-bold"
+                      : "")
+                  }
+                >
+                  {lineNumber}
+                </div>
+              );
+            })}
+          </div>
+        )}
 
         {/* Content area */}
-        <div className="flex-1 pl-4 relative">
+        <div className={`flex-1 ${showLineNumbers ? "pl-4" : ""} relative`}>
           {readOnly ? (
             // Read-only mode: just display the content
-            <div className="whitespace-pre">
-              {renderLineContent
-                ? lines.map((line, index) => (
-                    <div
-                      key={index}
-                      className={
-                        highlightLine?.(index + 1)
-                          ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
-                          : "text-zinc-900 dark:text-zinc-50"
-                      }
-                    >
-                      {renderLineContent(line, index)}
-                    </div>
-                  ))
-                : value}
+            <div
+              className={
+                wrap ? "whitespace-pre-wrap break-all" : "whitespace-pre"
+              }
+            >
+              {renderContent
+                ? renderContent(value)
+                : renderLineContent
+                  ? lines.map((line, index) => (
+                      <div
+                        key={index}
+                        className={
+                          highlightLine?.(index + 1)
+                            ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
+                            : "text-zinc-900 dark:text-zinc-50"
+                        }
+                      >
+                        {renderLineContent(line, index)}
+                      </div>
+                    ))
+                  : value}
             </div>
           ) : (
             // Editable mode: overlay transparent textarea on top of rendered content
             <>
-              <div className="absolute inset-0 whitespace-pre">
-                {lines.map((line, index) => {
-                  const lineNumber = index + 1;
-                  const isHighlighted = highlightLine?.(lineNumber);
-                  const lineContent = renderLineContent
-                    ? renderLineContent(line, index)
-                    : line;
-                  return (
-                    <div
-                      key={index}
-                      className={
-                        isHighlighted
-                          ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
-                          : "text-zinc-900 dark:text-zinc-50"
-                      }
-                    >
-                      {lineContent}
-                    </div>
-                  );
-                })}
+              <div
+                className={`absolute inset-0 ${wrap ? "whitespace-pre-wrap break-all" : "whitespace-pre"}`}
+              >
+                {renderContent
+                  ? renderContent(value)
+                  : lines.map((line, index) => {
+                      const lineNumber = index + 1;
+                      const isHighlighted = highlightLine?.(lineNumber);
+                      const lineContent = renderLineContent
+                        ? renderLineContent(line, index)
+                        : line;
+                      return (
+                        <div
+                          key={index}
+                          className={
+                            isHighlighted
+                              ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
+                              : "text-zinc-900 dark:text-zinc-50"
+                          }
+                        >
+                          {lineContent}
+                        </div>
+                      );
+                    })}
               </div>
               <textarea
                 ref={textareaRef}
@@ -192,7 +223,7 @@ export const TextEditor = forwardRef<TextEditorRef, TextEditorProps>(
                   onChange ? (e) => onChange(e.target.value) : undefined
                 }
                 placeholder=""
-                className="absolute inset-0 bg-transparent text-transparent caret-zinc-900 dark:caret-zinc-50 resize-none focus:outline-none whitespace-pre overflow-hidden"
+                className={`absolute inset-0 bg-transparent text-transparent caret-zinc-900 dark:caret-zinc-50 resize-none focus:outline-none ${wrap ? "whitespace-pre-wrap break-all" : "whitespace-pre"} overflow-hidden`}
                 spellCheck={false}
               />
             </>

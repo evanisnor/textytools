@@ -49,27 +49,35 @@ export interface TextEditorContainerRef {
 export const TextEditorContainer = forwardRef<
   TextEditorContainerRef,
   TextEditorContainerProps
->(({ height = "h-64", containerClassName = "", ...editorProps }, ref) => {
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const editorRef = useRef<TextEditorRef>(null);
+>(
+  (
+    { height = "h-64", containerClassName = "", className, ...editorProps },
+    ref,
+  ) => {
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
+    const editorRef = useRef<TextEditorRef>(null);
 
-  useImperativeHandle(ref, () => ({
-    scrollTo: (options: ScrollToOptions) => {
-      scrollContainerRef.current?.scrollTo(options);
-    },
-    getScrollContainer: () => scrollContainerRef.current,
-    getEditor: () => editorRef.current,
-  }));
+    useImperativeHandle(ref, () => ({
+      scrollTo: (options: ScrollToOptions) => {
+        scrollContainerRef.current?.scrollTo(options);
+      },
+      getScrollContainer: () => scrollContainerRef.current,
+      getEditor: () => editorRef.current,
+    }));
 
-  return (
-    <div
-      className={`bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 ${height} ${containerClassName}`}
-    >
-      <div ref={scrollContainerRef} className="h-full overflow-auto p-4">
-        <TextEditor ref={editorRef} {...editorProps} />
+    return (
+      <div
+        className={`bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 ${height} ${containerClassName}`}
+      >
+        <div
+          ref={scrollContainerRef}
+          className={`h-full overflow-auto p-4 ${className || ""}`}
+        >
+          <TextEditor ref={editorRef} {...editorProps} />
+        </div>
       </div>
-    </div>
-  );
-});
+    );
+  },
+);
 
 TextEditorContainer.displayName = "TextEditorContainer";
