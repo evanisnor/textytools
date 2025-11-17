@@ -33,33 +33,24 @@ const COLUMN_COLORS = [
   "bg-zinc-200/60 dark:bg-zinc-700/40",
 ];
 
-function highlightCSV(csvText: string, delimiter: string): JSX.Element {
-  const lines = csvText.split("\n");
+function renderCSVLine(line: string, delimiter: string): JSX.Element {
+  if (!line.trim()) {
+    return <>{line}</>;
+  }
+
+  const values = parseCsvLine(line, delimiter);
 
   return (
     <>
-      {lines.map((line, lineIndex) => {
-        if (!line.trim()) {
-          return <React.Fragment key={lineIndex}>{"\n"}</React.Fragment>;
-        }
-
-        const values = parseCsvLine(line, delimiter);
-
-        return (
-          <React.Fragment key={lineIndex}>
-            {values.map((value, colIndex) => (
-              <span
-                key={colIndex}
-                className={`${COLUMN_COLORS[colIndex % COLUMN_COLORS.length]} px-0.5`}
-              >
-                {value || "\u00A0"}
-                {colIndex < values.length - 1 && delimiter}
-              </span>
-            ))}
-            {"\n"}
-          </React.Fragment>
-        );
-      })}
+      {values.map((value, colIndex) => (
+        <span
+          key={colIndex}
+          className={`${COLUMN_COLORS[colIndex % COLUMN_COLORS.length]} px-0.5`}
+        >
+          {value || "\u00A0"}
+          {colIndex < values.length - 1 && delimiter}
+        </span>
+      ))}
     </>
   );
 }
@@ -87,8 +78,6 @@ export default function CsvJsonConverter() {
   const [input, setInput] = useState("");
   const [delimiter, setDelimiter] = useState(",");
   const [includeHeaders, setIncludeHeaders] = useState(true);
-  const inputEditableRef = React.useRef<HTMLDivElement>(null);
-  const outputEditableRef = React.useRef<HTMLDivElement>(null);
   const { showToast, ToastComponent } = useToast();
 
   React.useEffect(() => {
@@ -100,12 +89,6 @@ export default function CsvJsonConverter() {
       setTimeout(() => setInput(storedInput), 0);
     }
   }, []);
-
-  const contentKey = React.useMemo(() => {
-    // Use line count of non-empty lines as key to force remount when rows are added/deleted
-    const lines = input.split("\n").filter((line) => line.trim());
-    return lines.length;
-  }, [input]);
 
   const result = useMemo(() => {
     if (!input.trim()) {
@@ -136,102 +119,6 @@ export default function CsvJsonConverter() {
       };
     }
   }, [input, delimiter, includeHeaders]);
-
-  // Helper to get cursor position as character offset from plain text
-  const getCursorPosition = (element: HTMLDivElement): number => {
-    try {
-      const selection = window.getSelection();
-      if (!selection || selection.rangeCount === 0) return 0;
-
-      const range = selection.getRangeAt(0);
-      const preCaretRange = range.cloneRange();
-      preCaretRange.selectNodeContents(element);
-      preCaretRange.setEnd(range.endContainer, range.endOffset);
-
-      return preCaretRange.toString().length;
-    } catch {
-      // If we can't get cursor position (e.g., during DOM mutations), return 0
-      return 0;
-    }
-  };
-
-  // Helper to restore cursor position by character offset
-  const setCursorPosition = (element: HTMLDivElement, offset: number) => {
-    const selection = window.getSelection();
-    if (!selection) return;
-
-    let charCount = 0;
-
-    const findPosition = (node: Node): boolean => {
-      if (node.nodeType === Node.TEXT_NODE) {
-        const textLength = node.textContent?.length || 0;
-        if (charCount + textLength >= offset) {
-          try {
-            const range = document.createRange();
-            range.setStart(node, Math.min(offset - charCount, textLength));
-            range.collapse(true);
-            selection.removeAllRanges();
-            selection.addRange(range);
-            return true;
-          } catch {
-            // If range creation fails, continue searching
-            return false;
-          }
-        }
-        charCount += textLength;
-      } else if (node.nodeType === Node.ELEMENT_NODE) {
-        for (let i = 0; i < node.childNodes.length; i++) {
-          if (findPosition(node.childNodes[i])) {
-            return true;
-          }
-        }
-      }
-      return false;
-    };
-
-    const found = findPosition(element);
-
-    // If we couldn't find the exact position, place cursor at the end
-    if (!found && element.lastChild) {
-      try {
-        const range = document.createRange();
-        range.selectNodeContents(element);
-        range.collapse(false);
-        selection.removeAllRanges();
-        selection.addRange(range);
-      } catch {
-        // Silently fail if we can't set cursor position
-      }
-    }
-  };
-
-  const handleInputContentEditableChange = (
-    e: React.FormEvent<HTMLDivElement>,
-  ) => {
-    const element = e.currentTarget;
-    const newText = element.textContent || "";
-
-    // Prevent React re-render if text hasn't actually changed
-    if (newText === input) {
-      return;
-    }
-
-    // If content is empty or only whitespace, don't try to restore cursor
-    if (!newText.trim()) {
-      setInput(newText);
-      return;
-    }
-
-    const cursorPos = getCursorPosition(element);
-    setInput(newText);
-
-    // Restore cursor position after React re-renders
-    requestAnimationFrame(() => {
-      if (inputEditableRef.current) {
-        setCursorPosition(inputEditableRef.current, cursorPos);
-      }
-    });
-  };
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 py-12 px-6">
@@ -335,27 +222,18 @@ export default function CsvJsonConverter() {
                   </div>
                 </div>
               )}
-              {result.detectedFormat === "csv" && input.trim() ? (
-                <div
-                  key={contentKey}
-                  ref={inputEditableRef}
-                  contentEditable
-                  suppressContentEditableWarning
-                  onInput={handleInputContentEditableChange}
-                  className="w-full h-[500px] p-4 bg-transparent focus:outline-none font-mono text-sm text-zinc-900 dark:text-zinc-50 whitespace-pre overflow-auto"
-                  spellCheck={false}
-                >
-                  {highlightCSV(input, delimiter)}
-                </div>
-              ) : (
-                <TextEditorContainer
-                  value={input}
-                  onChange={setInput}
-                  placeholder='Paste JSON or CSV here...\n\nJSON example:\n[\n  {"name": "Alice", "age": 30},\n  {"name": "Bob", "age": 25}\n]\n\nCSV example:\nname,age\nAlice,30\nBob,25'
-                  height="h-[500px]"
-                  containerClassName="p-0 border-0"
-                />
-              )}
+              <TextEditorContainer
+                value={input}
+                onChange={setInput}
+                placeholder='Paste JSON or CSV here...\n\nJSON example:\n[\n  {"name": "Alice", "age": 30},\n  {"name": "Bob", "age": 25}\n]\n\nCSV example:\nname,age\nAlice,30\nBob,25'
+                height="h-[500px]"
+                containerClassName="p-0 border-0"
+                renderLineContent={
+                  result.detectedFormat === "csv" && input.trim()
+                    ? (line) => renderCSVLine(line, delimiter)
+                    : undefined
+                }
+              />
             </div>
           </div>
 
@@ -427,26 +305,22 @@ export default function CsvJsonConverter() {
               </div>
             </div>
             <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-1">
-              {result.detectedFormat === "json" &&
-              result.success &&
-              result.output ? (
-                <div
-                  ref={outputEditableRef}
-                  className="w-full h-[500px] p-4 bg-transparent overflow-auto font-mono text-sm text-zinc-900 dark:text-zinc-50 whitespace-pre"
-                >
-                  {highlightCSV(result.output, delimiter)}
-                </div>
-              ) : (
-                <TextEditorContainer
-                  value={result.success ? result.output : ""}
-                  readOnly
-                  placeholder={
-                    result.error ? "" : "Converted output will appear here..."
-                  }
-                  height="h-[500px]"
-                  containerClassName="p-0 border-0"
-                />
-              )}
+              <TextEditorContainer
+                value={result.success ? result.output : ""}
+                readOnly
+                placeholder={
+                  result.error ? "" : "Converted output will appear here..."
+                }
+                height="h-[500px]"
+                containerClassName="p-0 border-0"
+                renderLineContent={
+                  result.detectedFormat === "json" &&
+                  result.success &&
+                  result.output
+                    ? (line) => renderCSVLine(line, delimiter)
+                    : undefined
+                }
+              />
             </div>
             {result.error && (
               <div className="mt-2 text-sm text-red-600 dark:text-red-400">
