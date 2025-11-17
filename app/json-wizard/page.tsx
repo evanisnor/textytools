@@ -3,6 +3,10 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useToast } from "@/app/components/Toast";
+import {
+  TextEditorContainer,
+  type TextEditorContainerRef,
+} from "@/app/components/TextEditorContainer";
 
 type ViewMode = "pretty" | "minified" | "escaped";
 
@@ -103,8 +107,8 @@ export default function JSONWizard() {
   const [sortKeys, setSortKeys] = useState(false);
   const [currentMatchIndex, setCurrentMatchIndex] = useState(0);
 
-  const inputContainerRef = useRef<HTMLDivElement>(null);
-  const outputContainerRef = useRef<HTMLDivElement>(null);
+  const inputEditorRef = useRef<TextEditorContainerRef>(null);
+  const outputEditorRef = useRef<TextEditorContainerRef>(null);
   const { showToast, ToastComponent } = useToast();
 
   // Track if component has mounted to avoid hydration mismatches
@@ -425,13 +429,15 @@ export default function JSONWizard() {
     if (
       !validation.isValid &&
       validation.lineNumber &&
-      inputContainerRef.current
+      inputEditorRef.current
     ) {
       const lineHeight = 20; // Approximate line height in pixels
       const errorLine = validation.lineNumber - 1;
       const scrollPosition = errorLine * lineHeight;
 
-      inputContainerRef.current.scrollTop = Math.max(0, scrollPosition - 100);
+      inputEditorRef.current.scrollTo({
+        top: Math.max(0, scrollPosition - 100),
+      });
     }
   }, [validation]);
 
@@ -448,18 +454,18 @@ export default function JSONWizard() {
       const inputMatchElement = document.getElementById(
         `input-match-${currentMatchIndex}`,
       );
-      if (inputMatchElement && inputContainerRef.current) {
-        const container = inputContainerRef.current;
+      const inputContainer = inputEditorRef.current?.getScrollContainer();
+      if (inputMatchElement && inputContainer) {
         const elementRect = inputMatchElement.getBoundingClientRect();
-        const containerRect = container.getBoundingClientRect();
+        const containerRect = inputContainer.getBoundingClientRect();
 
         // Calculate the scroll position to center the match in the container
         const relativeTop =
-          elementRect.top - containerRect.top + container.scrollTop;
+          elementRect.top - containerRect.top + inputContainer.scrollTop;
         const centerOffset =
-          container.clientHeight / 2 - elementRect.height / 2;
+          inputContainer.clientHeight / 2 - elementRect.height / 2;
 
-        container.scrollTo({
+        inputEditorRef.current?.scrollTo({
           top: relativeTop - centerOffset,
           behavior: "smooth",
         });
@@ -472,18 +478,18 @@ export default function JSONWizard() {
           const outputMatchElement = document.getElementById(
             `output-match-${outputMatchIndex}`,
           );
-          if (outputMatchElement && outputContainerRef.current) {
-            const container = outputContainerRef.current;
+          const outputContainer = outputEditorRef.current?.getScrollContainer();
+          if (outputMatchElement && outputContainer) {
             const elementRect = outputMatchElement.getBoundingClientRect();
-            const containerRect = container.getBoundingClientRect();
+            const containerRect = outputContainer.getBoundingClientRect();
 
             // Calculate the scroll position to center the match in the container
             const relativeTop =
-              elementRect.top - containerRect.top + container.scrollTop;
+              elementRect.top - containerRect.top + outputContainer.scrollTop;
             const centerOffset =
-              container.clientHeight / 2 - elementRect.height / 2;
+              outputContainer.clientHeight / 2 - elementRect.height / 2;
 
-            container.scrollTo({
+            outputEditorRef.current?.scrollTo({
               top: relativeTop - centerOffset,
               behavior: "smooth",
             });
@@ -607,38 +613,6 @@ export default function JSONWizard() {
     });
   };
 
-  const renderWithLineNumbers = (text: string) => {
-    if (!text) return null;
-
-    const lines = text.split("\n");
-    const lineNumberWidth = String(lines.length).length;
-
-    // Get the corresponding output match index for the current input match
-    const outputMatchIndex = inputToOutputMatchMap.get(currentMatchIndex) ?? -1;
-
-    return (
-      <div className="flex font-mono text-sm">
-        <div
-          className="select-none text-zinc-400 dark:text-zinc-600 text-right pr-4 border-r border-zinc-200 dark:border-zinc-800"
-          style={{ minWidth: `${lineNumberWidth + 2}ch` }}
-        >
-          {lines.map((_, index) => (
-            <div key={index}>{index + 1}</div>
-          ))}
-        </div>
-        <div className="flex-1 pl-4 whitespace-pre">
-          {searchTerm
-            ? lines.map((line, index) => (
-                <div key={index}>
-                  {renderHighlightedText(line, index, true, outputMatchIndex)}
-                </div>
-              ))
-            : text}
-        </div>
-      </div>
-    );
-  };
-
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 py-12 px-6">
       <div className="max-w-7xl mx-auto">
@@ -726,7 +700,7 @@ export default function JSONWizard() {
                   </button>
                 )}
               </div>
-              <div className="relative bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4 h-64 overflow-auto">
+              <div className="relative">
                 {input.trim() && (
                   <div className="absolute top-3 right-3 z-10">
                     <div
@@ -748,77 +722,22 @@ export default function JSONWizard() {
                     </div>
                   </div>
                 )}
-                <div ref={inputContainerRef} className="h-full overflow-auto">
-                  {input ? (
-                    <div className="flex font-mono text-sm">
-                      <div
-                        className="select-none text-zinc-400 dark:text-zinc-600 text-right pr-4 border-r border-zinc-200 dark:border-zinc-800"
-                        style={{
-                          minWidth: `${String(input.split("\n").length).length + 2}ch`,
-                        }}
-                      >
-                        {input.split("\n").map((_, index) => {
-                          const lineNumber = index + 1;
-                          const isErrorLine =
-                            !validation.isValid &&
-                            validation.lineNumber === lineNumber;
-                          return (
-                            <div
-                              key={index}
-                              className={
-                                isErrorLine
-                                  ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 font-bold"
-                                  : ""
-                              }
-                            >
-                              {lineNumber}
-                            </div>
-                          );
-                        })}
-                      </div>
-                      <div className="flex-1 pl-4 relative">
-                        <div className="absolute inset-0 whitespace-pre">
-                          {input.split("\n").map((line, index) => {
-                            const lineNumber = index + 1;
-                            const isErrorLine =
-                              !validation.isValid &&
-                              validation.lineNumber === lineNumber;
-                            const lineContent = searchTerm
-                              ? renderHighlightedText(line, index)
-                              : line;
-                            return (
-                              <div
-                                key={index}
-                                className={
-                                  isErrorLine
-                                    ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
-                                    : "text-zinc-900 dark:text-zinc-50"
-                                }
-                              >
-                                {lineContent}
-                              </div>
-                            );
-                          })}
-                        </div>
-                        <textarea
-                          value={input}
-                          onChange={(e) => setInput(e.target.value)}
-                          placeholder=""
-                          className="absolute inset-0 bg-transparent text-transparent caret-zinc-900 dark:caret-zinc-50 resize-none focus:outline-none whitespace-pre"
-                          spellCheck={false}
-                        />
-                      </div>
-                    </div>
-                  ) : (
-                    <textarea
-                      value={input}
-                      onChange={(e) => setInput(e.target.value)}
-                      placeholder='Paste your JSON here, e.g., {"key": "value"}'
-                      className="w-full h-full bg-transparent text-zinc-900 dark:text-zinc-50 placeholder-zinc-400 dark:placeholder-zinc-600 resize-none focus:outline-none font-mono text-sm"
-                      spellCheck={false}
-                    />
-                  )}
-                </div>
+                <TextEditorContainer
+                  ref={inputEditorRef}
+                  value={input}
+                  onChange={setInput}
+                  placeholder='Paste your JSON here, e.g., {"key": "value"}'
+                  renderLineContent={
+                    searchTerm
+                      ? (line, index) => renderHighlightedText(line, index)
+                      : undefined
+                  }
+                  highlightLine={
+                    !validation.isValid && validation.lineNumber
+                      ? (lineNumber) => lineNumber === validation.lineNumber
+                      : undefined
+                  }
+                />
               </div>
             </div>
 
@@ -886,18 +805,33 @@ export default function JSONWizard() {
                   )}
                 </div>
               </div>
-              <div
-                ref={outputContainerRef}
-                className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4 h-64 overflow-auto"
-              >
-                {processedJSON ? (
-                  renderWithLineNumbers(processedJSON)
-                ) : (
+              {processedJSON ? (
+                <TextEditorContainer
+                  ref={outputEditorRef}
+                  value={processedJSON}
+                  readOnly
+                  renderLineContent={
+                    searchTerm
+                      ? (line, index) => {
+                          const outputMatchIndex =
+                            inputToOutputMatchMap.get(currentMatchIndex) ?? -1;
+                          return renderHighlightedText(
+                            line,
+                            index,
+                            true,
+                            outputMatchIndex,
+                          );
+                        }
+                      : undefined
+                  }
+                />
+              ) : (
+                <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4 h-64">
                   <div className="text-zinc-400 dark:text-zinc-600 font-mono text-sm">
                     Formatted JSON will appear here...
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           </div>
 

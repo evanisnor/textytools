@@ -305,13 +305,18 @@ Edit [app/page.tsx](app/page.tsx:17-76) to add a link card in the grid:
 
 **Text Input/Output Areas**: See [text-counter](app/text-counter/page.tsx:104-112) or [case-converter](app/case-converter/page.tsx:209-217)
 
+**TextEditor with Line Numbers**:
+
+- [TextEditor component](app/components/TextEditor.tsx) - Core textarea with line numbers, syntax highlighting, and read-only mode
+- [TextEditorContainer component](app/components/TextEditorContainer.tsx) - Pre-styled container wrapper for TextEditor with consistent styling and scroll behavior. **Use this for most cases**. See [json-wizard](app/json-wizard/page.tsx) for implementation example
+
 **Option Selection Grid**: See [case-converter](app/case-converter/page.tsx:251-268) for radio-style selection
 
 **Checkbox Options**: See [text-sanitizer](app/text-sanitizer/page.tsx:289-309) for multi-select filters
 
 **Stats Display**: See [text-counter](app/text-counter/page.tsx:57-102) for metric cards
 
-**Advanced UI with Search**: See [json-wizard](app/json-wizard/page.tsx:802-860) for search implementation
+**Advanced UI with Search**: See [json-wizard](app/json-wizard/page.tsx) for search implementation with TextEditor
 
 ## Development
 
