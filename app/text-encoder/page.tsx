@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import bs58 from "bs58";
 import { useToast } from "@/app/components/Toast";
+import { TextEditorContainer } from "@/app/components/TextEditorContainer";
 
 type EncodingType =
   | "base64"
@@ -1071,19 +1072,17 @@ export default function TextEncoderPage() {
                   </button>
                 )}
               </div>
-              <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-1">
-                <textarea
-                  value={text}
-                  onChange={(e) => setText(e.target.value)}
-                  placeholder={
-                    mode === "encode"
-                      ? "Enter text to encode..."
-                      : "Enter encoded text to decode..."
-                  }
-                  className="w-full h-48 p-4 bg-transparent text-zinc-900 dark:text-zinc-50 placeholder-zinc-400 dark:placeholder-zinc-600 resize-none focus:outline-none font-mono text-sm"
-                  spellCheck={false}
-                />
-              </div>
+              <TextEditorContainer
+                value={text}
+                onChange={setText}
+                placeholder={
+                  mode === "encode"
+                    ? "Enter text to encode..."
+                    : "Enter encoded text to decode..."
+                }
+                height="h-48"
+                showLineNumbers={false}
+              />
             </div>
 
             <div>
@@ -1113,23 +1112,22 @@ export default function TextEncoderPage() {
                   </button>
                 )}
               </div>
-              <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-1">
-                <div
-                  className={`w-full h-48 p-4 overflow-auto font-mono text-sm whitespace-pre-wrap wrap-break-word ${
-                    outputText.startsWith("Error:")
-                      ? "text-red-600 dark:text-red-400"
-                      : "text-zinc-900 dark:text-zinc-50"
-                  }`}
-                >
-                  {outputText || (
-                    <span className="text-zinc-400 dark:text-zinc-600">
-                      {mode === "encode"
-                        ? "Encoded output will appear here..."
-                        : "Decoded output will appear here..."}
-                    </span>
-                  )}
-                </div>
-              </div>
+              <TextEditorContainer
+                value={outputText}
+                readOnly
+                placeholder={
+                  mode === "encode"
+                    ? "Encoded output will appear here..."
+                    : "Decoded output will appear here..."
+                }
+                height="h-48"
+                showLineNumbers={false}
+                className={
+                  outputText.startsWith("Error:")
+                    ? "text-red-600 dark:text-red-400"
+                    : ""
+                }
+              />
             </div>
           </div>
 

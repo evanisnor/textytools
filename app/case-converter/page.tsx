@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useToast } from "@/app/components/Toast";
+import { TextEditorContainer } from "@/app/components/TextEditorContainer";
 
 type CaseType =
   | "upper"
@@ -232,15 +233,13 @@ export default function CaseConverter() {
                   </button>
                 )}
               </div>
-              <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-1">
-                <textarea
-                  value={text}
-                  onChange={(e) => setText(e.target.value)}
-                  placeholder="Paste or type your text here..."
-                  className="w-full h-48 p-4 bg-transparent text-zinc-900 dark:text-zinc-50 placeholder-zinc-400 dark:placeholder-zinc-600 resize-none focus:outline-none font-mono text-sm"
-                  spellCheck={false}
-                />
-              </div>
+              <TextEditorContainer
+                value={text}
+                onChange={setText}
+                placeholder="Paste or type your text here..."
+                height="h-48"
+                showLineNumbers={false}
+              />
             </div>
 
             <div>
@@ -270,15 +269,13 @@ export default function CaseConverter() {
                   </button>
                 )}
               </div>
-              <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-1">
-                <div className="w-full h-48 p-4 overflow-auto font-mono text-sm text-zinc-900 dark:text-zinc-50 whitespace-pre-wrap wrap-break-word">
-                  {convertedText || (
-                    <span className="text-zinc-400 dark:text-zinc-600">
-                      Converted text will appear here...
-                    </span>
-                  )}
-                </div>
-              </div>
+              <TextEditorContainer
+                value={convertedText}
+                readOnly
+                placeholder="Converted text will appear here..."
+                height="h-48"
+                showLineNumbers={false}
+              />
             </div>
           </div>
 
