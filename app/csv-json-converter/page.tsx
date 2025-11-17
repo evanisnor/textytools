@@ -3,6 +3,7 @@
 import React, { useState, useMemo, JSX } from "react";
 import Link from "next/link";
 import { useToast } from "@/app/components/Toast";
+import { TextEditorContainer } from "@/app/components/TextEditorContainer";
 
 interface JsonObject {
   [key: string]: unknown;
@@ -347,13 +348,12 @@ export default function CsvJsonConverter() {
                   {highlightCSV(input, delimiter)}
                 </div>
               ) : (
-                <textarea
+                <TextEditorContainer
                   value={input}
-                  onChange={(e) => setInput(e.target.value)}
+                  onChange={setInput}
                   placeholder='Paste JSON or CSV here...\n\nJSON example:\n[\n  {"name": "Alice", "age": 30},\n  {"name": "Bob", "age": 25}\n]\n\nCSV example:\nname,age\nAlice,30\nBob,25'
-                  className="w-full h-[500px] p-4 bg-transparent resize-none focus:outline-none font-mono text-sm text-zinc-900 dark:text-zinc-50 placeholder-zinc-400 dark:placeholder-zinc-600 whitespace-pre overflow-auto"
-                  spellCheck={false}
-                  wrap="off"
+                  height="h-[500px]"
+                  containerClassName="p-0 border-0"
                 />
               )}
             </div>
@@ -437,15 +437,14 @@ export default function CsvJsonConverter() {
                   {highlightCSV(result.output, delimiter)}
                 </div>
               ) : (
-                <textarea
+                <TextEditorContainer
                   value={result.success ? result.output : ""}
                   readOnly
                   placeholder={
                     result.error ? "" : "Converted output will appear here..."
                   }
-                  className="w-full h-[500px] p-4 bg-transparent resize-none focus:outline-none font-mono text-sm text-zinc-900 dark:text-zinc-50 placeholder-zinc-400 dark:placeholder-zinc-600 whitespace-pre"
-                  spellCheck={false}
-                  wrap="off"
+                  height="h-[500px]"
+                  containerClassName="p-0 border-0"
                 />
               )}
             </div>

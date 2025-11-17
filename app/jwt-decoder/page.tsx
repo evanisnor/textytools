@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, JSX } from "react";
 import Link from "next/link";
 import { useToast } from "@/app/components/Toast";
+import { TextEditorContainer } from "@/app/components/TextEditorContainer";
 
 interface JWTPayload {
   [key: string]: unknown;
@@ -327,24 +328,19 @@ export default function JWTDecoder() {
                 </button>
               )}
             </div>
-            <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-1">
-              <div className="relative">
-                {input.trim() && !result.error ? (
-                  <div className="w-full h-[500px] p-4 bg-transparent overflow-auto font-mono text-sm text-zinc-900 dark:text-zinc-50 whitespace-pre-wrap break-all">
-                    {highlightJWT(input)}
-                  </div>
-                ) : (
-                  <textarea
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    placeholder="Paste a JWT token here...&#10;&#10;Example:&#10;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
-                    className="w-full h-[500px] p-4 bg-transparent resize-none focus:outline-none font-mono text-sm text-zinc-900 dark:text-zinc-50 placeholder-zinc-400 dark:placeholder-zinc-600 whitespace-pre-wrap break-all"
-                    spellCheck={false}
-                    autoComplete="off"
-                  />
-                )}
-              </div>
-            </div>
+            <TextEditorContainer
+              value={input}
+              onChange={setInput}
+              placeholder="Paste a JWT token here...&#10;&#10;Example:&#10;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+              height="h-[500px]"
+              renderContent={
+                input.trim() && !result.error
+                  ? (content) => highlightJWT(content)
+                  : undefined
+              }
+              showLineNumbers={false}
+              wrap={true}
+            />
           </div>
 
           {/* Output */}
@@ -412,17 +408,14 @@ export default function JWTDecoder() {
                 )}
               </div>
             </div>
-            <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-1">
-              <textarea
-                value={result.success ? formattedOutput : ""}
-                readOnly
-                placeholder={
-                  result.error ? "" : "Decoded JWT will appear here..."
-                }
-                className="w-full h-[500px] p-4 bg-transparent resize-none focus:outline-none font-mono text-sm text-zinc-900 dark:text-zinc-50 placeholder-zinc-400 dark:placeholder-zinc-600 whitespace-pre"
-                spellCheck={false}
-              />
-            </div>
+            <TextEditorContainer
+              value={result.success ? formattedOutput : ""}
+              readOnly
+              placeholder={
+                result.error ? "" : "Decoded JWT will appear here..."
+              }
+              height="h-[500px]"
+            />
             {result.error && (
               <div className="mt-2 text-sm text-red-600 dark:text-red-400">
                 Error: {result.error}
