@@ -5,6 +5,7 @@ import Link from "next/link";
 import { debounce } from "lodash";
 import { Tiktoken } from "js-tiktoken/lite";
 import cl100k_base from "js-tiktoken/ranks/cl100k_base";
+import { TextEditorContainer } from "@/app/components/TextEditorContainer";
 
 export default function TextCounter() {
   const [text, setText] = useState("");
@@ -166,15 +167,12 @@ export default function TextCounter() {
               </button>
             )}
           </div>
-          <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-1">
-            <textarea
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              placeholder="Paste or type your text here..."
-              className="w-full h-96 p-4 bg-transparent text-zinc-900 dark:text-zinc-50 placeholder-zinc-400 dark:placeholder-zinc-600 resize-none focus:outline-none font-mono text-sm"
-              spellCheck={false}
-            />
-          </div>
+          <TextEditorContainer
+            value={text}
+            onChange={setText}
+            placeholder="Paste or type your text here..."
+            height="h-96"
+          />
         </div>
       </div>
     </div>
