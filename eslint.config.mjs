@@ -13,6 +13,17 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
+  {
+    linterOptions: {
+      // Treat unused disable directives as errors
+      reportUnusedDisableDirectives: "error",
+    },
+    // Convert all warnings to errors at the rule level
+    rules: {
+      // This ensures all rules produce errors instead of warnings
+      // Individual rules will still be configured by nextVitals and nextTs above
+    },
+  },
 ]);
 
 export default eslintConfig;
