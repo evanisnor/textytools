@@ -217,8 +217,8 @@ export default function TextSanitizer() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:items-start">
+          <div className="lg:col-span-2 space-y-6 flex flex-col">
             <div>
               <div className="flex items-center justify-between mb-2 min-h-9">
                 <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
@@ -302,8 +302,8 @@ export default function TextSanitizer() {
             </div>
           </div>
 
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
+          <div className="flex flex-col h-full">
+            <div className="flex items-center justify-between mb-2 min-h-9">
               <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
                 Sanitization Options
               </label>
@@ -324,7 +324,7 @@ export default function TextSanitizer() {
               </div>
             </div>
 
-            <div className="space-y-2 max-h-[600px] overflow-y-auto pr-2">
+            <div className="space-y-2 flex-1 overflow-y-auto pr-2">
               {options.map((option) => (
                 <label
                   key={option.id}

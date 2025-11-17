@@ -678,8 +678,8 @@ export default function JSONWizard() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          <div className="lg:col-span-3 space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:items-start">
+          <div className="lg:col-span-3 space-y-6 flex flex-col">
             {/* Input */}
             <div>
               <div className="flex items-center justify-between mb-2 min-h-9">
@@ -884,12 +884,14 @@ export default function JSONWizard() {
           </div>
 
           {/* Controls Panel */}
-          <div className="space-y-4">
+          <div className="flex flex-col h-full">
             {/* Search */}
             <div>
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-                Search
-              </label>
+              <div className="mb-2 min-h-9">
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  Search
+                </label>
+              </div>
               <div className="space-y-2">
                 <input
                   type="text"
@@ -947,10 +949,12 @@ export default function JSONWizard() {
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-3">
-                Modify
-              </label>
+            <div className="mt-4">
+              <div className="mb-2 min-h-9">
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  Modify
+                </label>
+              </div>
               <div className="space-y-2">
                 <button
                   onClick={() => setViewMode("pretty")}
@@ -995,10 +999,12 @@ export default function JSONWizard() {
             </div>
 
             {/* Options */}
-            <div>
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-                Options
-              </label>
+            <div className="mt-4">
+              <div className="mb-2 min-h-9">
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  Options
+                </label>
+              </div>
               <div className="space-y-3">
                 <label className="flex items-center gap-2 p-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 cursor-pointer">
                   <input

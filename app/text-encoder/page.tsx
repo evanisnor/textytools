@@ -1019,8 +1019,8 @@ export default function TextEncoderPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:items-start">
+          <div className="lg:col-span-2 space-y-6 flex flex-col">
             <div className="flex gap-2 mb-4">
               <button
                 onClick={() => handleModeChange("encode")}
@@ -1133,11 +1133,13 @@ export default function TextEncoderPage() {
             </div>
           </div>
 
-          <div className="space-y-3">
-            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-3">
-              Select Encoding Format
-            </label>
-            <div className="space-y-2 max-h-[600px] overflow-y-auto pr-2">
+          <div className="flex flex-col h-full">
+            <div className="mb-2 min-h-9">
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                Select Encoding Format
+              </label>
+            </div>
+            <div className="space-y-2 flex-1 overflow-y-auto pr-2">
               {encodingOptions.map((option) => {
                 const isHashFunction = [
                   "md5",
