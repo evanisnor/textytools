@@ -444,30 +444,48 @@ export default function JSONWizard() {
 
     // Use setTimeout to ensure the DOM has updated with the new highlighted elements
     setTimeout(() => {
-      // Scroll input to current match using scrollIntoView for accurate positioning
+      // Scroll input to current match within its container only
       const inputMatchElement = document.getElementById(
         `input-match-${currentMatchIndex}`,
       );
-      if (inputMatchElement) {
-        inputMatchElement.scrollIntoView({
+      if (inputMatchElement && inputContainerRef.current) {
+        const container = inputContainerRef.current;
+        const elementRect = inputMatchElement.getBoundingClientRect();
+        const containerRect = container.getBoundingClientRect();
+
+        // Calculate the scroll position to center the match in the container
+        const relativeTop =
+          elementRect.top - containerRect.top + container.scrollTop;
+        const centerOffset =
+          container.clientHeight / 2 - elementRect.height / 2;
+
+        container.scrollTo({
+          top: relativeTop - centerOffset,
           behavior: "smooth",
-          block: "center",
-          inline: "center",
         });
       }
 
-      // Scroll output to the corresponding match using scrollIntoView for accurate positioning
+      // Scroll output to the corresponding match within its container only
       if (outputSearchMatches.length > 0) {
         const outputMatchIndex = inputToOutputMatchMap.get(currentMatchIndex);
         if (outputMatchIndex !== undefined && outputMatchIndex >= 0) {
           const outputMatchElement = document.getElementById(
             `output-match-${outputMatchIndex}`,
           );
-          if (outputMatchElement) {
-            outputMatchElement.scrollIntoView({
+          if (outputMatchElement && outputContainerRef.current) {
+            const container = outputContainerRef.current;
+            const elementRect = outputMatchElement.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+
+            // Calculate the scroll position to center the match in the container
+            const relativeTop =
+              elementRect.top - containerRect.top + container.scrollTop;
+            const centerOffset =
+              container.clientHeight / 2 - elementRect.height / 2;
+
+            container.scrollTo({
+              top: relativeTop - centerOffset,
               behavior: "smooth",
-              block: "center",
-              inline: "center",
             });
           }
         }
