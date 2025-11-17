@@ -116,27 +116,44 @@ export const TextEditor = forwardRef<TextEditorRef, TextEditorProps>(
       };
     }, [readOnly]);
 
-    // Show simple textarea only when empty and no custom rendering
-    if (!value && !renderContent && !renderLineContent) {
+    const lines = value.split("\n");
+    const lineNumberWidth = String(lines.length).length;
+    const hasCustomRendering = renderContent || renderLineContent;
+    const showNumbers = showLineNumbers && value; // Only show line numbers when there's content
+
+    // Simple mode: no line numbers and no custom rendering
+    if (!showLineNumbers && !hasCustomRendering) {
       return (
-        <textarea
-          value={value}
-          onChange={onChange ? (e) => onChange(e.target.value) : undefined}
-          placeholder={placeholder}
-          readOnly={readOnly}
-          className={`w-full h-full bg-transparent text-zinc-900 dark:text-zinc-50 placeholder-zinc-400 dark:placeholder-zinc-600 resize-none focus:outline-none font-mono text-sm ${wrap ? "whitespace-pre-wrap break-all" : "whitespace-pre"} ${className}`}
-          spellCheck={false}
-        />
+        <div
+          ref={containerRef}
+          className={`w-full min-h-full flex flex-col ${className}`}
+          onClick={() => {
+            // Allow clicking anywhere to focus the textarea
+            if (!readOnly && textareaRef.current) {
+              textareaRef.current.focus();
+            }
+          }}
+        >
+          <textarea
+            ref={textareaRef}
+            value={value}
+            onChange={onChange ? (e) => onChange(e.target.value) : undefined}
+            placeholder={placeholder}
+            readOnly={readOnly}
+            className={`w-full flex-1 bg-transparent text-zinc-900 dark:text-zinc-50 placeholder-zinc-400 dark:placeholder-zinc-600 resize-none focus:outline-none font-mono text-sm ${wrap ? "whitespace-pre-wrap break-all" : "whitespace-pre"}`}
+            spellCheck={false}
+          />
+        </div>
       );
     }
 
-    const lines = value.split("\n");
-    const lineNumberWidth = String(lines.length).length;
-
     return (
-      <div ref={containerRef} className={`flex font-mono text-sm ${className}`}>
+      <div
+        ref={containerRef}
+        className={`flex min-h-full font-mono text-sm ${className}`}
+      >
         {/* Line numbers */}
-        {showLineNumbers && (
+        {showNumbers && (
           <div
             className="select-none text-zinc-400 dark:text-zinc-600 text-right pr-4 border-r border-zinc-200 dark:border-zinc-800"
             style={{ minWidth: `${lineNumberWidth + 2}ch` }}
@@ -163,7 +180,15 @@ export const TextEditor = forwardRef<TextEditorRef, TextEditorProps>(
         )}
 
         {/* Content area */}
-        <div className={`flex-1 ${showLineNumbers ? "pl-4" : ""} relative`}>
+        <div
+          className={`flex-1 ${showNumbers ? "pl-4" : ""} relative flex flex-col`}
+          onClick={() => {
+            // Allow clicking anywhere in the content area to focus the textarea
+            if (!readOnly && textareaRef.current) {
+              textareaRef.current.focus();
+            }
+          }}
+        >
           {readOnly ? (
             // Read-only mode: just display the content
             <div
@@ -190,43 +215,45 @@ export const TextEditor = forwardRef<TextEditorRef, TextEditorProps>(
             </div>
           ) : (
             // Editable mode: overlay transparent textarea on top of rendered content
-            <>
-              <div
-                className={`absolute inset-0 ${wrap ? "whitespace-pre-wrap break-all" : "whitespace-pre"}`}
-              >
-                {renderContent
-                  ? renderContent(value)
-                  : lines.map((line, index) => {
-                      const lineNumber = index + 1;
-                      const isHighlighted = highlightLine?.(lineNumber);
-                      const lineContent = renderLineContent
-                        ? renderLineContent(line, index)
-                        : line;
-                      return (
-                        <div
-                          key={index}
-                          className={
-                            isHighlighted
-                              ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
-                              : "text-zinc-900 dark:text-zinc-50"
-                          }
-                        >
-                          {lineContent}
-                        </div>
-                      );
-                    })}
-              </div>
+            <div className="relative flex-1">
+              {hasCustomRendering && (
+                <div
+                  className={`absolute inset-0 pointer-events-none ${wrap ? "whitespace-pre-wrap break-all" : "whitespace-pre"}`}
+                >
+                  {renderContent
+                    ? renderContent(value)
+                    : lines.map((line, index) => {
+                        const lineNumber = index + 1;
+                        const isHighlighted = highlightLine?.(lineNumber);
+                        const lineContent = renderLineContent
+                          ? renderLineContent(line, index)
+                          : line;
+                        return (
+                          <div
+                            key={index}
+                            className={
+                              isHighlighted
+                                ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
+                                : "text-zinc-900 dark:text-zinc-50"
+                            }
+                          >
+                            {lineContent}
+                          </div>
+                        );
+                      })}
+                </div>
+              )}
               <textarea
                 ref={textareaRef}
                 value={value}
                 onChange={
                   onChange ? (e) => onChange(e.target.value) : undefined
                 }
-                placeholder=""
-                className={`absolute inset-0 bg-transparent text-transparent caret-zinc-900 dark:caret-zinc-50 resize-none focus:outline-none ${wrap ? "whitespace-pre-wrap break-all" : "whitespace-pre"} overflow-hidden`}
+                placeholder={placeholder}
+                className={`${hasCustomRendering ? "absolute inset-0" : "w-full h-full"} bg-transparent ${hasCustomRendering ? "text-transparent" : "text-zinc-900 dark:text-zinc-50"} caret-zinc-900 dark:caret-zinc-50 resize-none focus:outline-none ${wrap ? "whitespace-pre-wrap break-all" : "whitespace-pre"} ${hasCustomRendering ? "overflow-hidden" : ""} placeholder-zinc-400 dark:placeholder-zinc-600`}
                 spellCheck={false}
               />
-            </>
+            </div>
           )}
         </div>
       </div>
