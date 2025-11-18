@@ -75,54 +75,55 @@ export default function TextCounter() {
     <ToolFrame
       title="Text Counter"
       description="Paste or type text below to see character, word, line, paragraph, and AI token counts in real-time."
+      headerRight={
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 lg:min-w-[700px]">
+          <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-3">
+            <div className="text-xs text-zinc-600 dark:text-zinc-400 mb-1">
+              Characters
+            </div>
+            <div className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
+              {characterCount.toLocaleString()}
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-3">
+            <div className="text-xs text-zinc-600 dark:text-zinc-400 mb-1">
+              Words
+            </div>
+            <div className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
+              {wordCount}
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-3">
+            <div className="text-xs text-zinc-600 dark:text-zinc-400 mb-1">
+              Lines
+            </div>
+            <div className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
+              {lineCount.toLocaleString()}
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-3">
+            <div className="text-xs text-zinc-600 dark:text-zinc-400 mb-1">
+              Paragraphs
+            </div>
+            <div className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
+              {paragraphCount}
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-3">
+            <div className="text-xs text-zinc-600 dark:text-zinc-400 mb-1">
+              Tokens (GPT-4+)
+            </div>
+            <div className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
+              {tokenCount}
+            </div>
+          </div>
+        </div>
+      }
     >
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
-        <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4">
-          <div className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
-            Characters
-          </div>
-          <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">
-            {characterCount.toLocaleString()}
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4">
-          <div className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
-            Words
-          </div>
-          <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">
-            {wordCount}
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4">
-          <div className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
-            Lines
-          </div>
-          <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">
-            {lineCount.toLocaleString()}
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4">
-          <div className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
-            Paragraphs
-          </div>
-          <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">
-            {paragraphCount}
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4">
-          <div className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
-            Tokens (GPT-4+)
-          </div>
-          <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">
-            {tokenCount}
-          </div>
-        </div>
-      </div>
-
       <div>
         <div className="flex items-center justify-between mb-2 min-h-9">
           <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
