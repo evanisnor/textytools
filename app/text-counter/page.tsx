@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import { debounce } from "lodash";
 import { Tiktoken } from "js-tiktoken/lite";
 import cl100k_base from "js-tiktoken/ranks/cl100k_base";
 import { TextEditorContainer } from "@/app/components/TextEditorContainer";
+import { ToolFrame } from "@/app/components/ToolFrame";
 
 export default function TextCounter() {
   const [text, setText] = useState("");
@@ -72,109 +72,91 @@ export default function TextCounter() {
   }, [textTrimmed, isTokenizing]);
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 py-12 px-6">
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-8">
-          <Link
-            href="/"
-            className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
-          >
-            ← back to textytools.dev
-          </Link>
-        </div>
-
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 mb-3">
-            Text Counter
-          </h1>
-          <p className="text-lg text-zinc-600 dark:text-zinc-400">
-            Paste or type text below to see character, word, line, paragraph,
-            and AI token counts in real-time.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
-          <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4">
-            <div className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
-              Characters
-            </div>
-            <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">
-              {characterCount.toLocaleString()}
-            </div>
+    <ToolFrame
+      title="Text Counter"
+      description="Paste or type text below to see character, word, line, paragraph, and AI token counts in real-time."
+    >
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+        <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4">
+          <div className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
+            Characters
           </div>
-
-          <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4">
-            <div className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
-              Words
-            </div>
-            <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">
-              {wordCount}
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4">
-            <div className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
-              Lines
-            </div>
-            <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">
-              {lineCount.toLocaleString()}
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4">
-            <div className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
-              Paragraphs
-            </div>
-            <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">
-              {paragraphCount}
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4">
-            <div className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
-              Tokens (GPT-4+)
-            </div>
-            <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">
-              {tokenCount}
-            </div>
+          <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">
+            {characterCount.toLocaleString()}
           </div>
         </div>
 
-        <div>
-          <div className="flex items-center justify-between mb-2 min-h-9">
-            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-              Input Text
-            </label>
-            {text.trim() && (
-              <button
-                onClick={() => setText("")}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 active:bg-zinc-300 dark:active:bg-zinc-600 transition-colors"
-              >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-                Clear
-              </button>
-            )}
+        <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4">
+          <div className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
+            Words
           </div>
-          <TextEditorContainer
-            value={text}
-            onChange={setText}
-            placeholder="Paste or type your text here..."
-            height="h-96"
-          />
+          <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">
+            {wordCount}
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4">
+          <div className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
+            Lines
+          </div>
+          <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">
+            {lineCount.toLocaleString()}
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4">
+          <div className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
+            Paragraphs
+          </div>
+          <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">
+            {paragraphCount}
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4">
+          <div className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
+            Tokens (GPT-4+)
+          </div>
+          <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">
+            {tokenCount}
+          </div>
         </div>
       </div>
-    </div>
+
+      <div>
+        <div className="flex items-center justify-between mb-2 min-h-9">
+          <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            Input Text
+          </label>
+          {text.trim() && (
+            <button
+              onClick={() => setText("")}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 active:bg-zinc-300 dark:active:bg-zinc-600 transition-colors"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+              Clear
+            </button>
+          )}
+        </div>
+        <TextEditorContainer
+          value={text}
+          onChange={setText}
+          placeholder="Paste or type your text here..."
+          height="h-96"
+        />
+      </div>
+    </ToolFrame>
   );
 }

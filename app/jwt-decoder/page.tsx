@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect, JSX } from "react";
 import Link from "next/link";
 import { useToast } from "@/app/components/Toast";
 import { TextEditorContainer } from "@/app/components/TextEditorContainer";
+import { ToolFrame } from "@/app/components/ToolFrame";
 
 interface JWTPayload {
   [key: string]: unknown;
@@ -193,122 +194,178 @@ export default function JWTDecoder() {
     : false;
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 py-12 px-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Back button */}
-        <div className="mb-8">
-          <Link
-            href="/"
-            className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
-          >
-            ← back to textytools.dev
-          </Link>
-        </div>
-
-        {/* Header */}
-        <div className="mb-8 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
-          <div>
-            <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 mb-3">
-              JWT Decoder
-            </h1>
-            <p className="text-lg text-zinc-600 dark:text-zinc-400">
-              Decode and inspect JSON Web Tokens (JWT) with real-time validation
-            </p>
+    <ToolFrame
+      title="JWT Decoder"
+      description="Decode and inspect JSON Web Tokens (JWT) with real-time validation"
+      headerRight={
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:min-w-[600px]">
+          {/* Algorithm */}
+          <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-3">
+            <div className="text-xs text-zinc-600 dark:text-zinc-400 mb-1">
+              Algorithm
+            </div>
+            <div className="text-lg font-bold text-zinc-900 dark:text-zinc-50 font-mono">
+              {result.decoded?.algorithm || "—"}
+            </div>
           </div>
 
-          {/* Stats Bar */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:min-w-[600px]">
-            {/* Algorithm */}
-            <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-3">
-              <div className="text-xs text-zinc-600 dark:text-zinc-400 mb-1">
-                Algorithm
-              </div>
-              <div className="text-lg font-bold text-zinc-900 dark:text-zinc-50 font-mono">
-                {result.decoded?.algorithm || "—"}
-              </div>
+          {/* Issued At */}
+          <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-3">
+            <div className="text-xs text-zinc-600 dark:text-zinc-400 mb-1">
+              Issued At
             </div>
-
-            {/* Issued At */}
-            <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-3">
-              <div className="text-xs text-zinc-600 dark:text-zinc-400 mb-1">
-                Issued At
-              </div>
-              <div className="text-xs font-medium text-zinc-900 dark:text-zinc-50">
-                {result.decoded?.issuedAt
-                  ? formatDate(result.decoded.issuedAt)
-                  : "—"}
-              </div>
+            <div className="text-xs font-medium text-zinc-900 dark:text-zinc-50">
+              {result.decoded?.issuedAt
+                ? formatDate(result.decoded.issuedAt)
+                : "—"}
             </div>
+          </div>
 
-            {/* Expires At */}
-            <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-3">
-              <div className="text-xs text-zinc-600 dark:text-zinc-400 mb-1">
-                {expired ? (
-                  <span className="block text-xs mt-0.5 text-red-600 dark:text-red-400">
-                    ⚠️ Expired
-                  </span>
-                ) : (
-                  "Expires At"
-                )}
-              </div>
-              <div
-                className={`text-xs font-medium ${
-                  result.decoded?.expiresAt
-                    ? expired
-                      ? "text-red-600 dark:text-red-400"
-                      : "text-green-600 dark:text-green-400"
+          {/* Expires At */}
+          <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-3">
+            <div className="text-xs text-zinc-600 dark:text-zinc-400 mb-1">
+              {expired ? (
+                <span className="block text-xs mt-0.5 text-red-600 dark:text-red-400">
+                  ⚠️ Expired
+                </span>
+              ) : (
+                "Expires At"
+              )}
+            </div>
+            <div
+              className={`text-xs font-medium ${
+                result.decoded?.expiresAt
+                  ? expired
+                    ? "text-red-600 dark:text-red-400"
+                    : "text-green-600 dark:text-green-400"
+                  : "text-zinc-900 dark:text-zinc-50"
+              }`}
+            >
+              {result.decoded?.expiresAt ? (
+                <>{formatDate(result.decoded.expiresAt)}</>
+              ) : (
+                "—"
+              )}
+            </div>
+          </div>
+
+          {/* Not Before */}
+          <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-3">
+            <div className="text-xs text-zinc-600 dark:text-zinc-400 mb-1">
+              {notYetValid ? (
+                <span className="block text-xs mt-0.5 text-orange-600 dark:text-orange-400">
+                  ⚠️ Not yet valid
+                </span>
+              ) : (
+                "Not Before"
+              )}
+            </div>
+            <div
+              className={`text-xs font-medium ${
+                result.decoded?.notBefore
+                  ? notYetValid
+                    ? "text-orange-600 dark:text-orange-400"
                     : "text-zinc-900 dark:text-zinc-50"
-                }`}
-              >
-                {result.decoded?.expiresAt ? (
-                  <>{formatDate(result.decoded.expiresAt)}</>
-                ) : (
-                  "—"
-                )}
-              </div>
-            </div>
-
-            {/* Not Before */}
-            <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-3">
-              <div className="text-xs text-zinc-600 dark:text-zinc-400 mb-1">
-                {notYetValid ? (
-                  <span className="block text-xs mt-0.5 text-orange-600 dark:text-orange-400">
-                    ⚠️ Not yet valid
-                  </span>
-                ) : (
-                  "Not Before"
-                )}
-              </div>
-              <div
-                className={`text-xs font-medium ${
-                  result.decoded?.notBefore
-                    ? notYetValid
-                      ? "text-orange-600 dark:text-orange-400"
-                      : "text-zinc-900 dark:text-zinc-50"
-                    : "text-zinc-900 dark:text-zinc-50"
-                }`}
-              >
-                {result.decoded?.notBefore ? (
-                  <>{formatDate(result.decoded.notBefore)}</>
-                ) : (
-                  "—"
-                )}
-              </div>
+                  : "text-zinc-900 dark:text-zinc-50"
+              }`}
+            >
+              {result.decoded?.notBefore ? (
+                <>{formatDate(result.decoded.notBefore)}</>
+              ) : (
+                "—"
+              )}
             </div>
           </div>
         </div>
+      }
+    >
+      {/* Input/Output Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        {/* Input */}
+        <div>
+          <div className="mb-2 flex items-center justify-between min-h-9">
+            <label className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
+              JWT Token
+            </label>
+            {input.trim() && (
+              <button
+                onClick={() => setInput("")}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 active:bg-zinc-300 dark:active:bg-zinc-600 transition-colors"
+              >
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+                Clear
+              </button>
+            )}
+          </div>
+          <TextEditorContainer
+            value={input}
+            onChange={setInput}
+            placeholder="Paste a JWT token here...&#10;&#10;Example:&#10;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+            height="h-[500px]"
+            renderContent={
+              input.trim() && !result.error
+                ? (content) => highlightJWT(content)
+                : undefined
+            }
+            showLineNumbers={false}
+            wrap={true}
+          />
+        </div>
 
-        {/* Input/Output Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          {/* Input */}
-          <div>
-            <div className="mb-2 flex items-center justify-between min-h-9">
-              <label className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
-                JWT Token
-              </label>
-              {input.trim() && (
+        {/* Output */}
+        <div>
+          <div className="mb-2 flex items-center justify-between min-h-9">
+            <label className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
+              Decoded Token
+            </label>
+            <div className="flex items-center gap-2">
+              {result.success && result.decoded && (
+                <Link
+                  href="/json-wizard"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    // Save current JWT input for restoration on back navigation
+                    localStorage.setItem("jwt-decoder-input", input);
+                    // Save formatted output for JSON Wizard
+                    localStorage.setItem("json-wizard-input", formattedOutput);
+                    window.location.href = "/json-wizard";
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-900 dark:text-blue-100 rounded hover:bg-blue-200 dark:hover:bg-blue-900/50 active:bg-blue-300 dark:active:bg-blue-900/70 transition-colors"
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 10l7-7m0 0l7 7m-7-7v18"
+                    />
+                  </svg>
+                  Format with JSON Wizard
+                </Link>
+              )}
+              {result.success && result.decoded && (
                 <button
-                  onClick={() => setInput("")}
+                  onClick={() => {
+                    navigator.clipboard.writeText(formattedOutput);
+                    showToast("Copied to clipboard");
+                  }}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 active:bg-zinc-300 dark:active:bg-zinc-600 transition-colors"
                 >
                   <svg
@@ -321,132 +378,50 @@ export default function JWTDecoder() {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
+                      d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
                     />
                   </svg>
-                  Clear
+                  Copy
                 </button>
               )}
             </div>
-            <TextEditorContainer
-              value={input}
-              onChange={setInput}
-              placeholder="Paste a JWT token here...&#10;&#10;Example:&#10;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
-              height="h-[500px]"
-              renderContent={
-                input.trim() && !result.error
-                  ? (content) => highlightJWT(content)
-                  : undefined
-              }
-              showLineNumbers={false}
-              wrap={true}
-            />
           </div>
-
-          {/* Output */}
-          <div>
-            <div className="mb-2 flex items-center justify-between min-h-9">
-              <label className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
-                Decoded Token
-              </label>
-              <div className="flex items-center gap-2">
-                {result.success && result.decoded && (
-                  <Link
-                    href="/json-wizard"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      // Save current JWT input for restoration on back navigation
-                      localStorage.setItem("jwt-decoder-input", input);
-                      // Save formatted output for JSON Wizard
-                      localStorage.setItem(
-                        "json-wizard-input",
-                        formattedOutput,
-                      );
-                      window.location.href = "/json-wizard";
-                    }}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-900 dark:text-blue-100 rounded hover:bg-blue-200 dark:hover:bg-blue-900/50 active:bg-blue-300 dark:active:bg-blue-900/70 transition-colors"
-                  >
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 10l7-7m0 0l7 7m-7-7v18"
-                      />
-                    </svg>
-                    Format with JSON Wizard
-                  </Link>
-                )}
-                {result.success && result.decoded && (
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(formattedOutput);
-                      showToast("Copied to clipboard");
-                    }}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 active:bg-zinc-300 dark:active:bg-zinc-600 transition-colors"
-                  >
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                      />
-                    </svg>
-                    Copy
-                  </button>
-                )}
-              </div>
+          <TextEditorContainer
+            value={result.success ? formattedOutput : ""}
+            readOnly
+            placeholder={result.error ? "" : "Decoded JWT will appear here..."}
+            height="h-[500px]"
+          />
+          {result.error && (
+            <div className="mt-2 text-sm text-red-600 dark:text-red-400">
+              Error: {result.error}
             </div>
-            <TextEditorContainer
-              value={result.success ? formattedOutput : ""}
-              readOnly
-              placeholder={
-                result.error ? "" : "Decoded JWT will appear here..."
-              }
-              height="h-[500px]"
-            />
-            {result.error && (
-              <div className="mt-2 text-sm text-red-600 dark:text-red-400">
-                Error: {result.error}
-              </div>
-            )}
-          </div>
+          )}
         </div>
+      </div>
 
-        {/* Info */}
-        <div className="mt-6 bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4">
-          <div className="text-sm text-zinc-600 dark:text-zinc-400 space-y-2">
-            <p>
-              <strong className="text-zinc-900 dark:text-zinc-50">
-                About JWT:
-              </strong>{" "}
-              JSON Web Tokens are an open, industry standard (RFC 7519) method
-              for representing claims securely between two parties. This tool
-              decodes and displays the contents without signature verification.
-            </p>
-            <p>
-              <strong className="text-zinc-900 dark:text-zinc-50">
-                Security Note:
-              </strong>{" "}
-              This decoder runs entirely in your browser. No tokens are sent to
-              any server. However, avoid pasting production tokens containing
-              sensitive data.
-            </p>
-          </div>
+      {/* Info */}
+      <div className="mt-6 bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4">
+        <div className="text-sm text-zinc-600 dark:text-zinc-400 space-y-2">
+          <p>
+            <strong className="text-zinc-900 dark:text-zinc-50">
+              About JWT:
+            </strong>{" "}
+            JSON Web Tokens are an open, industry standard (RFC 7519) method for
+            representing claims securely between two parties. This tool decodes
+            and displays the contents without signature verification.
+          </p>
+          <p>
+            <strong className="text-zinc-900 dark:text-zinc-50">
+              Security Note:
+            </strong>{" "}
+            This decoder runs entirely in your browser. No tokens are sent to
+            any server. However, avoid pasting production tokens containing
+            sensitive data.
+          </p>
         </div>
       </div>
       {ToastComponent}
-    </div>
+    </ToolFrame>
   );
 }

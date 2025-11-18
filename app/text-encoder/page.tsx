@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import bs58 from "bs58";
 import { useToast } from "@/app/components/Toast";
 import { TextEditorContainer } from "@/app/components/TextEditorContainer";
+import { ToolFrame } from "@/app/components/ToolFrame";
 
 type EncodingType =
   | "base64"
@@ -999,184 +999,164 @@ export default function TextEncoderPage() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 py-12 px-6">
-      <div className="max-w-6xl mx-auto">
-        <div className="mb-8">
-          <Link
-            href="/"
-            className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
-          >
-            ← back to textytools.dev
-          </Link>
-        </div>
-
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 mb-3">
-            Text Encoder
-          </h1>
-          <p className="text-lg text-zinc-600 dark:text-zinc-400">
-            Encode and decode text using various formats including Base64, URL,
-            Hex, and more.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:items-start">
-          <div className="lg:col-span-2 space-y-6 flex flex-col">
-            <div className="flex gap-2 mb-4">
-              <button
-                onClick={() => handleModeChange("encode")}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  mode === "encode"
-                    ? "bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900"
-                    : "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700"
-                }`}
-              >
-                Encode
-              </button>
-              <button
-                onClick={() => handleModeChange("decode")}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  mode === "decode"
-                    ? "bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900"
-                    : "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700"
-                }`}
-              >
-                Decode
-              </button>
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between mb-2 min-h-9">
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                  {mode === "encode" ? "Plain Text" : "Encoded Text"}
-                </label>
-                {text.trim() && (
-                  <button
-                    onClick={() => setText("")}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 active:bg-zinc-300 dark:active:bg-zinc-600 transition-colors"
-                  >
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                    Clear
-                  </button>
-                )}
-              </div>
-              <TextEditorContainer
-                value={text}
-                onChange={setText}
-                placeholder={
-                  mode === "encode"
-                    ? "Enter text to encode..."
-                    : "Enter encoded text to decode..."
-                }
-                height="h-48"
-                showLineNumbers={false}
-              />
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between mb-2 min-h-9">
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                  {mode === "encode" ? "Encoded Output" : "Decoded Output"}
-                </label>
-                {outputText && !outputText.startsWith("Error:") && (
-                  <button
-                    onClick={copyToClipboard}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 active:bg-zinc-300 dark:active:bg-zinc-600 transition-colors"
-                  >
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                      />
-                    </svg>
-                    Copy
-                  </button>
-                )}
-              </div>
-              <TextEditorContainer
-                value={outputText}
-                readOnly
-                placeholder={
-                  mode === "encode"
-                    ? "Encoded output will appear here..."
-                    : "Decoded output will appear here..."
-                }
-                height="h-48"
-                showLineNumbers={false}
-                className={
-                  outputText.startsWith("Error:")
-                    ? "text-red-600 dark:text-red-400"
-                    : ""
-                }
-              />
-            </div>
+    <ToolFrame
+      title="Text Encoder"
+      description="Encode and decode text using various formats including Base64, URL, Hex, and more."
+    >
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:items-start">
+        <div className="lg:col-span-2 space-y-6 flex flex-col">
+          <div className="flex gap-2 mb-4">
+            <button
+              onClick={() => handleModeChange("encode")}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                mode === "encode"
+                  ? "bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900"
+                  : "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700"
+              }`}
+            >
+              Encode
+            </button>
+            <button
+              onClick={() => handleModeChange("decode")}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                mode === "decode"
+                  ? "bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900"
+                  : "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700"
+              }`}
+            >
+              Decode
+            </button>
           </div>
 
-          <div className="flex flex-col h-full">
-            <div className="mb-2 min-h-9">
+          <div>
+            <div className="flex items-center justify-between mb-2 min-h-9">
               <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                Select Encoding Format
+                {mode === "encode" ? "Plain Text" : "Encoded Text"}
               </label>
-            </div>
-            <div className="space-y-2 flex-1 overflow-y-auto pr-2">
-              {encodingOptions.map((option) => {
-                const isHashFunction = [
-                  "md5",
-                  "sha1",
-                  "sha256",
-                  "sha512",
-                ].includes(option.id);
-                const isDisabled = mode === "decode" && isHashFunction;
-
-                return (
-                  <button
-                    key={option.id}
-                    onClick={() =>
-                      !isDisabled && setSelectedEncoding(option.id)
-                    }
-                    disabled={isDisabled}
-                    className={`w-full text-left p-4 rounded-lg border transition-colors ${
-                      isDisabled
-                        ? "opacity-50 cursor-not-allowed border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-900"
-                        : selectedEncoding === option.id
-                          ? "border-zinc-900 dark:border-zinc-50 bg-zinc-100 dark:bg-zinc-800"
-                          : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-zinc-300 dark:hover:border-zinc-700"
-                    }`}
+              {text.trim() && (
+                <button
+                  onClick={() => setText("")}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 active:bg-zinc-300 dark:active:bg-zinc-600 transition-colors"
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
                   >
-                    <div className="font-medium text-zinc-900 dark:text-zinc-50 mb-1">
-                      {option.label}
-                    </div>
-                    <div className="text-xs text-zinc-600 dark:text-zinc-400">
-                      {option.description}
-                      {isDisabled && " (encode only)"}
-                    </div>
-                  </button>
-                );
-              })}
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                  Clear
+                </button>
+              )}
             </div>
+            <TextEditorContainer
+              value={text}
+              onChange={setText}
+              placeholder={
+                mode === "encode"
+                  ? "Enter text to encode..."
+                  : "Enter encoded text to decode..."
+              }
+              height="h-48"
+              showLineNumbers={false}
+            />
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-2 min-h-9">
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                {mode === "encode" ? "Encoded Output" : "Decoded Output"}
+              </label>
+              {outputText && !outputText.startsWith("Error:") && (
+                <button
+                  onClick={copyToClipboard}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 active:bg-zinc-300 dark:active:bg-zinc-600 transition-colors"
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                    />
+                  </svg>
+                  Copy
+                </button>
+              )}
+            </div>
+            <TextEditorContainer
+              value={outputText}
+              readOnly
+              placeholder={
+                mode === "encode"
+                  ? "Encoded output will appear here..."
+                  : "Decoded output will appear here..."
+              }
+              height="h-48"
+              showLineNumbers={false}
+              className={
+                outputText.startsWith("Error:")
+                  ? "text-red-600 dark:text-red-400"
+                  : ""
+              }
+            />
+          </div>
+        </div>
+
+        <div className="flex flex-col h-full">
+          <div className="mb-2 min-h-9">
+            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              Select Encoding Format
+            </label>
+          </div>
+          <div className="space-y-2 flex-1 overflow-y-auto pr-2">
+            {encodingOptions.map((option) => {
+              const isHashFunction = [
+                "md5",
+                "sha1",
+                "sha256",
+                "sha512",
+              ].includes(option.id);
+              const isDisabled = mode === "decode" && isHashFunction;
+
+              return (
+                <button
+                  key={option.id}
+                  onClick={() => !isDisabled && setSelectedEncoding(option.id)}
+                  disabled={isDisabled}
+                  className={`w-full text-left p-4 rounded-lg border transition-colors ${
+                    isDisabled
+                      ? "opacity-50 cursor-not-allowed border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-900"
+                      : selectedEncoding === option.id
+                        ? "border-zinc-900 dark:border-zinc-50 bg-zinc-100 dark:bg-zinc-800"
+                        : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-zinc-300 dark:hover:border-zinc-700"
+                  }`}
+                >
+                  <div className="font-medium text-zinc-900 dark:text-zinc-50 mb-1">
+                    {option.label}
+                  </div>
+                  <div className="text-xs text-zinc-600 dark:text-zinc-400">
+                    {option.description}
+                    {isDisabled && " (encode only)"}
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
       {ToastComponent}
-    </div>
+    </ToolFrame>
   );
 }

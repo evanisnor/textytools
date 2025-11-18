@@ -7,6 +7,7 @@ import {
   TextEditorContainer,
   type TextEditorContainerRef,
 } from "@/app/components/TextEditorContainer";
+import { ToolFrame } from "@/app/components/ToolFrame";
 
 type ViewMode = "pretty" | "minified" | "escaped";
 
@@ -614,73 +615,157 @@ export default function JSONWizard() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 py-12 px-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <Link
-            href="/"
-            className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
-          >
-            ← back to textytools.dev
-          </Link>
+    <ToolFrame
+      title="JSON Wizard"
+      description="Format, validate, and search JSON with real-time feedback."
+      headerRight={
+        <div className="grid grid-cols-3 gap-3 lg:min-w-[400px]">
+          <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-3">
+            <div className="text-xs text-zinc-600 dark:text-zinc-400">
+              Total Keys
+            </div>
+            <div className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
+              {mounted && validation.isValid && input.trim()
+                ? stats.keys.toLocaleString()
+                : "—"}
+            </div>
+          </div>
+          <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-3">
+            <div className="text-xs text-zinc-600 dark:text-zinc-400">
+              Max Depth
+            </div>
+            <div className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
+              {mounted && validation.isValid && input.trim()
+                ? stats.depth
+                : "—"}
+            </div>
+          </div>
+          <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-3">
+            <div className="text-xs text-zinc-600 dark:text-zinc-400">Size</div>
+            <div className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
+              {mounted && validation.isValid && input.trim()
+                ? `${stats.size.toLocaleString()} bytes`
+                : "—"}
+            </div>
+          </div>
         </div>
-
-        <div className="mb-8 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+      }
+    >
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:items-start">
+        <div className="lg:col-span-3 space-y-6 flex flex-col">
+          {/* Input */}
           <div>
-            <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 mb-3">
-              JSON Wizard
-            </h1>
-            <p className="text-lg text-zinc-600 dark:text-zinc-400">
-              Format, validate, and search JSON with real-time feedback.
-            </p>
+            <div className="flex items-center justify-between mb-2 min-h-9">
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                Input JSON
+              </label>
+              {input.trim() && (
+                <button
+                  onClick={() => setInput("")}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 active:bg-zinc-300 dark:active:bg-zinc-600 transition-colors"
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                  Clear
+                </button>
+              )}
+            </div>
+            <div className="relative">
+              {input.trim() && (
+                <div className="absolute top-3 right-3 z-10">
+                  <div
+                    className={`flex items-center gap-2 px-2 py-1 rounded border text-xs font-medium ${
+                      validation.isValid
+                        ? "bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800 text-green-800 dark:text-green-200"
+                        : "bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200"
+                    }`}
+                  >
+                    {validation.isValid ? "✓ Valid JSON" : "✗ Invalid JSON"}
+                    {!validation.isValid &&
+                      validation.lineNumber &&
+                      validation.columnNumber && (
+                        <span className="text-red-700 dark:text-red-300">
+                          (Line {validation.lineNumber}, Col{" "}
+                          {validation.columnNumber})
+                        </span>
+                      )}
+                  </div>
+                </div>
+              )}
+              <TextEditorContainer
+                ref={inputEditorRef}
+                value={input}
+                onChange={setInput}
+                placeholder='Paste your JSON here, e.g., {"key": "value"}'
+                renderLineContent={
+                  searchTerm
+                    ? (line, index) => renderHighlightedText(line, index)
+                    : undefined
+                }
+                highlightLine={
+                  !validation.isValid && validation.lineNumber
+                    ? (lineNumber) => lineNumber === validation.lineNumber
+                    : undefined
+                }
+              />
+            </div>
           </div>
 
-          {/* Stats Bar */}
-          <div className="grid grid-cols-3 gap-3 lg:min-w-[400px]">
-            <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-3">
-              <div className="text-xs text-zinc-600 dark:text-zinc-400">
-                Total Keys
-              </div>
-              <div className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
-                {mounted && validation.isValid && input.trim()
-                  ? stats.keys.toLocaleString()
-                  : "—"}
-              </div>
-            </div>
-            <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-3">
-              <div className="text-xs text-zinc-600 dark:text-zinc-400">
-                Max Depth
-              </div>
-              <div className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
-                {mounted && validation.isValid && input.trim()
-                  ? stats.depth
-                  : "—"}
-              </div>
-            </div>
-            <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-3">
-              <div className="text-xs text-zinc-600 dark:text-zinc-400">
-                Size
-              </div>
-              <div className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
-                {mounted && validation.isValid && input.trim()
-                  ? `${stats.size.toLocaleString()} bytes`
-                  : "—"}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:items-start">
-          <div className="lg:col-span-3 space-y-6 flex flex-col">
-            {/* Input */}
-            <div>
-              <div className="flex items-center justify-between mb-2 min-h-9">
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                  Input JSON
-                </label>
-                {input.trim() && (
+          {/* Output */}
+          <div>
+            <div className="flex items-center justify-between mb-2 min-h-9">
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                Output
+              </label>
+              <div className="flex items-center gap-2">
+                {processedJSON &&
+                  validation.isValid &&
+                  viewMode !== "escaped" && (
+                    <Link
+                      href="/csv-json-converter"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        // Save current JSON input for restoration on back navigation
+                        localStorage.setItem("json-wizard-input", input);
+                        // Save processed JSON for CSV Converter
+                        localStorage.setItem(
+                          "csv-json-converter-input",
+                          processedJSON,
+                        );
+                        window.location.href = "/csv-json-converter";
+                      }}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-900 dark:text-blue-100 rounded hover:bg-blue-200 dark:hover:bg-blue-900/50 active:bg-blue-300 dark:active:bg-blue-900/70 transition-colors"
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 10l7-7m0 0l7 7m-7-7v18"
+                        />
+                      </svg>
+                      Convert to CSV
+                    </Link>
+                  )}
+                {processedJSON && validation.isValid && (
                   <button
-                    onClick={() => setInput("")}
+                    onClick={copyToClipboard}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 active:bg-zinc-300 dark:active:bg-zinc-600 transition-colors"
                   >
                     <svg
@@ -693,306 +778,201 @@ export default function JSONWizard() {
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
+                        d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
                       />
                     </svg>
-                    Clear
+                    Copy
                   </button>
                 )}
               </div>
-              <div className="relative">
-                {input.trim() && (
-                  <div className="absolute top-3 right-3 z-10">
-                    <div
-                      className={`flex items-center gap-2 px-2 py-1 rounded border text-xs font-medium ${
-                        validation.isValid
-                          ? "bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800 text-green-800 dark:text-green-200"
-                          : "bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200"
-                      }`}
-                    >
-                      {validation.isValid ? "✓ Valid JSON" : "✗ Invalid JSON"}
-                      {!validation.isValid &&
-                        validation.lineNumber &&
-                        validation.columnNumber && (
-                          <span className="text-red-700 dark:text-red-300">
-                            (Line {validation.lineNumber}, Col{" "}
-                            {validation.columnNumber})
-                          </span>
-                        )}
-                    </div>
-                  </div>
-                )}
-                <TextEditorContainer
-                  ref={inputEditorRef}
-                  value={input}
-                  onChange={setInput}
-                  placeholder='Paste your JSON here, e.g., {"key": "value"}'
-                  renderLineContent={
-                    searchTerm
-                      ? (line, index) => renderHighlightedText(line, index)
-                      : undefined
-                  }
-                  highlightLine={
-                    !validation.isValid && validation.lineNumber
-                      ? (lineNumber) => lineNumber === validation.lineNumber
-                      : undefined
-                  }
-                />
-              </div>
             </div>
-
-            {/* Output */}
-            <div>
-              <div className="flex items-center justify-between mb-2 min-h-9">
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                  Output
-                </label>
-                <div className="flex items-center gap-2">
-                  {processedJSON &&
-                    validation.isValid &&
-                    viewMode !== "escaped" && (
-                      <Link
-                        href="/csv-json-converter"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          // Save current JSON input for restoration on back navigation
-                          localStorage.setItem("json-wizard-input", input);
-                          // Save processed JSON for CSV Converter
-                          localStorage.setItem(
-                            "csv-json-converter-input",
-                            processedJSON,
-                          );
-                          window.location.href = "/csv-json-converter";
-                        }}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-900 dark:text-blue-100 rounded hover:bg-blue-200 dark:hover:bg-blue-900/50 active:bg-blue-300 dark:active:bg-blue-900/70 transition-colors"
-                      >
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M5 10l7-7m0 0l7 7m-7-7v18"
-                          />
-                        </svg>
-                        Convert to CSV
-                      </Link>
-                    )}
-                  {processedJSON && validation.isValid && (
-                    <button
-                      onClick={copyToClipboard}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 active:bg-zinc-300 dark:active:bg-zinc-600 transition-colors"
-                    >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                        />
-                      </svg>
-                      Copy
-                    </button>
-                  )}
+            {processedJSON ? (
+              <TextEditorContainer
+                ref={outputEditorRef}
+                value={processedJSON}
+                readOnly
+                renderLineContent={
+                  searchTerm
+                    ? (line, index) => {
+                        const outputMatchIndex =
+                          inputToOutputMatchMap.get(currentMatchIndex) ?? -1;
+                        return renderHighlightedText(
+                          line,
+                          index,
+                          true,
+                          outputMatchIndex,
+                        );
+                      }
+                    : undefined
+                }
+              />
+            ) : (
+              <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4 h-64">
+                <div className="text-zinc-400 dark:text-zinc-600 font-mono text-sm">
+                  Formatted JSON will appear here...
                 </div>
               </div>
-              {processedJSON ? (
-                <TextEditorContainer
-                  ref={outputEditorRef}
-                  value={processedJSON}
-                  readOnly
-                  renderLineContent={
-                    searchTerm
-                      ? (line, index) => {
-                          const outputMatchIndex =
-                            inputToOutputMatchMap.get(currentMatchIndex) ?? -1;
-                          return renderHighlightedText(
-                            line,
-                            index,
-                            true,
-                            outputMatchIndex,
-                          );
-                        }
-                      : undefined
-                  }
-                />
-              ) : (
-                <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4 h-64">
-                  <div className="text-zinc-400 dark:text-zinc-600 font-mono text-sm">
-                    Formatted JSON will appear here...
-                  </div>
-                </div>
-              )}
-            </div>
+            )}
           </div>
+        </div>
 
-          {/* Controls Panel */}
-          <div className="flex flex-col h-full">
-            {/* Search */}
-            <div>
-              <div className="mb-2 min-h-9">
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                  Search
-                </label>
-              </div>
-              <div className="space-y-2">
-                <input
-                  type="text"
-                  value={searchTerm}
-                  onChange={(e) => {
-                    setSearchTerm(e.target.value);
-                    setCurrentMatchIndex(0);
-                  }}
-                  placeholder="Search in JSON..."
-                  disabled={!validation.isValid}
-                  className="w-full p-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-50"
-                />
-
-                <div className="flex items-center justify-between gap-2">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={caseSensitive}
-                      onChange={(e) => {
-                        setCaseSensitive(e.target.checked);
-                        setCurrentMatchIndex(0);
-                      }}
-                      disabled={!validation.isValid}
-                      className="h-4 w-4 rounded border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-50 focus:ring-zinc-900 dark:focus:ring-zinc-50"
-                    />
-                    <span className="text-sm text-zinc-600 dark:text-zinc-400">
-                      Case Sensitive
-                    </span>
-                  </label>
-
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={goToPreviousMatch}
-                      disabled={!searchTerm || totalMatches === 0}
-                      className="p-2 rounded border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                      title="Previous match"
-                    >
-                      ←
-                    </button>
-                    <span className="text-xs text-zinc-600 dark:text-zinc-400 min-w-[60px] text-center">
-                      {searchTerm && totalMatches > 0
-                        ? `${currentMatchIndex + 1} / ${totalMatches}`
-                        : "0 / 0"}
-                    </span>
-                    <button
-                      onClick={goToNextMatch}
-                      disabled={!searchTerm || totalMatches === 0}
-                      className="p-2 rounded border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                      title="Next match"
-                    >
-                      →
-                    </button>
-                  </div>
-                </div>
-              </div>
+        {/* Controls Panel */}
+        <div className="flex flex-col h-full">
+          {/* Search */}
+          <div>
+            <div className="mb-2 min-h-9">
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                Search
+              </label>
             </div>
+            <div className="space-y-2">
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setCurrentMatchIndex(0);
+                }}
+                placeholder="Search in JSON..."
+                disabled={!validation.isValid}
+                className="w-full p-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-50"
+              />
 
-            <div className="mt-4">
-              <div className="mb-2 min-h-9">
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                  Modify
-                </label>
-              </div>
-              <div className="space-y-2">
-                <button
-                  onClick={() => setViewMode("pretty")}
-                  disabled={!validation.isValid}
-                  className={`w-full text-left p-3 rounded-lg border transition-colors ${
-                    viewMode === "pretty"
-                      ? "border-zinc-900 dark:border-zinc-50 bg-zinc-100 dark:bg-zinc-800"
-                      : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-zinc-300 dark:hover:border-zinc-700"
-                  } ${!validation.isValid ? "opacity-50 cursor-not-allowed" : ""}`}
-                >
-                  <div className="font-medium text-sm text-zinc-900 dark:text-zinc-50">
-                    Pretty Print
-                  </div>
-                </button>
-                <button
-                  onClick={() => setViewMode("minified")}
-                  disabled={!validation.isValid}
-                  className={`w-full text-left p-3 rounded-lg border transition-colors ${
-                    viewMode === "minified"
-                      ? "border-zinc-900 dark:border-zinc-50 bg-zinc-100 dark:bg-zinc-800"
-                      : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-zinc-300 dark:hover:border-zinc-700"
-                  } ${!validation.isValid ? "opacity-50 cursor-not-allowed" : ""}`}
-                >
-                  <div className="font-medium text-sm text-zinc-900 dark:text-zinc-50">
-                    Minified
-                  </div>
-                </button>
-                <button
-                  onClick={() => setViewMode("escaped")}
-                  disabled={!validation.isValid || !input.trim()}
-                  className={`w-full text-left p-3 rounded-lg border transition-colors ${
-                    viewMode === "escaped"
-                      ? "border-zinc-900 dark:border-zinc-50 bg-zinc-100 dark:bg-zinc-800"
-                      : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-zinc-300 dark:hover:border-zinc-700"
-                  } ${!validation.isValid || !input.trim() ? "opacity-50 cursor-not-allowed" : ""}`}
-                >
-                  <div className="font-medium text-sm text-zinc-900 dark:text-zinc-50">
-                    Escaped
-                  </div>
-                </button>
-              </div>
-            </div>
-
-            {/* Options */}
-            <div className="mt-4">
-              <div className="mb-2 min-h-9">
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                  Options
-                </label>
-              </div>
-              <div className="space-y-3">
-                <label className="flex items-center gap-2 p-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 cursor-pointer">
+              <div className="flex items-center justify-between gap-2">
+                <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
-                    checked={sortKeys}
-                    onChange={(e) => setSortKeys(e.target.checked)}
+                    checked={caseSensitive}
+                    onChange={(e) => {
+                      setCaseSensitive(e.target.checked);
+                      setCurrentMatchIndex(0);
+                    }}
                     disabled={!validation.isValid}
                     className="h-4 w-4 rounded border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-50 focus:ring-zinc-900 dark:focus:ring-zinc-50"
                   />
-                  <span className="text-sm text-zinc-900 dark:text-zinc-50">
-                    Sort Keys
+                  <span className="text-sm text-zinc-600 dark:text-zinc-400">
+                    Case Sensitive
                   </span>
                 </label>
 
-                {/* Indent Size */}
-                <div className="p-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
-                  <label className="block text-sm text-zinc-900 dark:text-zinc-50 mb-2">
-                    Indent Size: {indentSize}
-                  </label>
-                  <input
-                    type="range"
-                    min="2"
-                    max="8"
-                    step="2"
-                    value={indentSize}
-                    onChange={(e) => setIndentSize(Number(e.target.value))}
-                    disabled={viewMode !== "pretty" || !validation.isValid}
-                    className="w-full"
-                  />
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={goToPreviousMatch}
+                    disabled={!searchTerm || totalMatches === 0}
+                    className="p-2 rounded border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                    title="Previous match"
+                  >
+                    ←
+                  </button>
+                  <span className="text-xs text-zinc-600 dark:text-zinc-400 min-w-[60px] text-center">
+                    {searchTerm && totalMatches > 0
+                      ? `${currentMatchIndex + 1} / ${totalMatches}`
+                      : "0 / 0"}
+                  </span>
+                  <button
+                    onClick={goToNextMatch}
+                    disabled={!searchTerm || totalMatches === 0}
+                    className="p-2 rounded border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                    title="Next match"
+                  >
+                    →
+                  </button>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4">
+            <div className="mb-2 min-h-9">
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                Modify
+              </label>
+            </div>
+            <div className="space-y-2">
+              <button
+                onClick={() => setViewMode("pretty")}
+                disabled={!validation.isValid}
+                className={`w-full text-left p-3 rounded-lg border transition-colors ${
+                  viewMode === "pretty"
+                    ? "border-zinc-900 dark:border-zinc-50 bg-zinc-100 dark:bg-zinc-800"
+                    : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-zinc-300 dark:hover:border-zinc-700"
+                } ${!validation.isValid ? "opacity-50 cursor-not-allowed" : ""}`}
+              >
+                <div className="font-medium text-sm text-zinc-900 dark:text-zinc-50">
+                  Pretty Print
+                </div>
+              </button>
+              <button
+                onClick={() => setViewMode("minified")}
+                disabled={!validation.isValid}
+                className={`w-full text-left p-3 rounded-lg border transition-colors ${
+                  viewMode === "minified"
+                    ? "border-zinc-900 dark:border-zinc-50 bg-zinc-100 dark:bg-zinc-800"
+                    : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-zinc-300 dark:hover:border-zinc-700"
+                } ${!validation.isValid ? "opacity-50 cursor-not-allowed" : ""}`}
+              >
+                <div className="font-medium text-sm text-zinc-900 dark:text-zinc-50">
+                  Minified
+                </div>
+              </button>
+              <button
+                onClick={() => setViewMode("escaped")}
+                disabled={!validation.isValid || !input.trim()}
+                className={`w-full text-left p-3 rounded-lg border transition-colors ${
+                  viewMode === "escaped"
+                    ? "border-zinc-900 dark:border-zinc-50 bg-zinc-100 dark:bg-zinc-800"
+                    : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-zinc-300 dark:hover:border-zinc-700"
+                } ${!validation.isValid || !input.trim() ? "opacity-50 cursor-not-allowed" : ""}`}
+              >
+                <div className="font-medium text-sm text-zinc-900 dark:text-zinc-50">
+                  Escaped
+                </div>
+              </button>
+            </div>
+          </div>
+
+          {/* Options */}
+          <div className="mt-4">
+            <div className="mb-2 min-h-9">
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                Options
+              </label>
+            </div>
+            <div className="space-y-3">
+              <label className="flex items-center gap-2 p-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={sortKeys}
+                  onChange={(e) => setSortKeys(e.target.checked)}
+                  disabled={!validation.isValid}
+                  className="h-4 w-4 rounded border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-50 focus:ring-zinc-900 dark:focus:ring-zinc-50"
+                />
+                <span className="text-sm text-zinc-900 dark:text-zinc-50">
+                  Sort Keys
+                </span>
+              </label>
+
+              {/* Indent Size */}
+              <div className="p-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+                <label className="block text-sm text-zinc-900 dark:text-zinc-50 mb-2">
+                  Indent Size: {indentSize}
+                </label>
+                <input
+                  type="range"
+                  min="2"
+                  max="8"
+                  step="2"
+                  value={indentSize}
+                  onChange={(e) => setIndentSize(Number(e.target.value))}
+                  disabled={viewMode !== "pretty" || !validation.isValid}
+                  className="w-full"
+                />
               </div>
             </div>
           </div>
         </div>
       </div>
       {ToastComponent}
-    </div>
+    </ToolFrame>
   );
 }
