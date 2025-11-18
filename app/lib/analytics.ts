@@ -69,3 +69,28 @@ export function trackToolConversion(params: ToolConversionParams) {
     });
   }
 }
+
+/**
+ * Track clear button click event
+ * This helps understand user engagement and when users reset their work
+ * @param params - Event parameters including tool name and any custom parameters
+ * @example
+ * trackClearEvent({ tool: "json-wizard", viewMode: "pretty" })
+ * trackClearEvent({ tool: "text-encoder", mode: "encode" })
+ */
+export function trackClearEvent(params: BaseEventParams) {
+  // Skip tracking in development mode
+  if (isDevelopment) {
+    console.log("[Analytics - Dev Mode - Clear]", params);
+    return;
+  }
+
+  if (typeof window !== "undefined" && window.dataLayer) {
+    const { tool, ...customParams } = params;
+    window.dataLayer.push({
+      event: "clear_button_click",
+      tool_name: tool,
+      ...customParams,
+    });
+  }
+}

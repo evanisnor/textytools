@@ -5,7 +5,11 @@ import Link from "next/link";
 import { useToast } from "@/app/components/Toast";
 import { TextEditorContainer } from "@/app/components/TextEditorContainer";
 import { ToolFrame } from "@/app/components/ToolFrame";
-import { trackCopyEvent, trackToolConversion } from "@/app/lib/analytics";
+import {
+  trackCopyEvent,
+  trackToolConversion,
+  trackClearEvent,
+} from "@/app/lib/analytics";
 
 interface JsonObject {
   [key: string]: unknown;
@@ -138,7 +142,18 @@ export default function CsvJsonConverter() {
               </label>
               {input.trim() && (
                 <button
-                  onClick={() => setInput("")}
+                  onClick={() => {
+                    trackClearEvent({
+                      tool: "csv-json-converter",
+                      direction:
+                        result.detectedFormat === "json"
+                          ? "json-to-csv"
+                          : "csv-to-json",
+                      delimiter,
+                      includeHeaders,
+                    });
+                    setInput("");
+                  }}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 active:bg-zinc-300 dark:active:bg-zinc-600 transition-colors"
                 >
                   <svg
