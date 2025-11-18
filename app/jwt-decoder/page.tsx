@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useToast } from "@/app/components/Toast";
 import { TextEditorContainer } from "@/app/components/TextEditorContainer";
 import { ToolFrame } from "@/app/components/ToolFrame";
-import { trackCopyEvent } from "@/app/lib/analytics";
+import { trackCopyEvent, trackToolConversion } from "@/app/lib/analytics";
 
 interface JWTPayload {
   [key: string]: unknown;
@@ -337,6 +337,11 @@ export default function JWTDecoder() {
                   href="/json-wizard"
                   onClick={(e) => {
                     e.preventDefault();
+                    // Track cross-tool conversion
+                    trackToolConversion({
+                      sourceTool: "jwt-decoder",
+                      destinationTool: "json-wizard",
+                    });
                     // Save current JWT input for restoration on back navigation
                     localStorage.setItem("jwt-decoder-input", input);
                     // Save formatted output for JSON Wizard

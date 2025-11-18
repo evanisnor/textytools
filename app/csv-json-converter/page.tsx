@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useToast } from "@/app/components/Toast";
 import { TextEditorContainer } from "@/app/components/TextEditorContainer";
 import { ToolFrame } from "@/app/components/ToolFrame";
-import { trackCopyEvent } from "@/app/lib/analytics";
+import { trackCopyEvent, trackToolConversion } from "@/app/lib/analytics";
 
 interface JsonObject {
   [key: string]: unknown;
@@ -199,6 +199,17 @@ export default function CsvJsonConverter() {
                       href="/json-wizard"
                       onClick={(e) => {
                         e.preventDefault();
+                        // Track cross-tool conversion
+                        trackToolConversion({
+                          sourceTool: "csv-json-converter",
+                          destinationTool: "json-wizard",
+                          direction:
+                            result.detectedFormat === "json"
+                              ? "json-to-csv"
+                              : "csv-to-json",
+                          delimiter,
+                          includeHeaders,
+                        });
                         // Save current CSV input for restoration on back navigation
                         localStorage.setItem("csv-json-converter-input", input);
                         // Save converted JSON for JSON Wizard

@@ -8,7 +8,7 @@ import {
   type TextEditorContainerRef,
 } from "@/app/components/TextEditorContainer";
 import { ToolFrame } from "@/app/components/ToolFrame";
-import { trackCopyEvent } from "@/app/lib/analytics";
+import { trackCopyEvent, trackToolConversion } from "@/app/lib/analytics";
 
 type ViewMode = "pretty" | "minified" | "escaped";
 
@@ -743,6 +743,13 @@ export default function JSONWizard() {
                       href="/csv-json-converter"
                       onClick={(e) => {
                         e.preventDefault();
+                        // Track cross-tool conversion
+                        trackToolConversion({
+                          sourceTool: "json-wizard",
+                          destinationTool: "csv-json-converter",
+                          viewMode,
+                          sortKeys,
+                        });
                         // Save current JSON input for restoration on back navigation
                         localStorage.setItem("json-wizard-input", input);
                         // Save processed JSON for CSV Converter
