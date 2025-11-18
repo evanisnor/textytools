@@ -1003,8 +1003,8 @@ export default function TextEncoderPage() {
       title="Text Encoder"
       description="Encode and decode text using various formats including Base64, URL, Hex, and more."
     >
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:items-start">
-        <div className="lg:col-span-2 space-y-6 flex flex-col">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:items-start">
+        <div className="lg:col-span-3 space-y-6 flex flex-col">
           <div className="flex gap-2 mb-4">
             <button
               onClick={() => handleModeChange("encode")}

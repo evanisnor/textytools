@@ -188,8 +188,8 @@ export default function CaseConverter() {
       title="Case Converter"
       description="Transform text between different case formats instantly."
     >
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:items-start">
-        <div className="lg:col-span-2 space-y-6 flex flex-col">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:items-start">
+        <div className="lg:col-span-3 space-y-6 flex flex-col">
           <div>
             <div className="flex items-center justify-between mb-2 min-h-9">
               <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">

@@ -126,9 +126,9 @@ export default function CsvJsonConverter() {
       title="CSV / JSON Converter"
       description="Convert between JSON and CSV formats with automatic format detection"
     >
-      {/* Main Grid: 2 columns for input/output, 1 column for options */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:items-start">
-        <div className="lg:col-span-2 space-y-6 flex flex-col">
+      {/* Main Grid: 3 columns for input/output, 1 column for options */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:items-start">
+        <div className="lg:col-span-3 space-y-6 flex flex-col">
           {/* Input */}
           <div>
             <div className="mb-2 flex items-center justify-between min-h-9">
