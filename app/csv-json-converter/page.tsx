@@ -126,144 +126,18 @@ export default function CsvJsonConverter() {
       title="CSV / JSON Converter"
       description="Convert between JSON and CSV formats with automatic format detection"
     >
-      {/* Options */}
-      <div className="mb-6 bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4">
-        <div className="flex flex-wrap items-center gap-6">
-          <div className="flex items-center gap-3">
-            <label className="text-sm text-zinc-600 dark:text-zinc-400">
-              Delimiter:
-            </label>
-            <select
-              value={delimiter === "\t" ? "tab" : delimiter}
-              onChange={(e) => {
-                const value = e.target.value;
-                setDelimiter(value === "tab" ? "\t" : value);
-              }}
-              className="px-3 py-1 rounded border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 text-sm focus:outline-none focus:border-zinc-300 dark:focus:border-zinc-700"
-            >
-              <option value=",">Comma (,)</option>
-              <option value=";">Semicolon (;)</option>
-              <option value="tab">Tab (\t)</option>
-              <option value="|">Pipe (|)</option>
-            </select>
-          </div>
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="includeHeaders"
-              checked={includeHeaders}
-              onChange={(e) => setIncludeHeaders(e.target.checked)}
-              className="w-4 h-4 rounded border-zinc-300 dark:border-zinc-700"
-            />
-            <label
-              htmlFor="includeHeaders"
-              className="text-sm text-zinc-600 dark:text-zinc-400"
-            >
-              Include headers
-            </label>
-          </div>
-        </div>
-      </div>
-
-      {/* Input/Output Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Input */}
-        <div>
-          <div className="mb-2 flex items-center justify-between min-h-9">
-            <label className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
-              Input
-            </label>
-            <button
-              onClick={() => setInput("")}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 active:bg-zinc-300 dark:active:bg-zinc-600 transition-colors"
-            >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-              Clear
-            </button>
-          </div>
-          <div className="relative bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-1">
-            {input.trim() && (
-              <div className="absolute top-3 right-3 z-10">
-                <div className="px-2 py-1 rounded bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700">
-                  <span className="text-xs font-medium text-zinc-900 dark:text-zinc-50">
-                    {result.detectedFormat === "json"
-                      ? "JSON → CSV"
-                      : "CSV → JSON"}
-                  </span>
-                </div>
-              </div>
-            )}
-            <TextEditorContainer
-              value={input}
-              onChange={setInput}
-              placeholder='Paste JSON or CSV here...\n\nJSON example:\n[\n  {"name": "Alice", "age": 30},\n  {"name": "Bob", "age": 25}\n]\n\nCSV example:\nname,age\nAlice,30\nBob,25'
-              height="h-[500px]"
-              containerClassName="p-0 border-0"
-              renderLineContent={
-                result.detectedFormat === "csv" && input.trim()
-                  ? (line) => renderCSVLine(line, delimiter)
-                  : undefined
-              }
-            />
-          </div>
-        </div>
-
-        {/* Output */}
-        <div>
-          <div className="mb-2 flex items-center justify-between min-h-9">
-            <label className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
-              Output
-            </label>
-            <div className="flex items-center gap-2">
-              {result.success &&
-                result.output &&
-                result.detectedFormat === "csv" && (
-                  <Link
-                    href="/json-wizard"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      // Save current CSV input for restoration on back navigation
-                      localStorage.setItem("csv-json-converter-input", input);
-                      // Save converted JSON for JSON Wizard
-                      localStorage.setItem("json-wizard-input", result.output);
-                      window.location.href = "/json-wizard";
-                    }}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-900 dark:text-blue-100 rounded hover:bg-blue-200 dark:hover:bg-blue-900/50 active:bg-blue-300 dark:active:bg-blue-900/70 transition-colors"
-                  >
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 10l7-7m0 0l7 7m-7-7v18"
-                      />
-                    </svg>
-                    Format with JSON Wizard
-                  </Link>
-                )}
-              {result.success && result.output && (
+      {/* Main Grid: 2 columns for input/output, 1 column for options */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:items-start">
+        <div className="lg:col-span-2 space-y-6 flex flex-col">
+          {/* Input */}
+          <div>
+            <div className="mb-2 flex items-center justify-between min-h-9">
+              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                Input
+              </label>
+              {input.trim() && (
                 <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(result.output);
-                    showToast("Copied to clipboard");
-                  }}
+                  onClick={() => setInput("")}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 active:bg-zinc-300 dark:active:bg-zinc-600 transition-colors"
                 >
                   <svg
@@ -276,37 +150,177 @@ export default function CsvJsonConverter() {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                      d="M6 18L18 6M6 6l12 12"
                     />
                   </svg>
-                  Copy
+                  Clear
                 </button>
               )}
             </div>
-          </div>
-          <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-1">
-            <TextEditorContainer
-              value={result.success ? result.output : ""}
-              readOnly
-              placeholder={
-                result.error ? "" : "Converted output will appear here..."
-              }
-              height="h-[500px]"
-              containerClassName="p-0 border-0"
-              renderLineContent={
-                result.detectedFormat === "json" &&
-                result.success &&
-                result.output
-                  ? (line) => renderCSVLine(line, delimiter)
-                  : undefined
-              }
-            />
-          </div>
-          {result.error && (
-            <div className="mt-2 text-sm text-red-600 dark:text-red-400">
-              Error: {result.error}
+            <div className="relative bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-1">
+              {input.trim() && (
+                <div className="absolute top-3 right-3 z-10">
+                  <div className="px-2 py-1 rounded bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700">
+                    <span className="text-xs font-medium text-zinc-900 dark:text-zinc-50">
+                      {result.detectedFormat === "json"
+                        ? "JSON → CSV"
+                        : "CSV → JSON"}
+                    </span>
+                  </div>
+                </div>
+              )}
+              <TextEditorContainer
+                value={input}
+                onChange={setInput}
+                placeholder='Paste JSON or CSV here...\n\nJSON example:\n[\n  {"name": "Alice", "age": 30},\n  {"name": "Bob", "age": 25}\n]\n\nCSV example:\nname,age\nAlice,30\nBob,25'
+                height="h-64"
+                containerClassName="p-0 border-0"
+                renderLineContent={
+                  result.detectedFormat === "csv" && input.trim()
+                    ? (line) => renderCSVLine(line, delimiter)
+                    : undefined
+                }
+              />
             </div>
-          )}
+          </div>
+
+          {/* Output */}
+          <div>
+            <div className="mb-2 flex items-center justify-between min-h-9">
+              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                Output
+              </label>
+              <div className="flex items-center gap-2">
+                {result.success &&
+                  result.output &&
+                  result.detectedFormat === "csv" && (
+                    <Link
+                      href="/json-wizard"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        // Save current CSV input for restoration on back navigation
+                        localStorage.setItem("csv-json-converter-input", input);
+                        // Save converted JSON for JSON Wizard
+                        localStorage.setItem(
+                          "json-wizard-input",
+                          result.output,
+                        );
+                        window.location.href = "/json-wizard";
+                      }}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-900 dark:text-blue-100 rounded hover:bg-blue-200 dark:hover:bg-blue-900/50 active:bg-blue-300 dark:active:bg-blue-900/70 transition-colors"
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 10l7-7m0 0l7 7m-7-7v18"
+                        />
+                      </svg>
+                      Format with JSON Wizard
+                    </Link>
+                  )}
+                {result.success && result.output && (
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(result.output);
+                      showToast("Copied to clipboard");
+                    }}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 active:bg-zinc-300 dark:active:bg-zinc-600 transition-colors"
+                  >
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                      />
+                    </svg>
+                    Copy
+                  </button>
+                )}
+              </div>
+            </div>
+            <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-1">
+              <TextEditorContainer
+                value={result.success ? result.output : ""}
+                readOnly
+                placeholder={
+                  result.error ? "" : "Converted output will appear here..."
+                }
+                height="h-64"
+                containerClassName="p-0 border-0"
+                renderLineContent={
+                  result.detectedFormat === "json" &&
+                  result.success &&
+                  result.output
+                    ? (line) => renderCSVLine(line, delimiter)
+                    : undefined
+                }
+              />
+            </div>
+            {result.error && (
+              <div className="mt-2 text-sm text-red-600 dark:text-red-400">
+                Error: {result.error}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Options Panel */}
+        <div className="flex flex-col h-full">
+          <div className="mb-2 min-h-9">
+            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              Options
+            </label>
+          </div>
+          <div className="space-y-4">
+            <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4">
+              <label className="block text-sm text-zinc-600 dark:text-zinc-400 mb-2">
+                Delimiter
+              </label>
+              <select
+                value={delimiter === "\t" ? "tab" : delimiter}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setDelimiter(value === "tab" ? "\t" : value);
+                }}
+                className="w-full px-3 py-2 rounded border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 text-sm focus:outline-none focus:border-zinc-300 dark:focus:border-zinc-700"
+              >
+                <option value=",">Comma (,)</option>
+                <option value=";">Semicolon (;)</option>
+                <option value="tab">Tab (\t)</option>
+                <option value="|">Pipe (|)</option>
+              </select>
+            </div>
+            <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="includeHeaders"
+                  checked={includeHeaders}
+                  onChange={(e) => setIncludeHeaders(e.target.checked)}
+                  className="w-4 h-4 rounded border-zinc-300 dark:border-zinc-700"
+                />
+                <label
+                  htmlFor="includeHeaders"
+                  className="text-sm text-zinc-600 dark:text-zinc-400"
+                >
+                  Include headers
+                </label>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
