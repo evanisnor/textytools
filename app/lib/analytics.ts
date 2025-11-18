@@ -8,6 +8,11 @@ interface BaseEventParams {
 }
 
 /**
+ * Check if we're in development mode
+ */
+const isDevelopment = process.env.NODE_ENV === "development";
+
+/**
  * Track a copy button click event
  * @param params - Event parameters including tool name and any custom parameters
  * @example
@@ -16,6 +21,12 @@ interface BaseEventParams {
  * trackCopyEvent({ tool: "json-wizard", format: "pretty" })
  */
 export function trackCopyEvent(params: BaseEventParams) {
+  // Skip tracking in development mode
+  if (isDevelopment) {
+    console.log("[Analytics - Dev Mode]", params);
+    return;
+  }
+
   if (typeof window !== "undefined" && window.dataLayer) {
     const { tool, ...customParams } = params;
     window.dataLayer.push({
