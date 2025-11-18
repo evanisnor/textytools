@@ -833,6 +833,12 @@ export default function JSONWizard() {
                   setSearchTerm(e.target.value);
                   setCurrentMatchIndex(0);
                 }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    goToNextMatch();
+                  }
+                }}
                 placeholder="Search in JSON..."
                 disabled={!validation.isValid}
                 className="w-full p-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-50"
