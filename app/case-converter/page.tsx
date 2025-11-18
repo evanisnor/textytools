@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useToast } from "@/app/components/Toast";
 import { TextEditorContainer } from "@/app/components/TextEditorContainer";
 import { ToolFrame } from "@/app/components/ToolFrame";
+import { trackCopyEvent } from "@/app/lib/analytics";
 
 type CaseType =
   | "upper"
@@ -178,6 +179,7 @@ export default function CaseConverter() {
     try {
       await navigator.clipboard.writeText(convertedText);
       showToast("Copied to clipboard");
+      trackCopyEvent({ tool: "case-converter", caseType: selectedCase });
     } catch (err) {
       console.error("Failed to copy:", err);
     }

@@ -8,6 +8,7 @@ import {
   type TextEditorContainerRef,
 } from "@/app/components/TextEditorContainer";
 import { ToolFrame } from "@/app/components/ToolFrame";
+import { trackCopyEvent } from "@/app/lib/analytics";
 
 type ViewMode = "pretty" | "minified" | "escaped";
 
@@ -510,6 +511,12 @@ export default function JSONWizard() {
     try {
       await navigator.clipboard.writeText(processedJSON);
       showToast("Copied to clipboard");
+      trackCopyEvent({
+        tool: "json-wizard",
+        viewMode,
+        sortKeys,
+        indentSize: viewMode === "pretty" ? indentSize : undefined,
+      });
     } catch (err) {
       console.error("Failed to copy:", err);
     }

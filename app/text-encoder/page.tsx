@@ -5,6 +5,7 @@ import bs58 from "bs58";
 import { useToast } from "@/app/components/Toast";
 import { TextEditorContainer } from "@/app/components/TextEditorContainer";
 import { ToolFrame } from "@/app/components/ToolFrame";
+import { trackCopyEvent } from "@/app/lib/analytics";
 
 type EncodingType =
   | "base64"
@@ -993,6 +994,11 @@ export default function TextEncoderPage() {
     try {
       await navigator.clipboard.writeText(outputText);
       showToast("Copied to clipboard");
+      trackCopyEvent({
+        tool: "text-encoder",
+        mode: mode,
+        encoding: selectedEncoding,
+      });
     } catch (err) {
       console.error("Failed to copy:", err);
     }

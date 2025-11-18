@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useToast } from "@/app/components/Toast";
 import { TextEditorContainer } from "@/app/components/TextEditorContainer";
 import { ToolFrame } from "@/app/components/ToolFrame";
+import { trackCopyEvent } from "@/app/lib/analytics";
 
 interface SanitizationOption {
   id: string;
@@ -189,6 +190,14 @@ export default function TextSanitizer() {
     try {
       await navigator.clipboard.writeText(sanitizedText);
       showToast("Copied to clipboard");
+      const enabledOptions = options
+        .filter((opt) => opt.enabled)
+        .map((opt) => opt.id);
+      trackCopyEvent({
+        tool: "text-sanitizer",
+        options: enabledOptions,
+        optionsCount: enabledOptions.length,
+      });
     } catch (err) {
       console.error("Failed to copy:", err);
     }
