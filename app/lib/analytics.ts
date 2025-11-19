@@ -94,3 +94,31 @@ export function trackClearEvent(params: BaseEventParams) {
     });
   }
 }
+
+/**
+ * Track toggle all button click event
+ * This helps understand when users enable or disable all options in bulk
+ * @param params - Event parameters including tool name, action (enable/disable), and any custom parameters
+ * @example
+ * trackToggleAllEvent({ tool: "text-sanitizer", action: "enable" })
+ * trackToggleAllEvent({ tool: "text-sanitizer", action: "disable" })
+ */
+export function trackToggleAllEvent(
+  params: BaseEventParams & { action: "enable" | "disable" },
+) {
+  // Skip tracking in development mode
+  if (isDevelopment) {
+    console.log("[Analytics - Dev Mode - Toggle All]", params);
+    return;
+  }
+
+  if (typeof window !== "undefined" && window.dataLayer) {
+    const { tool, action, ...customParams } = params;
+    window.dataLayer.push({
+      event: "toggle_all_click",
+      tool_name: tool,
+      action,
+      ...customParams,
+    });
+  }
+}

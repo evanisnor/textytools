@@ -4,7 +4,11 @@ import { useState } from "react";
 import { useToast } from "@/app/components/Toast";
 import { TextEditorContainer } from "@/app/components/TextEditorContainer";
 import { ToolFrame } from "@/app/components/ToolFrame";
-import { trackCopyEvent, trackClearEvent } from "@/app/lib/analytics";
+import {
+  trackCopyEvent,
+  trackClearEvent,
+  trackToggleAllEvent,
+} from "@/app/lib/analytics";
 
 interface SanitizationOption {
   id: string;
@@ -180,10 +184,12 @@ export default function TextSanitizer() {
 
   const enableAll = () => {
     setOptions((prev) => prev.map((opt) => ({ ...opt, enabled: true })));
+    trackToggleAllEvent({ tool: "text-sanitizer", action: "enable" });
   };
 
   const disableAll = () => {
     setOptions((prev) => prev.map((opt) => ({ ...opt, enabled: false })));
+    trackToggleAllEvent({ tool: "text-sanitizer", action: "disable" });
   };
 
   const copyToClipboard = async () => {
