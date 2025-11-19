@@ -10,6 +10,7 @@
     "format": "prettier --write ."
   },
   "dependencies": {
+    "@sentry/nextjs": "^10.25.0",
     "base-x": "^5.0.1",
     "bs58": "^6.0.0",
     "js-tiktoken": "^1.0.21",
