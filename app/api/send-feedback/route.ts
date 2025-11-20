@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import formData from "form-data";
 import Mailgun from "mailgun.js";
 
 export const runtime = "nodejs";
@@ -35,10 +34,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Initialize Mailgun client
-    const mailgun = new Mailgun(formData);
+    const mailgun = new Mailgun(FormData);
     const mg = mailgun.client({
       username: "api",
       key: mailgunApiKey,
+      useFetch: true,
     });
 
     // Get the authorized recipient email for sandbox/free accounts
