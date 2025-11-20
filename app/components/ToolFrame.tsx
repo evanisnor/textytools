@@ -1,5 +1,9 @@
+"use client";
+
 import Link from "next/link";
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
+import { FeedbackModal } from "./FeedbackModal";
+import { trackFeedbackOpen } from "../lib/analytics";
 
 interface ToolFrameProps {
   title: string;
@@ -8,6 +12,8 @@ interface ToolFrameProps {
   maxWidth?: "3xl" | "4xl" | "5xl" | "6xl" | "7xl";
   /** Optional stats or custom content to appear on the right side of the header */
   headerRight?: ReactNode;
+  /** Tool name for analytics tracking */
+  toolName: string;
 }
 
 export function ToolFrame({
@@ -16,20 +22,33 @@ export function ToolFrame({
   children,
   maxWidth = "7xl",
   headerRight,
+  toolName,
 }: ToolFrameProps) {
   const maxWidthClass = `max-w-${maxWidth}`;
+  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
+
+  const handleFeedbackClick = () => {
+    setIsFeedbackModalOpen(true);
+    trackFeedbackOpen({ tool: toolName });
+  };
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 py-12 px-6">
       <div className={`${maxWidthClass} mx-auto`}>
-        {/* Back button */}
-        <div className="mb-8">
+        {/* Back button and Feedback button */}
+        <div className="mb-8 flex items-center justify-between">
           <Link
             href="/"
             className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
           >
             ← back to textytools.dev
           </Link>
+          <button
+            onClick={handleFeedbackClick}
+            className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
+          >
+            Send Feedback
+          </button>
         </div>
 
         {/* Header */}
@@ -47,6 +66,13 @@ export function ToolFrame({
 
         {/* Content */}
         {children}
+
+        {/* Feedback Modal */}
+        <FeedbackModal
+          isOpen={isFeedbackModalOpen}
+          onClose={() => setIsFeedbackModalOpen(false)}
+          toolName={toolName}
+        />
       </div>
     </div>
   );

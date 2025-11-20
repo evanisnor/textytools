@@ -13,6 +13,7 @@ import {
   trackToolConversion,
   trackClearEvent,
 } from "@/app/lib/analytics";
+import { TOOL_NAMES } from "@/app/lib/constants";
 
 type ViewMode = "pretty" | "minified" | "escaped";
 
@@ -516,7 +517,7 @@ export default function JSONWizard() {
       await navigator.clipboard.writeText(processedJSON);
       showToast("Copied to clipboard");
       trackCopyEvent({
-        tool: "json-wizard",
+        tool: TOOL_NAMES.JSON_WIZARD,
         viewMode,
         sortKeys,
         indentSize: viewMode === "pretty" ? indentSize : undefined,
@@ -629,6 +630,7 @@ export default function JSONWizard() {
     <ToolFrame
       title="JSON Wizard"
       description="Format, validate, and search JSON with real-time feedback."
+      toolName={TOOL_NAMES.JSON_WIZARD}
       headerRight={
         <div className="grid grid-cols-3 gap-3 lg:min-w-[400px]">
           <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-3">
@@ -677,7 +679,7 @@ export default function JSONWizard() {
                 <button
                   onClick={() => {
                     trackClearEvent({
-                      tool: "json-wizard",
+                      tool: TOOL_NAMES.JSON_WIZARD,
                       viewMode,
                       sortKeys,
                     });

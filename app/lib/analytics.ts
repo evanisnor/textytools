@@ -122,3 +122,51 @@ export function trackToggleAllEvent(
     });
   }
 }
+
+/**
+ * Track feedback modal open event
+ * This helps understand when users are engaging with the feedback feature
+ * @param params - Event parameters including tool name and any custom parameters
+ * @example
+ * trackFeedbackOpen({ tool: "json-wizard" })
+ */
+export function trackFeedbackOpen(params: BaseEventParams) {
+  // Skip tracking in development mode
+  if (isDevelopment) {
+    console.log("[Analytics - Dev Mode - Feedback Open]", params);
+    return;
+  }
+
+  if (typeof window !== "undefined" && window.dataLayer) {
+    const { tool, ...customParams } = params;
+    window.dataLayer.push({
+      event: "feedback_open",
+      tool_name: tool,
+      ...customParams,
+    });
+  }
+}
+
+/**
+ * Track feedback submission event
+ * This helps measure successful feedback submissions
+ * @param params - Event parameters including tool name and any custom parameters
+ * @example
+ * trackFeedbackSubmit({ tool: "json-wizard" })
+ */
+export function trackFeedbackSubmit(params: BaseEventParams) {
+  // Skip tracking in development mode
+  if (isDevelopment) {
+    console.log("[Analytics - Dev Mode - Feedback Submit]", params);
+    return;
+  }
+
+  if (typeof window !== "undefined" && window.dataLayer) {
+    const { tool, ...customParams } = params;
+    window.dataLayer.push({
+      event: "feedback_submit",
+      tool_name: tool,
+      ...customParams,
+    });
+  }
+}

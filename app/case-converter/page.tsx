@@ -5,6 +5,7 @@ import { useToast } from "@/app/components/Toast";
 import { TextEditorContainer } from "@/app/components/TextEditorContainer";
 import { ToolFrame } from "@/app/components/ToolFrame";
 import { trackCopyEvent, trackClearEvent } from "@/app/lib/analytics";
+import { TOOL_NAMES } from "@/app/lib/constants";
 
 type CaseType =
   | "upper"
@@ -179,7 +180,10 @@ export default function CaseConverter() {
     try {
       await navigator.clipboard.writeText(convertedText);
       showToast("Copied to clipboard");
-      trackCopyEvent({ tool: "case-converter", caseType: selectedCase });
+      trackCopyEvent({
+        tool: TOOL_NAMES.CASE_CONVERTER,
+        caseType: selectedCase,
+      });
     } catch (err) {
       console.error("Failed to copy:", err);
     }
@@ -189,6 +193,7 @@ export default function CaseConverter() {
     <ToolFrame
       title="Case Converter"
       description="Transform text between different case formats instantly."
+      toolName={TOOL_NAMES.CASE_CONVERTER}
     >
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:items-start">
         <div className="lg:col-span-3 space-y-6 flex flex-col">
@@ -204,7 +209,7 @@ export default function CaseConverter() {
                 <button
                   onClick={() => {
                     trackClearEvent({
-                      tool: "case-converter",
+                      tool: TOOL_NAMES.CASE_CONVERTER,
                       caseType: selectedCase,
                     });
                     setText("");

@@ -6,6 +6,7 @@ import { Tiktoken } from "js-tiktoken/lite";
 import cl100k_base from "js-tiktoken/ranks/cl100k_base";
 import { TextEditorContainer } from "@/app/components/TextEditorContainer";
 import { ToolFrame } from "@/app/components/ToolFrame";
+import { TOOL_NAMES } from "@/app/lib/constants";
 
 export default function TextCounter() {
   const [text, setText] = useState("");
@@ -75,6 +76,7 @@ export default function TextCounter() {
     <ToolFrame
       title="Text Counter"
       description="Paste or type text below to see character, word, line, paragraph, and AI token counts in real-time."
+      toolName={TOOL_NAMES.TEXT_COUNTER}
       headerRight={
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 lg:min-w-[700px]">
           <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-3">

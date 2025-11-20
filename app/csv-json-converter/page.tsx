@@ -10,6 +10,7 @@ import {
   trackToolConversion,
   trackClearEvent,
 } from "@/app/lib/analytics";
+import { TOOL_NAMES } from "@/app/lib/constants";
 
 interface JsonObject {
   [key: string]: unknown;
@@ -130,6 +131,7 @@ export default function CsvJsonConverter() {
     <ToolFrame
       title="CSV / JSON Converter"
       description="Convert between JSON and CSV formats with automatic format detection"
+      toolName={TOOL_NAMES.CSV_JSON_CONVERTER}
     >
       {/* Main Grid: 3 columns for input/output, 1 column for options */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:items-start">
@@ -147,7 +149,7 @@ export default function CsvJsonConverter() {
                 <button
                   onClick={() => {
                     trackClearEvent({
-                      tool: "csv-json-converter",
+                      tool: TOOL_NAMES.CSV_JSON_CONVERTER,
                       direction:
                         result.detectedFormat === "json"
                           ? "json-to-csv"
@@ -265,7 +267,7 @@ export default function CsvJsonConverter() {
                       navigator.clipboard.writeText(result.output);
                       showToast("Copied to clipboard");
                       trackCopyEvent({
-                        tool: "csv-json-converter",
+                        tool: TOOL_NAMES.CSV_JSON_CONVERTER,
                         direction:
                           result.detectedFormat === "json"
                             ? "json-to-csv"

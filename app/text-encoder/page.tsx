@@ -6,6 +6,7 @@ import { useToast } from "@/app/components/Toast";
 import { TextEditorContainer } from "@/app/components/TextEditorContainer";
 import { ToolFrame } from "@/app/components/ToolFrame";
 import { trackCopyEvent } from "@/app/lib/analytics";
+import { TOOL_NAMES } from "@/app/lib/constants";
 
 type EncodingType =
   | "base64"
@@ -995,7 +996,7 @@ export default function TextEncoderPage() {
       await navigator.clipboard.writeText(outputText);
       showToast("Copied to clipboard");
       trackCopyEvent({
-        tool: "text-encoder",
+        tool: TOOL_NAMES.TEXT_ENCODER,
         mode: mode,
         encoding: selectedEncoding,
       });
@@ -1008,6 +1009,7 @@ export default function TextEncoderPage() {
     <ToolFrame
       title="Text Encoder"
       description="Encode and decode text using various formats including Base64, URL, Hex, and more."
+      toolName={TOOL_NAMES.TEXT_ENCODER}
     >
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:items-start">
         <div className="lg:col-span-3 space-y-6 flex flex-col">

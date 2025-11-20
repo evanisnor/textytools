@@ -77,6 +77,9 @@ jobs:
         env:
           NEXT_PUBLIC_GOOGLE_ID: ${{ vars.GOOGLE_ID }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          MAILGUN_API_KEY: ${{secrets.MAILGUN_API_KEY}}
+          MAILGUN_DOMAIN: ${{vars.MAILGUN_DOMAIN}}
+          MAILGUN_RECIPIENT_EMAIL: ${{vars.MAILGUN_RECIPIENT_EMAIL}}
         run: ${{ steps.detect-package-manager.outputs.runner }} next build
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

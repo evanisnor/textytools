@@ -10,6 +10,7 @@ import {
   trackToolConversion,
   trackClearEvent,
 } from "@/app/lib/analytics";
+import { TOOL_NAMES } from "@/app/lib/constants";
 
 interface JWTPayload {
   [key: string]: unknown;
@@ -202,6 +203,7 @@ export default function JWTDecoder() {
     <ToolFrame
       title="JWT Decoder"
       description="Decode and inspect JSON Web Tokens (JWT) with real-time validation"
+      toolName={TOOL_NAMES.JWT_DECODER}
       headerRight={
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:min-w-[600px]">
           {/* Algorithm */}
@@ -298,7 +300,7 @@ export default function JWTDecoder() {
             {input.trim() && (
               <button
                 onClick={() => {
-                  trackClearEvent({ tool: "jwt-decoder" });
+                  trackClearEvent({ tool: TOOL_NAMES.JWT_DECODER });
                   setInput("");
                 }}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 active:bg-zinc-300 dark:active:bg-zinc-600 transition-colors"
@@ -385,7 +387,7 @@ export default function JWTDecoder() {
                   onClick={() => {
                     navigator.clipboard.writeText(formattedOutput);
                     showToast("Copied to clipboard");
-                    trackCopyEvent({ tool: "jwt-decoder" });
+                    trackCopyEvent({ tool: TOOL_NAMES.JWT_DECODER });
                   }}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 active:bg-zinc-300 dark:active:bg-zinc-600 transition-colors"
                 >

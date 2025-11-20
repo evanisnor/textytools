@@ -9,6 +9,7 @@ import {
   trackClearEvent,
   trackToggleAllEvent,
 } from "@/app/lib/analytics";
+import { TOOL_NAMES } from "@/app/lib/constants";
 
 interface SanitizationOption {
   id: string;
@@ -184,12 +185,12 @@ export default function TextSanitizer() {
 
   const enableAll = () => {
     setOptions((prev) => prev.map((opt) => ({ ...opt, enabled: true })));
-    trackToggleAllEvent({ tool: "text-sanitizer", action: "enable" });
+    trackToggleAllEvent({ tool: TOOL_NAMES.TEXT_SANITIZER, action: "enable" });
   };
 
   const disableAll = () => {
     setOptions((prev) => prev.map((opt) => ({ ...opt, enabled: false })));
-    trackToggleAllEvent({ tool: "text-sanitizer", action: "disable" });
+    trackToggleAllEvent({ tool: TOOL_NAMES.TEXT_SANITIZER, action: "disable" });
   };
 
   const copyToClipboard = async () => {
@@ -200,7 +201,7 @@ export default function TextSanitizer() {
         .filter((opt) => opt.enabled)
         .map((opt) => opt.id);
       trackCopyEvent({
-        tool: "text-sanitizer",
+        tool: TOOL_NAMES.TEXT_SANITIZER,
         options: enabledOptions,
         optionsCount: enabledOptions.length,
       });
@@ -215,6 +216,7 @@ export default function TextSanitizer() {
     <ToolFrame
       title="Text Sanitizer"
       description="Clean and transform your text with customizable sanitization options."
+      toolName={TOOL_NAMES.TEXT_SANITIZER}
     >
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:items-start">
         <div className="lg:col-span-3 space-y-6 flex flex-col">
@@ -233,7 +235,7 @@ export default function TextSanitizer() {
                       .filter((opt) => opt.enabled)
                       .map((opt) => opt.id);
                     trackClearEvent({
-                      tool: "text-sanitizer",
+                      tool: TOOL_NAMES.TEXT_SANITIZER,
                       enabledOptions,
                       optionsCount: enabledOptions.length,
                     });
