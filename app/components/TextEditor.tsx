@@ -27,6 +27,10 @@ export interface TextEditorProps {
    * @default false
    */
   wrap?: boolean;
+  /**
+   * ID for the textarea element (for label association)
+   */
+  id?: string;
 }
 
 export interface TextEditorRef {
@@ -67,6 +71,7 @@ export const TextEditor = forwardRef<TextEditorRef, TextEditorProps>(
       renderContent,
       showLineNumbers = true,
       wrap = false,
+      id,
     },
     ref,
   ) => {
@@ -136,6 +141,7 @@ export const TextEditor = forwardRef<TextEditorRef, TextEditorProps>(
         >
           <textarea
             ref={textareaRef}
+            id={id}
             value={value}
             onChange={onChange ? (e) => onChange(e.target.value) : undefined}
             placeholder={placeholder}
@@ -190,28 +196,43 @@ export const TextEditor = forwardRef<TextEditorRef, TextEditorProps>(
           }}
         >
           {readOnly ? (
-            // Read-only mode: just display the content
-            <div
-              className={
-                wrap ? "whitespace-pre-wrap break-all" : "whitespace-pre"
-              }
-            >
-              {renderContent
-                ? renderContent(value)
-                : renderLineContent
-                  ? lines.map((line, index) => (
-                      <div
-                        key={index}
-                        className={
-                          highlightLine?.(index + 1)
-                            ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
-                            : "text-zinc-900 dark:text-zinc-50"
-                        }
-                      >
-                        {renderLineContent(line, index)}
-                      </div>
-                    ))
-                  : value}
+            // Read-only mode: overlay rendered content on top of readonly textarea
+            <div className="relative flex-1">
+              {hasCustomRendering && (
+                <div
+                  className={`absolute inset-0 pointer-events-none ${wrap ? "whitespace-pre-wrap break-all" : "whitespace-pre"}`}
+                >
+                  {renderContent
+                    ? renderContent(value)
+                    : lines.map((line, index) => {
+                        const lineNumber = index + 1;
+                        const isHighlighted = highlightLine?.(lineNumber);
+                        const lineContent = renderLineContent
+                          ? renderLineContent(line, index)
+                          : line;
+                        return (
+                          <div
+                            key={index}
+                            className={
+                              isHighlighted
+                                ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
+                                : "text-zinc-900 dark:text-zinc-50"
+                            }
+                          >
+                            {lineContent}
+                          </div>
+                        );
+                      })}
+                </div>
+              )}
+              <textarea
+                id={id}
+                value={value}
+                readOnly
+                placeholder={placeholder}
+                className={`${hasCustomRendering ? "absolute inset-0" : "w-full h-full"} bg-transparent ${hasCustomRendering ? "text-transparent" : "text-zinc-900 dark:text-zinc-50"} resize-none focus:outline-none ${wrap ? "whitespace-pre-wrap break-all" : "whitespace-pre"} ${hasCustomRendering ? "overflow-hidden" : ""} placeholder-zinc-400 dark:placeholder-zinc-600`}
+                spellCheck={false}
+              />
             </div>
           ) : (
             // Editable mode: overlay transparent textarea on top of rendered content
@@ -245,6 +266,7 @@ export const TextEditor = forwardRef<TextEditorRef, TextEditorProps>(
               )}
               <textarea
                 ref={textareaRef}
+                id={id}
                 value={value}
                 onChange={
                   onChange ? (e) => onChange(e.target.value) : undefined

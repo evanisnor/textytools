@@ -289,7 +289,10 @@ export default function JWTDecoder() {
         {/* Input */}
         <div>
           <div className="mb-2 flex items-center justify-between min-h-9">
-            <label className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
+            <label
+              htmlFor="jwt-input"
+              className="text-sm font-medium text-zinc-900 dark:text-zinc-50"
+            >
               JWT Token
             </label>
             {input.trim() && (
@@ -318,6 +321,7 @@ export default function JWTDecoder() {
             )}
           </div>
           <TextEditorContainer
+            id="jwt-input"
             value={input}
             onChange={setInput}
             placeholder={`Paste a JWT token here...\n\nExample:\neyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c`}
@@ -335,7 +339,10 @@ export default function JWTDecoder() {
         {/* Output */}
         <div>
           <div className="mb-2 flex items-center justify-between min-h-9">
-            <label className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
+            <label
+              htmlFor="jwt-output"
+              className="text-sm font-medium text-zinc-900 dark:text-zinc-50"
+            >
               Decoded Token
             </label>
             <div className="flex items-center gap-2">
@@ -401,6 +408,7 @@ export default function JWTDecoder() {
             </div>
           </div>
           <TextEditorContainer
+            id="jwt-output"
             value={result.success ? formattedOutput : ""}
             readOnly
             placeholder={result.error ? "" : "Decoded JWT will appear here..."}

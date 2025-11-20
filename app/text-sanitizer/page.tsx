@@ -220,7 +220,10 @@ export default function TextSanitizer() {
         <div className="lg:col-span-3 space-y-6 flex flex-col">
           <div>
             <div className="flex items-center justify-between mb-2 min-h-9">
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              <label
+                htmlFor="text-sanitizer-input"
+                className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+              >
                 Input Text
               </label>
               {text.trim() && (
@@ -256,6 +259,7 @@ export default function TextSanitizer() {
               )}
             </div>
             <TextEditorContainer
+              id="text-sanitizer-input"
               value={text}
               onChange={setText}
               placeholder="Paste or type your text here..."
@@ -266,7 +270,10 @@ export default function TextSanitizer() {
 
           <div>
             <div className="flex items-center justify-between mb-2 min-h-9">
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              <label
+                htmlFor="text-sanitizer-output"
+                className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+              >
                 Sanitized Text{" "}
                 {activeCount > 0 && (
                   <span className="text-xs font-normal text-zinc-500">
@@ -298,6 +305,7 @@ export default function TextSanitizer() {
               )}
             </div>
             <TextEditorContainer
+              id="text-sanitizer-output"
               value={sanitizedText}
               readOnly
               placeholder="Sanitized text will appear here..."
@@ -309,9 +317,9 @@ export default function TextSanitizer() {
 
         <div className="flex flex-col h-full">
           <div className="flex items-center justify-between mb-2 min-h-9">
-            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            <div className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
               Sanitization Options
-            </label>
+            </div>
             <div className="flex gap-2">
               <button
                 onClick={enableAll}
@@ -333,9 +341,11 @@ export default function TextSanitizer() {
             {options.map((option) => (
               <label
                 key={option.id}
+                htmlFor={`sanitizer-${option.id}`}
                 className="flex items-start gap-3 p-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors cursor-pointer"
               >
                 <input
+                  id={`sanitizer-${option.id}`}
                   type="checkbox"
                   checked={option.enabled}
                   onChange={() => toggleOption(option.id)}

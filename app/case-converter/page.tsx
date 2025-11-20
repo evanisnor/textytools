@@ -194,7 +194,10 @@ export default function CaseConverter() {
         <div className="lg:col-span-3 space-y-6 flex flex-col">
           <div>
             <div className="flex items-center justify-between mb-2 min-h-9">
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              <label
+                htmlFor="case-converter-input"
+                className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+              >
                 Input Text
               </label>
               {text.trim() && (
@@ -226,6 +229,7 @@ export default function CaseConverter() {
               )}
             </div>
             <TextEditorContainer
+              id="case-converter-input"
               value={text}
               onChange={setText}
               placeholder="Paste or type your text here..."
@@ -236,7 +240,10 @@ export default function CaseConverter() {
 
           <div>
             <div className="flex items-center justify-between mb-2 min-h-9">
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              <label
+                htmlFor="case-converter-output"
+                className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+              >
                 Converted Text
               </label>
               {convertedText && (
@@ -262,6 +269,7 @@ export default function CaseConverter() {
               )}
             </div>
             <TextEditorContainer
+              id="case-converter-output"
               value={convertedText}
               readOnly
               placeholder="Converted text will appear here..."
@@ -273,9 +281,9 @@ export default function CaseConverter() {
 
         <div className="flex flex-col h-full">
           <div className="mb-2 min-h-9">
-            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            <div className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
               Select Case Format
-            </label>
+            </div>
           </div>
           <div className="space-y-2 flex-1 overflow-y-auto pr-2">
             {caseOptions.map((option) => (

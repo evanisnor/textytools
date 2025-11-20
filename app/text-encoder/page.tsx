@@ -1036,7 +1036,10 @@ export default function TextEncoderPage() {
 
           <div>
             <div className="flex items-center justify-between mb-2 min-h-9">
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              <label
+                htmlFor="text-encoder-input"
+                className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+              >
                 {mode === "encode" ? "Plain Text" : "Encoded Text"}
               </label>
               {text.trim() && (
@@ -1062,6 +1065,7 @@ export default function TextEncoderPage() {
               )}
             </div>
             <TextEditorContainer
+              id="text-encoder-input"
               value={text}
               onChange={setText}
               placeholder={
@@ -1076,7 +1080,10 @@ export default function TextEncoderPage() {
 
           <div>
             <div className="flex items-center justify-between mb-2 min-h-9">
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              <label
+                htmlFor="text-encoder-output"
+                className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+              >
                 {mode === "encode" ? "Encoded Output" : "Decoded Output"}
               </label>
               {outputText && !outputText.startsWith("Error:") && (
@@ -1102,6 +1109,7 @@ export default function TextEncoderPage() {
               )}
             </div>
             <TextEditorContainer
+              id="text-encoder-output"
               value={outputText}
               readOnly
               placeholder={
@@ -1122,9 +1130,9 @@ export default function TextEncoderPage() {
 
         <div className="flex flex-col h-full">
           <div className="mb-2 min-h-9">
-            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            <div className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
               Select Encoding Format
-            </label>
+            </div>
           </div>
           <div className="space-y-2 flex-1 overflow-y-auto pr-2">
             {encodingOptions.map((option) => {

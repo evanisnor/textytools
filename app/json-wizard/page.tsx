@@ -667,7 +667,10 @@ export default function JSONWizard() {
           {/* Input */}
           <div>
             <div className="flex items-center justify-between mb-2 min-h-9">
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              <label
+                htmlFor="json-wizard-input"
+                className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+              >
                 Input JSON
               </label>
               {input.trim() && (
@@ -722,6 +725,7 @@ export default function JSONWizard() {
                 </div>
               )}
               <TextEditorContainer
+                id="json-wizard-input"
                 ref={inputEditorRef}
                 value={input}
                 onChange={setInput}
@@ -743,7 +747,10 @@ export default function JSONWizard() {
           {/* Output */}
           <div>
             <div className="flex items-center justify-between mb-2 min-h-9">
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              <label
+                htmlFor="json-wizard-output"
+                className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+              >
                 Output
               </label>
               <div className="flex items-center gap-2">
@@ -811,33 +818,28 @@ export default function JSONWizard() {
                 )}
               </div>
             </div>
-            {processedJSON ? (
-              <TextEditorContainer
-                ref={outputEditorRef}
-                value={processedJSON}
-                readOnly
-                renderLineContent={
-                  searchTerm
-                    ? (line, index) => {
-                        const outputMatchIndex =
-                          inputToOutputMatchMap.get(currentMatchIndex) ?? -1;
-                        return renderHighlightedText(
-                          line,
-                          index,
-                          true,
-                          outputMatchIndex,
-                        );
-                      }
-                    : undefined
-                }
-              />
-            ) : (
-              <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4 h-64">
-                <div className="text-zinc-400 dark:text-zinc-600 font-mono text-sm">
-                  Formatted JSON will appear here...
-                </div>
-              </div>
-            )}
+            <TextEditorContainer
+              id="json-wizard-output"
+              ref={outputEditorRef}
+              value={processedJSON || ""}
+              readOnly
+              placeholder="Formatted JSON will appear here..."
+              height="h-64"
+              {...(searchTerm && processedJSON
+                ? {
+                    renderLineContent: (line, index) => {
+                      const outputMatchIndex =
+                        inputToOutputMatchMap.get(currentMatchIndex) ?? -1;
+                      return renderHighlightedText(
+                        line,
+                        index,
+                        true,
+                        outputMatchIndex,
+                      );
+                    },
+                  }
+                : {})}
+            />
           </div>
         </div>
 
@@ -846,12 +848,16 @@ export default function JSONWizard() {
           {/* Search */}
           <div>
             <div className="mb-2 min-h-9">
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              <label
+                htmlFor="json-search"
+                className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+              >
                 Search
               </label>
             </div>
             <div className="space-y-2">
               <input
+                id="json-search"
                 type="text"
                 value={searchTerm}
                 onChange={(e) => {
@@ -870,8 +876,12 @@ export default function JSONWizard() {
               />
 
               <div className="flex items-center justify-between gap-2">
-                <label className="flex items-center gap-2 cursor-pointer">
+                <label
+                  htmlFor="case-sensitive"
+                  className="flex items-center gap-2 cursor-pointer"
+                >
                   <input
+                    id="case-sensitive"
                     type="checkbox"
                     checked={caseSensitive}
                     onChange={(e) => {
@@ -915,9 +925,9 @@ export default function JSONWizard() {
 
           <div className="mt-4">
             <div className="mb-2 min-h-9">
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              <div className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
                 Modify
-              </label>
+              </div>
             </div>
             <div className="space-y-2">
               <button
@@ -965,13 +975,17 @@ export default function JSONWizard() {
           {/* Options */}
           <div className="mt-4">
             <div className="mb-2 min-h-9">
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              <div className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
                 Options
-              </label>
+              </div>
             </div>
             <div className="space-y-3">
-              <label className="flex items-center gap-2 p-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 cursor-pointer">
+              <label
+                htmlFor="sort-keys"
+                className="flex items-center gap-2 p-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 cursor-pointer"
+              >
                 <input
+                  id="sort-keys"
                   type="checkbox"
                   checked={sortKeys}
                   onChange={(e) => setSortKeys(e.target.checked)}
@@ -985,10 +999,14 @@ export default function JSONWizard() {
 
               {/* Indent Size */}
               <div className="p-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
-                <label className="block text-sm text-zinc-900 dark:text-zinc-50 mb-2">
+                <label
+                  htmlFor="indent-size"
+                  className="block text-sm text-zinc-900 dark:text-zinc-50 mb-2"
+                >
                   Indent Size: {indentSize}
                 </label>
                 <input
+                  id="indent-size"
                   type="range"
                   min="2"
                   max="8"

@@ -137,7 +137,10 @@ export default function CsvJsonConverter() {
           {/* Input */}
           <div>
             <div className="mb-2 flex items-center justify-between min-h-9">
-              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              <label
+                htmlFor="csv-json-input"
+                className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
+              >
                 Input
               </label>
               {input.trim() && (
@@ -186,6 +189,7 @@ export default function CsvJsonConverter() {
                 </div>
               )}
               <TextEditorContainer
+                id="csv-json-input"
                 value={input}
                 onChange={setInput}
                 placeholder='Paste JSON or CSV here...\n\nJSON example:\n[\n  {"name": "Alice", "age": 30},\n  {"name": "Bob", "age": 25}\n]\n\nCSV example:\nname,age\nAlice,30\nBob,25'
@@ -203,7 +207,10 @@ export default function CsvJsonConverter() {
           {/* Output */}
           <div>
             <div className="mb-2 flex items-center justify-between min-h-9">
-              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              <label
+                htmlFor="csv-json-output"
+                className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
+              >
                 Output
               </label>
               <div className="flex items-center gap-2">
@@ -289,6 +296,7 @@ export default function CsvJsonConverter() {
             </div>
             <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-1">
               <TextEditorContainer
+                id="csv-json-output"
                 value={result.success ? result.output : ""}
                 readOnly
                 placeholder={
@@ -316,16 +324,20 @@ export default function CsvJsonConverter() {
         {/* Options Panel */}
         <div className="flex flex-col h-full">
           <div className="mb-2 min-h-9">
-            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            <div className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
               Options
-            </label>
+            </div>
           </div>
           <div className="space-y-4">
             <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4">
-              <label className="block text-sm text-zinc-600 dark:text-zinc-400 mb-2">
+              <label
+                htmlFor="delimiter-select"
+                className="block text-sm text-zinc-600 dark:text-zinc-400 mb-2"
+              >
                 Delimiter
               </label>
               <select
+                id="delimiter-select"
                 value={delimiter === "\t" ? "tab" : delimiter}
                 onChange={(e) => {
                   const value = e.target.value;
