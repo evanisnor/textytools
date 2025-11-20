@@ -3,9 +3,11 @@
 import { useState } from "react";
 import ToolCard from "./components/ToolCard";
 import { FeedbackModal } from "./components/FeedbackModal";
+import { isFeatureEnabled } from "./lib/featureFlags";
 
 export default function Home() {
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
+  const showFeedback = isFeatureEnabled("feedbackForm");
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebApplication",
@@ -132,25 +134,29 @@ export default function Home() {
               description="Decode and inspect JSON Web Tokens with validation"
             />
 
-            <ToolCard
-              title="&lt;Something New&gt;"
-              description="Have an idea for a tool you'd like to see? Let me know!"
-              onClick={() => setIsFeedbackOpen(true)}
-              backgroundColor="bg-zinc-50 dark:bg-zinc-950"
-            >
-              <div className="mt-4 px-4 py-2 text-sm bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900 rounded-md text-center font-medium">
-                Suggest a Tool
-              </div>
-            </ToolCard>
+            {showFeedback && (
+              <ToolCard
+                title="&lt;Something New&gt;"
+                description="Have an idea for a tool you'd like to see? Let me know!"
+                onClick={() => setIsFeedbackOpen(true)}
+                backgroundColor="bg-zinc-50 dark:bg-zinc-950"
+              >
+                <div className="mt-4 px-4 py-2 text-sm bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900 rounded-md text-center font-medium">
+                  Suggest a Tool
+                </div>
+              </ToolCard>
+            )}
           </div>
         </main>
       </div>
 
-      <FeedbackModal
-        isOpen={isFeedbackOpen}
-        onClose={() => setIsFeedbackOpen(false)}
-        toolName="Tool Suggestion"
-      />
+      {showFeedback && (
+        <FeedbackModal
+          isOpen={isFeedbackOpen}
+          onClose={() => setIsFeedbackOpen(false)}
+          toolName="Tool Suggestion"
+        />
+      )}
     </>
   );
 }
