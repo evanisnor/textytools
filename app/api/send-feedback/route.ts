@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import formData from "form-data";
 import Mailgun from "mailgun.js";
 
+export const runtime = "nodejs";
+
 export async function POST(request: NextRequest) {
   try {
     const { name, email, message } = await request.json();
