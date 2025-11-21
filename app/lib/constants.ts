@@ -4,6 +4,7 @@
  */
 export const TOOL_NAMES = {
   CASE_CONVERTER: "case-converter",
+  DIFF_VIEWER: "diff-viewer",
   CSV_JSON_CONVERTER: "csv-json-converter",
   JSON_WIZARD: "json-wizard",
   JWT_DECODER: "jwt-decoder",

@@ -29,6 +29,8 @@ export const metadata: Metadata = {
     "text sanitizer",
     "token counter",
     "developer utilities",
+    "difftool",
+    "diff viewer",
   ],
   authors: [{ name: "Texty Software" }],
   creator: "Texty Software",

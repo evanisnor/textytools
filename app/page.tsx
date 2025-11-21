@@ -69,6 +69,13 @@ export default function Home() {
         url: "https://textytools.dev/jwt-decoder",
         description: "Decode and inspect JSON Web Tokens with validation",
       },
+      {
+        "@type": "WebPage",
+        name: "Diff Viewer",
+        url: "https://textytools.dev/diff-viewer",
+        description:
+          "Compare two text blocks with side-by-side diff highlighting and search",
+      },
     ],
   };
 
@@ -94,6 +101,12 @@ export default function Home() {
               href="/text-counter"
               title="Text Counter"
               description="Count characters, words, lines, paragraphs and AI tokens in real-time"
+            />
+
+            <ToolCard
+              href="/diff-viewer"
+              title="Diff Viewer"
+              description="Compare two text blocks with side-by-side diff highlighting and search"
             />
 
             <ToolCard
