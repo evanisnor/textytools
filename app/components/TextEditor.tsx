@@ -272,8 +272,15 @@ export const TextEditor = forwardRef<TextEditorRef, TextEditorProps>(
                   onChange ? (e) => onChange(e.target.value) : undefined
                 }
                 placeholder={placeholder}
-                className={`${hasCustomRendering ? "absolute inset-0" : "w-full h-full"} bg-transparent ${hasCustomRendering ? "text-transparent" : "text-zinc-900 dark:text-zinc-50"} caret-zinc-900 dark:caret-zinc-50 resize-none focus:outline-none ${wrap ? "whitespace-pre-wrap break-all" : "whitespace-pre"} ${hasCustomRendering ? "overflow-hidden" : ""} placeholder-zinc-400 dark:placeholder-zinc-600`}
+                className={`${hasCustomRendering ? "absolute inset-0" : "w-full h-full"} bg-transparent ${hasCustomRendering ? "text-transparent" : "text-zinc-900 dark:text-zinc-50"} resize-none focus:outline-none ${wrap ? "whitespace-pre-wrap break-all" : "whitespace-pre"} ${hasCustomRendering ? "overflow-hidden" : ""} placeholder-zinc-400 dark:placeholder-zinc-600 selection:bg-blue-200/50 dark:selection:bg-blue-800/50`}
                 spellCheck={false}
+                style={
+                  hasCustomRendering
+                    ? {
+                        caretColor: "var(--caret-color)",
+                      }
+                    : undefined
+                }
               />
             </div>
           )}

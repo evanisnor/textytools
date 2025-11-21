@@ -52,7 +52,7 @@ function renderCSVLine(line: string, delimiter: string): JSX.Element {
       {values.map((value, colIndex) => (
         <span
           key={colIndex}
-          className={`${COLUMN_COLORS[colIndex % COLUMN_COLORS.length]} px-0.5`}
+          className={COLUMN_COLORS[colIndex % COLUMN_COLORS.length]}
         >
           {value || "\u00A0"}
           {colIndex < values.length - 1 && delimiter}
