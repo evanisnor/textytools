@@ -5,6 +5,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:sourcemaps": "next build && npm run sentry:sourcemaps",
+    "sentry:sourcemaps": "sentry-cli sourcemaps inject .next && sentry-cli sourcemaps upload --org texty-software --project textytools .next",
+    "sentry:login": "sentry-cli login",
     "start": "next start",
     "lint": "eslint --max-warnings=0",
     "format": "prettier --write ."
@@ -22,6 +25,7 @@
   },
   "devDependencies": {
     "@next/third-parties": "^16.0.3",
+    "@sentry/cli": "^2.58.2",
     "@tailwindcss/postcss": "^4",
     "@types/lodash": "^4.17.20",
     "@types/node": "^20",
