@@ -1121,6 +1121,7 @@ export default function TextEncoderPage() {
               }
               height="h-48"
               showLineNumbers={false}
+              wrap={true}
               className={
                 outputText.startsWith("Error:")
                   ? "text-red-600 dark:text-red-400"
