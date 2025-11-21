@@ -8,6 +8,7 @@ import {
   type TextEditorContainerRef,
 } from "@/app/components/TextEditorContainer";
 import { ToolFrame } from "@/app/components/ToolFrame";
+import { SearchBox } from "@/app/components/SearchBox";
 import {
   trackCopyEvent,
   trackToolConversion,
@@ -858,23 +859,16 @@ export default function JSONWizard() {
               </label>
             </div>
             <div className="space-y-2">
-              <input
+              <SearchBox
                 id="json-search"
-                type="text"
                 value={searchTerm}
-                onChange={(e) => {
-                  setSearchTerm(e.target.value);
+                onChange={(value) => {
+                  setSearchTerm(value);
                   setCurrentMatchIndex(0);
                 }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    goToNextMatch();
-                  }
-                }}
+                onEnter={goToNextMatch}
                 placeholder="Search in JSON..."
-                disabled={!validation.isValid}
-                className="w-full p-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-50"
+                disabled={!validation.isValid || !input.trim()}
               />
 
               <div className="flex items-center justify-between gap-2">
