@@ -93,6 +93,7 @@ utility-apps/
 │   ├── layout.tsx           # Root layout with Geist fonts
 │   ├── page.tsx             # Home page with utility grid
 │   ├── globals.css          # Tailwind imports and theme
+|   ├── components/          # Shared components
 │   ├── case-converter/
 │   │   └── page.tsx
 │   ├── text-counter/
@@ -107,7 +108,6 @@ utility-apps/
 │   │   └── page.tsx
 │   └── jwt-decoder/
 │       └── page.tsx
-├── public/                   # Static assets
 ├── package.json
 ├── tsconfig.json
 └── next.config.ts
@@ -133,27 +133,9 @@ The project uses a minimal zinc-based color palette with dark mode support:
 - **Borders**: `zinc-200` (light) / `zinc-800` (dark)
 - **Interactive**: Hover states use `zinc-300/zinc-700`
 
-### Layout Pattern
+### Sga
 
-All utilities follow a consistent layout structure:
-
-```tsx
-<div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 py-12 px-6">
-  <div className="max-w-[size] mx-auto">
-    {/* Back button */}
-    <Link href="/">← Back to home</Link>
-
-    {/* Header */}
-    <h1 className="text-4xl font-bold...">Utility Name</h1>
-    <p className="text-lg text-zinc-600...">Description</p>
-
-    {/* Main content grid */}
-    <div className="grid grid-cols-1 lg:grid-cols-[ratio] gap-6">
-      {/* Content areas */}
-    </div>
-  </div>
-</div>
-```
+All utilities use ToolFrame
 
 ### Typography
 
@@ -163,17 +145,15 @@ All utilities follow a consistent layout structure:
 
 ### Components & Interactivity
 
-#### Input/Output Areas
-
-```tsx
-<div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-1">
-  <textarea className="w-full h-[size] p-4 bg-transparent... resize-none focus:outline-none font-mono text-sm" />
-</div>
-```
+- `Modal.tsx` - A reusable component for modal dialogs. Forms should be implemented as children (like `FeedbackModal.tsx`)
+- `TextEditorContainer.tsx`, which wraps `TextEditor.tsx` to enforce consistency for input and output textareas across tools
+- `Toast.tsx` for displaying ephemeral messages to the user
+- `ToolCard.tsx` used on the main page for navigation to tools
+- `ToolFrame.tsx` is the root component for all tools to ensure consistency in their layout.
 
 #### Buttons & Controls
 
-- **Primary Actions**: Bordered cards with hover effects
+- **Primary Actions**: Bordered cards with hover effects and cursor-pointer
 - **Secondary Actions**: Text links with color transitions
 - **Disabled State**: `opacity-50 cursor-not-allowed`
 
@@ -211,65 +191,74 @@ touch app/your-utility/page.tsx
 
 ### 2. Follow the Standard Structure
 
+Use the `ToolFrame` component for consistent layout and the `TextEditorContainer` component for text input/output areas:
+
 ```tsx
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { ToolFrame } from "@/app/components/ToolFrame";
+import { TextEditorContainer } from "@/app/components/TextEditorContainer";
+import { TOOL_NAMES } from "@/app/lib/constants";
 
 export default function YourUtility() {
   const [input, setInput] = useState("");
+  const [output, setOutput] = useState("");
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 py-12 px-6">
-      <div className="max-w-4xl mx-auto">
-        {/* Back button */}
-        <div className="mb-8">
-          <Link
-            href="/"
-            className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
-          >
-            ← Back to home
-          </Link>
-        </div>
+    <ToolFrame
+      title="Your Utility Name"
+      description="Brief description of what this utility does"
+      toolName={TOOL_NAMES.YOUR_UTILITY}
+      maxWidth="7xl" // or "4xl", "5xl", "6xl" depending on your layout needs
+    >
+      {/* Main content */}
+      <div className="grid lg:grid-cols-2 gap-6">
+        {/* Input area */}
+        <TextEditorContainer
+          value={input}
+          onChange={setInput}
+          placeholder="Enter your text here..."
+          height="h-96"
+        />
 
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 mb-3">
-            Your Utility Name
-          </h1>
-          <p className="text-lg text-zinc-600 dark:text-zinc-400">
-            Brief description of what this utility does
-          </p>
-        </div>
-
-        {/* Main content */}
-        {/* ... your utility's UI ... */}
+        {/* Output area */}
+        <TextEditorContainer
+          value={output}
+          readOnly
+          placeholder="Results will appear here..."
+          height="h-96"
+        />
       </div>
-    </div>
+    </ToolFrame>
   );
 }
 ```
 
-### 3. Add to Home Page
+### 3. Add Tool Name Constant
 
-Edit [app/page.tsx](app/page.tsx:17-76) to add a link card in the grid:
+Add your tool name to [app/lib/constants.ts](app/lib/constants.ts) for analytics tracking:
 
 ```tsx
-<Link
-  href="/your-utility"
-  className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors"
->
-  <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
-    Your Utility
-  </h2>
-  <p className="text-sm text-zinc-600 dark:text-zinc-400">
-    Brief description for the home page
-  </p>
-</Link>
+export const TOOL_NAMES = {
+  // ... existing tools
+  YOUR_UTILITY: "your-utility",
+} as const;
 ```
 
-### 4. Design Considerations
+### 4. Add to Home Page
+
+Edit [app/page.tsx](app/page.tsx) to add your utility using the `ToolCard` component:
+
+```tsx
+<ToolCard
+  href="/your-utility"
+  title="Your Utility"
+  description="Brief description for the home page"
+/>
+```
+
+### 5. Design Considerations
 
 **Keep it simple**: Focus on a single, well-defined task
 
@@ -301,9 +290,7 @@ Edit [app/page.tsx](app/page.tsx:17-76) to add a link card in the grid:
 - Large data sets (optimize rendering if needed)
 - Copy-to-clipboard functionality for outputs
 
-### 5. Common Patterns to Reuse
-
-**Text Input/Output Areas**: See [text-counter](app/text-counter/page.tsx:104-112) or [case-converter](app/case-converter/page.tsx:209-217)
+### 6. Common Patterns to Reuse
 
 **TextEditor with Line Numbers**:
 
@@ -368,7 +355,3 @@ Potential additions to consider:
 - **Markdown Previewer**: Live markdown rendering
 - **Color Converter**: HEX, RGB, HSL conversions
 - **UUID Generator**: Generate UUIDs with various versions
-
-## License
-
-This is a personal utility project. Feel free to use and modify as needed.
