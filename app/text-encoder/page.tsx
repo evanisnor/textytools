@@ -1077,6 +1077,7 @@ export default function TextEncoderPage() {
               }
               height="h-48"
               showLineNumbers={false}
+              wrap={true}
             />
           </div>
 
