@@ -951,7 +951,7 @@ export default function JSONWizard() {
               readOnly
               placeholder="Formatted JSON will appear here..."
               height="h-64"
-              wrap={viewMode === "minified"}
+              wrap={viewMode === "minified" || viewMode === "escaped"}
               renderContent={
                 !searchTerm && outputJsonSyntaxRenderer
                   ? outputJsonSyntaxRenderer
