@@ -878,6 +878,7 @@ export default function JSONWizard() {
               ref={inputEditorRef}
               value={input}
               onChange={setInput}
+              wrap={true}
               placeholder='Paste your JSON here, e.g., {"key": "value"}'
               renderLineContent={(line, index) =>
                 renderHighlightedText(
