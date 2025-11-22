@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "textytools.dev - Free Developer Utilities",
+  title: "textytools.dev - Free browser tools for developers",
   description:
     "Fast, browser-based productivity tools for developers. Text manipulation, JSON formatting, case conversion, encoding, JWT decoding, and more.",
   keywords: [
@@ -58,7 +58,7 @@ export const metadata: Metadata = {
   authors: [{ name: "Texty Software" }],
   creator: "Texty Software",
   openGraph: {
-    title: "textytools.dev - Free Developer Utilities",
+    title: "textytools.dev - Free browser tools for developers",
     description:
       "Fast, browser-based productivity tools for developers. Text manipulation, JSON formatting, case conversion, encoding, and more.",
     type: "website",

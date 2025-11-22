@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Diff Viewer - textytools.dev",
+  title: "Diff Viewer - Compare text side-by-side with highlights",
   description:
     "Compare two text blocks with side-by-side diff highlighting, search, and navigation. Helpful for code, documents, and prose diffing.",
   keywords: [
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     "textytools",
   ],
   openGraph: {
-    title: "Diff Viewer - textytools.dev",
+    title: "Diff Viewer - Compare text side-by-side with highlights",
     description:
       "Compare two text blocks with side-by-side diff highlighting, search, and navigation.",
   },

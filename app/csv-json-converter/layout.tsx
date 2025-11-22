@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "CSV / JSON Converter - textytools.dev",
+  title: "CSV / JSON Converter - Convert between CSV and JSON",
   description:
     "Bidirectional converter between CSV and JSON formats with proper data type parsing and nested object support. Features auto-detect types, configurable delimiters, and proper CSV escaping. Free browser-based CSV JSON converter.",
   keywords: [
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     "textytools",
   ],
   openGraph: {
-    title: "CSV / JSON Converter - textytools.dev",
+    title: "CSV / JSON Converter - Convert between CSV and JSON",
     description: "Convert between CSV and JSON formats with proper parsing.",
   },
 };

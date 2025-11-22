@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "JSON Wizard - textytools.dev",
+  title: "JSON Wizard - Validate, format, and edit JSON easily",
   description:
     "Validate, format, search, and manipulate JSON data with advanced tooling. Features real-time validation, pretty print, minify, escape/unescape, search with match navigation, and sort keys. Free browser-based JSON formatter.",
   keywords: [
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     "textytools",
   ],
   openGraph: {
-    title: "JSON Wizard - textytools.dev",
+    title: "JSON Wizard - Validate, format, and edit JSON easily",
     description:
       "Validate, format, search, and manipulate JSON data with advanced tooling.",
   },

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Text Sanitizer - textytools.dev",
+  title: "Text Sanitizer - Clean, trim, and normalize text quickly",
   description:
     "Clean and transform text with 12 customizable sanitization options. Trim lines, remove empty/duplicate lines, strip emoji/punctuation/numbers, normalize whitespace, sort/reverse lines. Free browser-based text cleaning tool.",
   keywords: [
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     "textytools",
   ],
   openGraph: {
-    title: "Text Sanitizer - textytools.dev",
+    title: "Text Sanitizer - Clean, trim, and normalize text quickly",
     description:
       "Clean and transform text with customizable sanitization options.",
   },

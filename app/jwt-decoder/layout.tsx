@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "JWT Decoder - textytools.dev",
+  title: "JWT Decoder - Inspect, validate, and decode tokens",
   description:
     "Decode and inspect JSON Web Tokens (JWT) with syntax highlighting and automatic validation. View header, payload, signature, algorithm, expiration, and standard claims. Free browser-based JWT decoder with no server communication.",
   keywords: [
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     "textytools",
   ],
   openGraph: {
-    title: "JWT Decoder - textytools.dev",
+    title: "JWT Decoder - Inspect, validate, and decode tokens",
     description: "Decode and inspect JSON Web Tokens with validation.",
   },
 };

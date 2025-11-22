@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy - textytools.dev",
+  title: "Privacy Policy - Data practices & no user data collection",
   description:
     "Privacy policy for textytools.dev. We do not collect, store, or share any user data.",
   keywords: [

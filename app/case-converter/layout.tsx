@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Case Converter - textytools.dev",
+  title: "Case Converter - Convert between 11 case formats quickly",
   description:
     "Transform text between 11 different case formats instantly: UPPER, lower, Title, Sentence, camelCase, PascalCase, snake_case, kebab-case, CONSTANT_CASE, dot.case, and path/case. Free browser-based case conversion tool.",
   keywords: [
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     "textytools",
   ],
   openGraph: {
-    title: "Case Converter - textytools.dev",
+    title: "Case Converter - Convert between 11 case formats quickly",
     description: "Transform text between 11 different case formats instantly.",
   },
 };

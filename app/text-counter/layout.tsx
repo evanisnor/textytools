@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Text Counter - textytools.dev",
+  title: "Text Counter - Count words, characters, lines, tokens",
   description:
     "Count characters, words, lines, paragraphs, and AI tokens (GPT-4) in real-time. Free browser-based text analysis tool for content creation and API cost estimation.",
   keywords: [
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     "textytools",
   ],
   openGraph: {
-    title: "Text Counter - textytools.dev",
+    title: "Text Counter - Count words, characters, lines, tokens",
     description:
       "Count characters, words, lines, paragraphs, and AI tokens in real-time.",
   },
