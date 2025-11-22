@@ -5,6 +5,17 @@ export const metadata: Metadata = {
   title: "Privacy Policy - textytools.dev",
   description:
     "Privacy policy for textytools.dev. We do not collect, store, or share any user data.",
+  keywords: [
+    "privacy policy",
+    "privacy",
+    "textytools",
+    "data collection",
+    "cookies",
+    "gdpr",
+    "data protection",
+    "no user data",
+    "privacy practices",
+  ],
 };
 
 export default function PrivacyPolicy() {
