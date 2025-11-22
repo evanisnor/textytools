@@ -21,6 +21,9 @@ export const metadata: Metadata = {
     title: "JWT Decoder - Inspect, validate, and decode tokens",
     description: "Decode and inspect JSON Web Tokens with validation.",
   },
+  alternates: {
+    canonical: "https://textytools.dev/jwt-decoder",
+  },
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {

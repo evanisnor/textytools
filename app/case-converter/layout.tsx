@@ -23,6 +23,9 @@ export const metadata: Metadata = {
     title: "Case Converter - Convert between 11 case formats quickly",
     description: "Transform text between 11 different case formats instantly.",
   },
+  alternates: {
+    canonical: "https://textytools.dev/case-converter",
+  },
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {

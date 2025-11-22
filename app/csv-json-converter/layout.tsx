@@ -22,6 +22,9 @@ export const metadata: Metadata = {
     title: "CSV / JSON Converter - Convert between CSV and JSON",
     description: "Convert between CSV and JSON formats with proper parsing.",
   },
+  alternates: {
+    canonical: "https://textytools.dev/csv-json-converter",
+  },
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {

@@ -23,6 +23,9 @@ export const metadata: Metadata = {
     description:
       "Count characters, words, lines, paragraphs, and AI tokens in real-time.",
   },
+  alternates: {
+    canonical: "https://textytools.dev/text-counter",
+  },
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {

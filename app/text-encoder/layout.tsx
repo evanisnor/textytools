@@ -24,6 +24,9 @@ export const metadata: Metadata = {
     title: "Text Encoder - Encode, decode, and hash text formats",
     description: "Encode and decode text using 17 different encoding formats.",
   },
+  alternates: {
+    canonical: "https://textytools.dev/text-encoder",
+  },
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {

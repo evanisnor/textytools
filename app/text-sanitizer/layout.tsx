@@ -22,6 +22,9 @@ export const metadata: Metadata = {
     description:
       "Clean and transform text with customizable sanitization options.",
   },
+  alternates: {
+    canonical: "https://textytools.dev/text-sanitizer",
+  },
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {

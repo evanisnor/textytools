@@ -16,6 +16,9 @@ export const metadata: Metadata = {
     "no user data",
     "privacy practices",
   ],
+  alternates: {
+    canonical: "https://textytools.dev/privacy",
+  },
 };
 
 export default function PrivacyPolicy() {

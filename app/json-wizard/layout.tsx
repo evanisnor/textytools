@@ -22,6 +22,9 @@ export const metadata: Metadata = {
     description:
       "Validate, format, search, and manipulate JSON data with advanced tooling.",
   },
+  alternates: {
+    canonical: "https://textytools.dev/json-wizard",
+  },
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {

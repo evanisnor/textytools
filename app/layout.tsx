@@ -63,6 +63,9 @@ export const metadata: Metadata = {
       "Fast, browser-based productivity tools for developers. Text manipulation, JSON formatting, case conversion, encoding, and more.",
     type: "website",
   },
+  alternates: {
+    canonical: "https://textytools.dev",
+  },
 };
 
 function Footer() {

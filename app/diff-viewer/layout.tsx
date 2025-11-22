@@ -22,6 +22,9 @@ export const metadata: Metadata = {
     description:
       "Compare two text blocks with side-by-side diff highlighting, search, and navigation.",
   },
+  alternates: {
+    canonical: "https://textytools.dev/diff-viewer",
+  },
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {
