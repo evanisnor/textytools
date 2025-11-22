@@ -33,52 +33,100 @@ interface SearchMatch {
 function computeDiff(input: string, output: string): DiffLine[] {
   const inputLines = input.split("\n");
   const outputLines = output.split("\n");
-  const maxLines = Math.max(inputLines.length, outputLines.length);
 
   const diffLines: DiffLine[] = [];
 
-  for (let i = 0; i < maxLines; i++) {
-    const inputLine = inputLines[i] ?? "";
-    const outputLine = outputLines[i] ?? "";
-    const inputExists = i < inputLines.length;
-    const outputExists = i < outputLines.length;
+  // Two-pointer approach to handle simple single-line insertions/deletions
+  let a = 0; // input index
+  let b = 0; // output index
 
-    if (!inputExists && outputExists) {
-      // Line only in output (added)
-      diffLines.push({
-        type: "added",
-        inputLineNumber: i + 1, // Still track the line number for rendering
-        outputLineNumber: i + 1,
-        inputContent: "",
-        outputContent: outputLine,
-      });
-    } else if (inputExists && !outputExists) {
-      // Line only in input (removed)
-      diffLines.push({
-        type: "removed",
-        inputLineNumber: i + 1,
-        outputLineNumber: i + 1, // Still track the line number for rendering
-        inputContent: inputLine,
-        outputContent: "",
-      });
-    } else if (inputLine === outputLine) {
-      // Lines match (unchanged)
+  while (a < inputLines.length || b < outputLines.length) {
+    const inLine = inputLines[a] ?? "";
+    const outLine = outputLines[b] ?? "";
+
+    // If both lines exist and are equal -> unchanged
+    if (a < inputLines.length && b < outputLines.length && inLine === outLine) {
       diffLines.push({
         type: "unchanged",
-        inputLineNumber: i + 1,
-        outputLineNumber: i + 1,
-        inputContent: inputLine,
-        outputContent: outputLine,
+        inputLineNumber: a + 1,
+        outputLineNumber: b + 1,
+        inputContent: inLine,
+        outputContent: outLine,
       });
-    } else {
-      // Lines differ (modified)
+      a++;
+      b++;
+      continue;
+    }
+
+    // Detect a removed line in input when the next input line matches current output
+    if (
+      a < inputLines.length &&
+      a + 1 < inputLines.length &&
+      b < outputLines.length &&
+      inputLines[a + 1] === outputLines[b]
+    ) {
+      // inputLines[a] was removed
+      diffLines.push({
+        type: "removed",
+        inputLineNumber: a + 1,
+        outputLineNumber: null,
+        inputContent: inputLines[a],
+        outputContent: "",
+      });
+      a++;
+      continue;
+    }
+
+    // Detect an added line in output when the next output line matches current input
+    if (
+      b < outputLines.length &&
+      b + 1 < outputLines.length &&
+      a < inputLines.length &&
+      outputLines[b + 1] === inputLines[a]
+    ) {
+      // outputLines[b] was added
+      diffLines.push({
+        type: "added",
+        inputLineNumber: null,
+        outputLineNumber: b + 1,
+        inputContent: "",
+        outputContent: outputLines[b],
+      });
+      b++;
+      continue;
+    }
+
+    // Fallback: treat as modified (both exist but differ), or leftover single-side lines
+    if (a < inputLines.length && b < outputLines.length) {
       diffLines.push({
         type: "modified",
-        inputLineNumber: i + 1,
-        outputLineNumber: i + 1,
-        inputContent: inputLine,
-        outputContent: outputLine,
+        inputLineNumber: a + 1,
+        outputLineNumber: b + 1,
+        inputContent: inputLines[a],
+        outputContent: outputLines[b],
       });
+      a++;
+      b++;
+    } else if (a < inputLines.length) {
+      // Remaining input lines are removed
+      diffLines.push({
+        type: "removed",
+        inputLineNumber: a + 1,
+        outputLineNumber: null,
+        inputContent: inputLines[a],
+        outputContent: "",
+      });
+      a++;
+    } else if (b < outputLines.length) {
+      // Remaining output lines are added
+      diffLines.push({
+        type: "added",
+        inputLineNumber: null,
+        outputLineNumber: b + 1,
+        inputContent: "",
+        outputContent: outputLines[b],
+      });
+      b++;
     }
   }
 

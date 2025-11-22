@@ -93,7 +93,7 @@ Line 4  -->    Line 3
                Line 4
 ```
 
-Result: Lines 2, 3, and 4 all appear modified (yellow) because they're at different positions
+Result: Lines 2 appears as a line addition, while 4 and 4 all appear unmodified because they have not changed from the original output.
 
 ## Keyboard Shortcuts
 
