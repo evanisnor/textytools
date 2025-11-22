@@ -162,6 +162,7 @@ export default function TextCounter() {
           onChange={setText}
           placeholder="Paste or type your text here..."
           height="h-96"
+          wrap={true}
         />
       </div>
     </ToolFrame>
