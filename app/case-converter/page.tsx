@@ -240,6 +240,7 @@ export default function CaseConverter() {
               placeholder="Paste or type your text here..."
               height="h-48"
               showLineNumbers={false}
+              wrap
             />
           </div>
 
@@ -280,6 +281,7 @@ export default function CaseConverter() {
               placeholder="Converted text will appear here..."
               height="h-48"
               showLineNumbers={false}
+              wrap
             />
           </div>
         </div>
