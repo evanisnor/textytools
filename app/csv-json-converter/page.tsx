@@ -11,6 +11,7 @@ import {
   trackClearEvent,
 } from "@/app/lib/analytics";
 import { TOOL_NAMES } from "@/app/lib/constants";
+import { useJsonSyntaxHighlighter } from "@/app/hooks/useJsonSyntaxHighlighter";
 
 interface JsonObject {
   [key: string]: unknown;
@@ -127,6 +128,17 @@ export default function CsvJsonConverter() {
     }
   }, [input, delimiter, includeHeaders]);
 
+  const inputJsonSyntax = useJsonSyntaxHighlighter({
+    enabled: result.detectedFormat === "json" && Boolean(input.trim()),
+  });
+
+  const outputJsonSyntax = useJsonSyntaxHighlighter({
+    enabled:
+      result.detectedFormat === "csv" &&
+      result.success &&
+      Boolean(result.output),
+  });
+
   return (
     <ToolFrame
       title="CSV / JSON Converter"
@@ -197,6 +209,11 @@ export default function CsvJsonConverter() {
                 placeholder='Paste JSON or CSV here...\n\nJSON example:\n[\n  {"name": "Alice", "age": 30},\n  {"name": "Bob", "age": 25}\n]\n\nCSV example:\nname,age\nAlice,30\nBob,25'
                 height="h-70"
                 containerClassName="p-0 border-0"
+                renderContent={
+                  result.detectedFormat === "json"
+                    ? inputJsonSyntax?.renderContent
+                    : undefined
+                }
                 renderLineContent={
                   result.detectedFormat === "csv" && input.trim()
                     ? (line) => renderCSVLine(line, delimiter)
@@ -306,6 +323,13 @@ export default function CsvJsonConverter() {
                 }
                 height="h-70"
                 containerClassName="p-0 border-0"
+                renderContent={
+                  result.detectedFormat === "csv" &&
+                  result.success &&
+                  result.output
+                    ? outputJsonSyntax?.renderContent
+                    : undefined
+                }
                 renderLineContent={
                   result.detectedFormat === "json" &&
                   result.success &&

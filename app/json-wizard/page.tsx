@@ -1,6 +1,13 @@
 "use client";
 
-import { useState, useMemo, useRef, useEffect } from "react";
+import {
+  Fragment,
+  useState,
+  useMemo,
+  useRef,
+  useEffect,
+  type ReactNode,
+} from "react";
 import Link from "next/link";
 import { useToast } from "@/app/components/Toast";
 import {
@@ -15,6 +22,11 @@ import {
   trackClearEvent,
 } from "@/app/lib/analytics";
 import { TOOL_NAMES } from "@/app/lib/constants";
+import {
+  useJsonSyntaxHighlighter,
+  tokenizeJson,
+  type JsonSyntaxTheme,
+} from "@/app/hooks/useJsonSyntaxHighlighter";
 
 type ViewMode = "pretty" | "minified" | "escaped";
 
@@ -301,6 +313,18 @@ export default function JSONWizard() {
     isEscapedString,
   ]);
 
+  const inputJsonSyntax = useJsonSyntaxHighlighter({
+    enabled: Boolean(input.trim()),
+  });
+  const inputJsonSyntaxRenderer = inputJsonSyntax?.renderContent;
+  const inputSyntaxTheme = inputJsonSyntax?.theme;
+
+  const outputJsonSyntax = useJsonSyntaxHighlighter({
+    enabled: Boolean(processedJSON.trim()),
+  });
+  const outputJsonSyntaxRenderer = outputJsonSyntax?.renderContent;
+  const outputSyntaxTheme = outputJsonSyntax?.theme;
+
   // Build ordered list of JSON paths where matches occur in output (in sort order if enabled)
   const outputMatchPaths = useMemo(() => {
     if (!searchTerm || !validation.isValid || !processedJSON.trim()) return [];
@@ -472,9 +496,14 @@ export default function JSONWizard() {
           elementRect.top - containerRect.top + inputContainer.scrollTop;
         const centerOffset =
           inputContainer.clientHeight / 2 - elementRect.height / 2;
+        const relativeLeft =
+          elementRect.left - containerRect.left + inputContainer.scrollLeft;
+        const centerOffsetX =
+          inputContainer.clientWidth / 2 - elementRect.width / 2;
 
         inputEditorRef.current?.scrollTo({
           top: relativeTop - centerOffset,
+          left: relativeLeft - centerOffsetX,
           behavior: "smooth",
         });
       }
@@ -496,9 +525,16 @@ export default function JSONWizard() {
               elementRect.top - containerRect.top + outputContainer.scrollTop;
             const centerOffset =
               outputContainer.clientHeight / 2 - elementRect.height / 2;
+            const relativeLeft =
+              elementRect.left -
+              containerRect.left +
+              outputContainer.scrollLeft;
+            const centerOffsetX =
+              outputContainer.clientWidth / 2 - elementRect.width / 2;
 
             outputEditorRef.current?.scrollTo({
               top: relativeTop - centerOffset,
+              left: relativeLeft - centerOffsetX,
               behavior: "smooth",
             });
           }
@@ -545,14 +581,41 @@ export default function JSONWizard() {
     lineIndex?: number,
     useOutputMatches = false,
     currentLocalMatchIndex?: number,
+    syntaxTheme?: JsonSyntaxTheme,
   ) => {
     if (!searchTerm || lineIndex === undefined) {
+      if (syntaxTheme && text.trim()) {
+        const tokens = tokenizeJson(text);
+        return tokens.map((token, tokenIndex) => {
+          if (token.type === "plain") {
+            return <Fragment key={tokenIndex}>{token.text}</Fragment>;
+          }
+          return (
+            <span key={tokenIndex} className={syntaxTheme[token.type]}>
+              {token.text}
+            </span>
+          );
+        });
+      }
       return text;
     }
 
     const positions = useOutputMatches ? outputMatchPositions : matchPositions;
     const lineMatches = positions.get(lineIndex);
     if (!lineMatches || lineMatches.size === 0) {
+      if (syntaxTheme && text.trim()) {
+        const tokens = tokenizeJson(text);
+        return tokens.map((token, tokenIndex) => {
+          if (token.type === "plain") {
+            return <Fragment key={tokenIndex}>{token.text}</Fragment>;
+          }
+          return (
+            <span key={tokenIndex} className={syntaxTheme[token.type]}>
+              {token.text}
+            </span>
+          );
+        });
+      }
       return text;
     }
 
@@ -569,10 +632,53 @@ export default function JSONWizard() {
       searchTerm.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
       caseSensitive ? "g" : "gi",
     );
-    const parts: Array<{ text: string; isMatch: boolean; matchIndex: number }> =
-      [];
+    const parts: Array<{
+      text: string;
+      isMatch: boolean;
+      matchIndex: number;
+      start: number;
+    }> = [];
     let lastIndex = 0;
     let match;
+    const syntaxTokens = syntaxTheme ? tokenizeJson(text) : null;
+
+    const renderWithSyntax = (
+      segment: string,
+      startIndex: number,
+    ): ReactNode => {
+      if (!segment) return segment;
+      if (!syntaxTokens || !syntaxTheme) return segment;
+
+      const segmentEnd = startIndex + segment.length;
+      const pieces: ReactNode[] = [];
+
+      syntaxTokens.forEach((token, tokenIndex) => {
+        const overlapStart = Math.max(startIndex, token.start);
+        const overlapEnd = Math.min(segmentEnd, token.end);
+        if (overlapStart >= overlapEnd) return;
+
+        const sliceStart = overlapStart - startIndex;
+        const sliceEnd = overlapEnd - startIndex;
+        const slice = segment.slice(sliceStart, sliceEnd);
+        if (!slice) return;
+
+        const className =
+          token.type === "plain" ? undefined : syntaxTheme[token.type];
+        const key = `${startIndex}-${tokenIndex}-${overlapStart}`;
+
+        pieces.push(
+          className ? (
+            <span key={key} className={className}>
+              {slice}
+            </span>
+          ) : (
+            <Fragment key={key}>{slice}</Fragment>
+          ),
+        );
+      });
+
+      return pieces.length > 0 ? pieces : segment;
+    };
 
     while ((match = regex.exec(text)) !== null) {
       // Add text before match
@@ -581,6 +687,7 @@ export default function JSONWizard() {
           text: text.substring(lastIndex, match.index),
           isMatch: false,
           matchIndex: -1,
+          start: lastIndex,
         });
       }
       // Add match - look up the pre-calculated match index
@@ -589,6 +696,7 @@ export default function JSONWizard() {
         text: match[0],
         isMatch: true,
         matchIndex: globalMatchIndex,
+        start: match.index,
       });
       lastIndex = match.index + match[0].length;
     }
@@ -599,6 +707,7 @@ export default function JSONWizard() {
         text: text.substring(lastIndex),
         isMatch: false,
         matchIndex: -1,
+        start: lastIndex,
       });
     }
 
@@ -619,11 +728,13 @@ export default function JSONWizard() {
                 : "bg-yellow-300 dark:bg-yellow-600 text-black"
             }
           >
-            {part.text}
+            {renderWithSyntax(part.text, part.start)}
           </span>
         );
       }
-      return <span key={index}>{part.text}</span>;
+
+      const content = renderWithSyntax(part.text, part.start);
+      return <Fragment key={index}>{content}</Fragment>;
     });
   };
 
@@ -733,9 +844,21 @@ export default function JSONWizard() {
                 value={input}
                 onChange={setInput}
                 placeholder='Paste your JSON here, e.g., {"key": "value"}'
+                renderContent={
+                  !searchTerm && inputJsonSyntaxRenderer
+                    ? inputJsonSyntaxRenderer
+                    : undefined
+                }
                 renderLineContent={
                   searchTerm
-                    ? (line, index) => renderHighlightedText(line, index)
+                    ? (line, index) =>
+                        renderHighlightedText(
+                          line,
+                          index,
+                          false,
+                          undefined,
+                          inputSyntaxTheme,
+                        )
                     : undefined
                 }
                 highlightLine={
@@ -828,9 +951,14 @@ export default function JSONWizard() {
               readOnly
               placeholder="Formatted JSON will appear here..."
               height="h-64"
-              {...(searchTerm && processedJSON
-                ? {
-                    renderLineContent: (line, index) => {
+              renderContent={
+                !searchTerm && outputJsonSyntaxRenderer
+                  ? outputJsonSyntaxRenderer
+                  : undefined
+              }
+              renderLineContent={
+                searchTerm && processedJSON
+                  ? (line, index) => {
                       const outputMatchIndex =
                         inputToOutputMatchMap.get(currentMatchIndex) ?? -1;
                       return renderHighlightedText(
@@ -838,10 +966,11 @@ export default function JSONWizard() {
                         index,
                         true,
                         outputMatchIndex,
+                        outputSyntaxTheme,
                       );
-                    },
-                  }
-                : {})}
+                    }
+                  : undefined
+              }
             />
           </div>
         </div>

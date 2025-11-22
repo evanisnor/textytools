@@ -11,6 +11,7 @@ import {
   trackClearEvent,
 } from "@/app/lib/analytics";
 import { TOOL_NAMES } from "@/app/lib/constants";
+import { useJsonSyntaxHighlighter } from "@/app/hooks/useJsonSyntaxHighlighter";
 
 interface JWTPayload {
   [key: string]: unknown;
@@ -193,6 +194,10 @@ export default function JWTDecoder() {
       2,
     );
   }, [result.decoded]);
+
+  const decodedJsonSyntax = useJsonSyntaxHighlighter({
+    enabled: result.success && Boolean(formattedOutput),
+  });
 
   const expired = result.decoded ? isExpired(result.decoded.expiresAt) : false;
   const notYetValid = result.decoded
@@ -415,6 +420,7 @@ export default function JWTDecoder() {
             readOnly
             placeholder={result.error ? "" : "Decoded JWT will appear here..."}
             height="h-[500px]"
+            renderContent={decodedJsonSyntax?.renderContent}
           />
           {result.error && (
             <div className="mt-2 text-sm text-red-600 dark:text-red-400">
