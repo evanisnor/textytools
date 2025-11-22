@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, JSX } from "react";
+import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import { useToast } from "@/app/components/Toast";
 import { TextEditorContainer } from "@/app/components/TextEditorContainer";
@@ -12,55 +12,11 @@ import {
 } from "@/app/lib/analytics";
 import { TOOL_NAMES } from "@/app/lib/constants";
 import { useJsonSyntaxHighlighter } from "@/app/hooks/useJsonSyntaxHighlighter";
+import { useCsvSyntaxHighlighter } from "@/app/hooks/useCsvSyntaxHighlighter";
+import { parseCsvLine } from "@/app/lib/csv";
 
 interface JsonObject {
   [key: string]: unknown;
-}
-
-// Column colors for CSV highlighting (supporting up to 20 columns)
-const COLUMN_COLORS = [
-  "bg-blue-200/60 dark:bg-blue-800/40",
-  "bg-green-200/60 dark:bg-green-800/40",
-  "bg-yellow-200/60 dark:bg-yellow-800/40",
-  "bg-purple-200/60 dark:bg-purple-800/40",
-  "bg-pink-200/60 dark:bg-pink-800/40",
-  "bg-indigo-200/60 dark:bg-indigo-800/40",
-  "bg-red-200/60 dark:bg-red-800/40",
-  "bg-orange-200/60 dark:bg-orange-800/40",
-  "bg-teal-200/60 dark:bg-teal-800/40",
-  "bg-cyan-200/60 dark:bg-cyan-800/40",
-  "bg-lime-200/60 dark:bg-lime-800/40",
-  "bg-emerald-200/60 dark:bg-emerald-800/40",
-  "bg-violet-200/60 dark:bg-violet-800/40",
-  "bg-fuchsia-200/60 dark:bg-fuchsia-800/40",
-  "bg-rose-200/60 dark:bg-rose-800/40",
-  "bg-sky-200/60 dark:bg-sky-800/40",
-  "bg-amber-200/60 dark:bg-amber-800/40",
-  "bg-slate-200/60 dark:bg-slate-800/40",
-  "bg-gray-200/60 dark:bg-gray-800/40",
-  "bg-zinc-200/60 dark:bg-zinc-700/40",
-];
-
-function renderCSVLine(line: string, delimiter: string): JSX.Element {
-  if (!line.trim()) {
-    return <>{line}</>;
-  }
-
-  const values = parseCsvLine(line, delimiter);
-
-  return (
-    <>
-      {values.map((value, colIndex) => (
-        <span
-          key={colIndex}
-          className={COLUMN_COLORS[colIndex % COLUMN_COLORS.length]}
-        >
-          {value || "\u00A0"}
-          {colIndex < values.length - 1 && delimiter}
-        </span>
-      ))}
-    </>
-  );
 }
 
 function detectInputFormat(input: string): "json" | "csv" {
@@ -137,6 +93,19 @@ export default function CsvJsonConverter() {
       result.detectedFormat === "csv" &&
       result.success &&
       Boolean(result.output),
+  });
+
+  const inputCsvSyntax = useCsvSyntaxHighlighter({
+    enabled: result.detectedFormat === "csv" && Boolean(input.trim()),
+    delimiter,
+  });
+
+  const outputCsvSyntax = useCsvSyntaxHighlighter({
+    enabled:
+      result.detectedFormat === "json" &&
+      result.success &&
+      Boolean(result.output),
+    delimiter,
   });
 
   return (
@@ -216,7 +185,7 @@ export default function CsvJsonConverter() {
                 }
                 renderLineContent={
                   result.detectedFormat === "csv" && input.trim()
-                    ? (line) => renderCSVLine(line, delimiter)
+                    ? inputCsvSyntax?.renderLineContent
                     : undefined
                 }
               />
@@ -334,7 +303,7 @@ export default function CsvJsonConverter() {
                   result.detectedFormat === "json" &&
                   result.success &&
                   result.output
-                    ? (line) => renderCSVLine(line, delimiter)
+                    ? outputCsvSyntax?.renderLineContent
                     : undefined
                 }
               />
@@ -644,37 +613,6 @@ function escapeCsvValue(value: string, delimiter: string): string {
   }
 
   return value;
-}
-
-// Helper: Parse CSV line handling quoted values
-function parseCsvLine(line: string, delimiter: string): string[] {
-  const result: string[] = [];
-  let current = "";
-  let inQuotes = false;
-
-  for (let i = 0; i < line.length; i++) {
-    const char = line[i];
-    const nextChar = line[i + 1];
-
-    if (char === '"') {
-      if (inQuotes && nextChar === '"') {
-        // Escaped quote
-        current += '"';
-        i++; // Skip next quote
-      } else {
-        // Toggle quote state
-        inQuotes = !inQuotes;
-      }
-    } else if (char === delimiter && !inQuotes) {
-      result.push(current);
-      current = "";
-    } else {
-      current += char;
-    }
-  }
-
-  result.push(current);
-  return result;
 }
 
 // Helper: Parse string values to appropriate types
