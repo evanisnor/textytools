@@ -1,6 +1,13 @@
 "use client";
 
-import { useRef, forwardRef, useImperativeHandle, useEffect } from "react";
+import {
+  useRef,
+  forwardRef,
+  useImperativeHandle,
+  useEffect,
+  useLayoutEffect,
+  useState,
+} from "react";
 
 export interface TextEditorProps {
   value: string;
@@ -77,6 +84,28 @@ export const TextEditor = forwardRef<TextEditorRef, TextEditorProps>(
   ) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
+    const contentRef = useRef<HTMLDivElement>(null);
+    const measureRef = useRef<HTMLDivElement>(null);
+    const [contentWidth, setContentWidth] = useState<number>(0);
+    const [lineHeights, setLineHeights] = useState<number[]>([]);
+    const [baseLineHeight, setBaseLineHeight] = useState<number>(20);
+    const arraysEqual = (a: number[], b: number[]) => {
+      if (a.length !== b.length) return false;
+      for (let i = 0; i < a.length; i += 1) {
+        if (a[i] !== b[i]) {
+          return false;
+        }
+      }
+      return true;
+    };
+
+    const lines = value.split("\n");
+    const lineNumberWidth = String(lines.length).length;
+    const hasCustomRendering = renderContent || renderLineContent;
+    const showNumbers = showLineNumbers && Boolean(value); // Only show line numbers when there's content
+    const wrapClasses = wrap
+      ? "whitespace-pre-wrap break-all"
+      : "whitespace-pre";
 
     useImperativeHandle(ref, () => ({
       scrollTo: (options: ScrollToOptions) => {
@@ -84,6 +113,55 @@ export const TextEditor = forwardRef<TextEditorRef, TextEditorProps>(
       },
       getContainer: () => containerRef.current,
     }));
+
+    useLayoutEffect(() => {
+      if (!contentRef.current) return;
+
+      const node = contentRef.current;
+
+      const updateMetrics = () => {
+        if (!textareaRef.current) return;
+        const computed = window.getComputedStyle(textareaRef.current);
+        const lineHeightValue = parseFloat(computed.lineHeight);
+        if (!Number.isNaN(lineHeightValue)) {
+          setBaseLineHeight((prev) =>
+            prev === lineHeightValue ? prev : lineHeightValue,
+          );
+        }
+        const width = node.clientWidth;
+        setContentWidth((prev) => (prev === width ? prev : width));
+      };
+
+      updateMetrics();
+
+      const resizeObserver = new ResizeObserver(() => {
+        updateMetrics();
+      });
+
+      resizeObserver.observe(node);
+
+      return () => {
+        resizeObserver.disconnect();
+      };
+    }, []);
+
+    useLayoutEffect(() => {
+      if (!wrap || !showNumbers) {
+        return;
+      }
+      if (!measureRef.current) return;
+
+      const nodes = Array.from(
+        measureRef.current.querySelectorAll<HTMLDivElement>("[data-line]"),
+      );
+      const measuredHeights = nodes.map((node) => {
+        return node.getBoundingClientRect().height || baseLineHeight;
+      });
+
+      setLineHeights((prev) =>
+        arraysEqual(prev, measuredHeights) ? prev : measuredHeights,
+      );
+    }, [value, wrap, showNumbers, contentWidth, baseLineHeight]);
 
     // Sync scroll between parent container and textarea
     useEffect(() => {
@@ -94,22 +172,41 @@ export const TextEditor = forwardRef<TextEditorRef, TextEditorProps>(
 
       if (!container) return;
 
+      let syncingFromTextarea = false;
+      let syncingFromContainer = false;
+
       const handleTextareaScroll = () => {
-        if (container.scrollTop !== textarea.scrollTop) {
+        if (syncingFromContainer) return;
+        const topChanged = container.scrollTop !== textarea.scrollTop;
+        const leftChanged = container.scrollLeft !== textarea.scrollLeft;
+        if (!topChanged && !leftChanged) {
+          return;
+        }
+        syncingFromTextarea = true;
+        if (topChanged) {
           container.scrollTop = textarea.scrollTop;
         }
-        if (container.scrollLeft !== textarea.scrollLeft) {
+        if (leftChanged) {
           container.scrollLeft = textarea.scrollLeft;
         }
+        syncingFromTextarea = false;
       };
 
       const handleContainerScroll = () => {
-        if (textarea.scrollTop !== container.scrollTop) {
+        if (syncingFromTextarea) return;
+        const topChanged = textarea.scrollTop !== container.scrollTop;
+        const leftChanged = textarea.scrollLeft !== container.scrollLeft;
+        if (!topChanged && !leftChanged) {
+          return;
+        }
+        syncingFromContainer = true;
+        if (topChanged) {
           textarea.scrollTop = container.scrollTop;
         }
-        if (textarea.scrollLeft !== container.scrollLeft) {
+        if (leftChanged) {
           textarea.scrollLeft = container.scrollLeft;
         }
+        syncingFromContainer = false;
       };
 
       textarea.addEventListener("scroll", handleTextareaScroll);
@@ -120,11 +217,6 @@ export const TextEditor = forwardRef<TextEditorRef, TextEditorProps>(
         container.removeEventListener("scroll", handleContainerScroll);
       };
     }, [readOnly]);
-
-    const lines = value.split("\n");
-    const lineNumberWidth = String(lines.length).length;
-    const hasCustomRendering = renderContent || renderLineContent;
-    const showNumbers = showLineNumbers && value; // Only show line numbers when there's content
 
     // Simple mode: no line numbers and no custom rendering
     if (!showLineNumbers && !hasCustomRendering) {
@@ -146,7 +238,7 @@ export const TextEditor = forwardRef<TextEditorRef, TextEditorProps>(
             onChange={onChange ? (e) => onChange(e.target.value) : undefined}
             placeholder={placeholder}
             readOnly={readOnly}
-            className={`w-full flex-1 bg-transparent text-zinc-900 dark:text-zinc-50 placeholder-zinc-400 dark:placeholder-zinc-600 resize-none focus:outline-none font-mono text-sm ${wrap ? "whitespace-pre-wrap break-all" : "whitespace-pre"}`}
+            className={`w-full flex-1 bg-transparent text-zinc-900 dark:text-zinc-50 placeholder-zinc-400 dark:placeholder-zinc-600 resize-none focus:outline-none font-mono text-sm ${wrapClasses}`}
             spellCheck={false}
           />
         </div>
@@ -168,6 +260,9 @@ export const TextEditor = forwardRef<TextEditorRef, TextEditorProps>(
               const lineNumber = index + 1;
               const isHighlighted = highlightLine?.(lineNumber);
               const customClassName = lineClassName?.(lineNumber);
+              const height = wrap
+                ? (lineHeights[index] ?? baseLineHeight)
+                : baseLineHeight;
               return (
                 <div
                   key={index}
@@ -177,6 +272,12 @@ export const TextEditor = forwardRef<TextEditorRef, TextEditorProps>(
                       ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 font-bold"
                       : "")
                   }
+                  style={{
+                    height,
+                    display: "flex",
+                    alignItems: "flex-start",
+                    justifyContent: "flex-end",
+                  }}
                 >
                   {lineNumber}
                 </div>
@@ -187,6 +288,7 @@ export const TextEditor = forwardRef<TextEditorRef, TextEditorProps>(
 
         {/* Content area */}
         <div
+          ref={contentRef}
           className={`flex-1 ${showNumbers ? "pl-4" : ""} relative flex flex-col`}
           onClick={() => {
             // Allow clicking anywhere in the content area to focus the textarea
@@ -200,7 +302,7 @@ export const TextEditor = forwardRef<TextEditorRef, TextEditorProps>(
             <div className="relative flex-1">
               {hasCustomRendering && (
                 <div
-                  className={`absolute inset-0 pointer-events-none ${wrap ? "whitespace-pre-wrap break-all" : "whitespace-pre"}`}
+                  className={`absolute inset-0 pointer-events-none ${wrapClasses}`}
                 >
                   {renderContent
                     ? renderContent(value)
@@ -226,11 +328,12 @@ export const TextEditor = forwardRef<TextEditorRef, TextEditorProps>(
                 </div>
               )}
               <textarea
+                ref={textareaRef}
                 id={id}
                 value={value}
                 readOnly
                 placeholder={placeholder}
-                className={`${hasCustomRendering ? "absolute inset-0" : "w-full h-full"} bg-transparent ${hasCustomRendering ? "text-transparent" : "text-zinc-900 dark:text-zinc-50"} resize-none focus:outline-none ${wrap ? "whitespace-pre-wrap break-all" : "whitespace-pre"} ${hasCustomRendering ? "overflow-hidden" : ""} placeholder-zinc-400 dark:placeholder-zinc-600`}
+                className={`${hasCustomRendering ? "absolute inset-0" : "w-full h-full"} bg-transparent ${hasCustomRendering ? "text-transparent" : "text-zinc-900 dark:text-zinc-50"} resize-none focus:outline-none ${wrapClasses} ${hasCustomRendering ? "overflow-hidden" : ""} placeholder-zinc-400 dark:placeholder-zinc-600`}
                 spellCheck={false}
               />
             </div>
@@ -239,7 +342,7 @@ export const TextEditor = forwardRef<TextEditorRef, TextEditorProps>(
             <div className="relative flex-1">
               {hasCustomRendering && (
                 <div
-                  className={`absolute inset-0 pointer-events-none ${wrap ? "whitespace-pre-wrap break-all" : "whitespace-pre"}`}
+                  className={`absolute inset-0 pointer-events-none ${wrapClasses}`}
                 >
                   {renderContent
                     ? renderContent(value)
@@ -272,7 +375,7 @@ export const TextEditor = forwardRef<TextEditorRef, TextEditorProps>(
                   onChange ? (e) => onChange(e.target.value) : undefined
                 }
                 placeholder={placeholder}
-                className={`${hasCustomRendering ? "absolute inset-0" : "w-full h-full"} bg-transparent ${hasCustomRendering ? "text-transparent" : "text-zinc-900 dark:text-zinc-50"} resize-none focus:outline-none ${wrap ? "whitespace-pre-wrap break-all" : "whitespace-pre"} ${hasCustomRendering ? "overflow-hidden" : ""} placeholder-zinc-400 dark:placeholder-zinc-600 selection:bg-blue-200/50 dark:selection:bg-blue-800/50`}
+                className={`${hasCustomRendering ? "absolute inset-0" : "w-full h-full"} bg-transparent ${hasCustomRendering ? "text-transparent" : "text-zinc-900 dark:text-zinc-50"} resize-none focus:outline-none ${wrapClasses} ${hasCustomRendering ? "overflow-hidden" : ""} placeholder-zinc-400 dark:placeholder-zinc-600 selection:bg-blue-200/50 dark:selection:bg-blue-800/50`}
                 spellCheck={false}
                 style={
                   hasCustomRendering
@@ -282,6 +385,24 @@ export const TextEditor = forwardRef<TextEditorRef, TextEditorProps>(
                     : undefined
                 }
               />
+            </div>
+          )}
+          {showNumbers && wrap && (
+            <div
+              ref={measureRef}
+              aria-hidden
+              className={`absolute inset-0 select-none opacity-0 pointer-events-none ${wrapClasses}`}
+              style={{
+                zIndex: -1,
+                visibility: "hidden",
+                lineHeight: `${baseLineHeight}px`,
+              }}
+            >
+              {lines.map((line, index) => (
+                <div key={index} data-line>
+                  {line || "\u200b"}
+                </div>
+              ))}
             </div>
           )}
         </div>
