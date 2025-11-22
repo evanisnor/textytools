@@ -106,6 +106,9 @@ export const TextEditor = forwardRef<TextEditorRef, TextEditorProps>(
     const wrapClasses = wrap
       ? "whitespace-pre-wrap break-all"
       : "whitespace-pre";
+    const normalizedPlaceholder = placeholder?.includes("\\n")
+      ? placeholder.replace(/\\n/g, "\n")
+      : placeholder;
 
     useImperativeHandle(ref, () => ({
       scrollTo: (options: ScrollToOptions) => {
@@ -236,7 +239,7 @@ export const TextEditor = forwardRef<TextEditorRef, TextEditorProps>(
             id={id}
             value={value}
             onChange={onChange ? (e) => onChange(e.target.value) : undefined}
-            placeholder={placeholder}
+            placeholder={normalizedPlaceholder}
             readOnly={readOnly}
             className={`w-full flex-1 bg-transparent text-zinc-900 dark:text-zinc-50 placeholder-zinc-400 dark:placeholder-zinc-600 resize-none focus:outline-none font-mono text-sm ${wrapClasses}`}
             spellCheck={false}
@@ -332,7 +335,7 @@ export const TextEditor = forwardRef<TextEditorRef, TextEditorProps>(
                 id={id}
                 value={value}
                 readOnly
-                placeholder={placeholder}
+                placeholder={normalizedPlaceholder}
                 className={`${hasCustomRendering ? "absolute inset-0" : "w-full h-full"} bg-transparent ${hasCustomRendering ? "text-transparent" : "text-zinc-900 dark:text-zinc-50"} resize-none focus:outline-none ${wrapClasses} ${hasCustomRendering ? "overflow-hidden" : ""} placeholder-zinc-400 dark:placeholder-zinc-600`}
                 spellCheck={false}
               />
@@ -374,7 +377,7 @@ export const TextEditor = forwardRef<TextEditorRef, TextEditorProps>(
                 onChange={
                   onChange ? (e) => onChange(e.target.value) : undefined
                 }
-                placeholder={placeholder}
+                placeholder={normalizedPlaceholder}
                 className={`${hasCustomRendering ? "absolute inset-0" : "w-full h-full"} bg-transparent ${hasCustomRendering ? "text-transparent" : "text-zinc-900 dark:text-zinc-50"} resize-none focus:outline-none ${wrapClasses} ${hasCustomRendering ? "overflow-hidden" : ""} placeholder-zinc-400 dark:placeholder-zinc-600 selection:bg-blue-200/50 dark:selection:bg-blue-800/50`}
                 spellCheck={false}
                 style={

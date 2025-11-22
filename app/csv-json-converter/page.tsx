@@ -195,7 +195,7 @@ export default function CsvJsonConverter() {
                 value={input}
                 onChange={setInput}
                 placeholder='Paste JSON or CSV here...\n\nJSON example:\n[\n  {"name": "Alice", "age": 30},\n  {"name": "Bob", "age": 25}\n]\n\nCSV example:\nname,age\nAlice,30\nBob,25'
-                height="h-64"
+                height="h-70"
                 containerClassName="p-0 border-0"
                 renderLineContent={
                   result.detectedFormat === "csv" && input.trim()
@@ -304,7 +304,7 @@ export default function CsvJsonConverter() {
                 placeholder={
                   result.error ? "" : "Converted output will appear here..."
                 }
-                height="h-64"
+                height="h-70"
                 containerClassName="p-0 border-0"
                 renderLineContent={
                   result.detectedFormat === "json" &&
