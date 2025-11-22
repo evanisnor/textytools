@@ -31,8 +31,10 @@ interface SearchMatch {
 
 // Simple line-by-line diff
 function computeDiff(input: string, output: string): DiffLine[] {
-  const inputLines = input.split("\n");
-  const outputLines = output.split("\n");
+  // Treat empty text as zero lines — prevent the placeholder/non-value
+  // from being interpreted as a single empty line in the diff.
+  const inputLines = input === "" ? [] : input.split("\n");
+  const outputLines = output === "" ? [] : output.split("\n");
 
   const diffLines: DiffLine[] = [];
 
