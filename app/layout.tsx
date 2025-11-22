@@ -69,17 +69,81 @@ function Footer() {
   return (
     <footer className="border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
       <div className="max-w-7xl mx-auto px-6 py-8">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-zinc-600 dark:text-zinc-400">
-            © {new Date().getFullYear()} Texty Software.
-          </p>
-          <div className="flex gap-6">
+        <div className="flex flex-col md:flex-row justify-between items-stretch gap-4">
+          <div className="flex-1 md:max-w-md">
+            <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
+              texty tools
+            </h3>
+            <div
+              aria-label="Tool catalog"
+              className="grid grid-cols-2 gap-2 text-sm text-zinc-600 dark:text-zinc-400"
+            >
+              <div className="flex flex-col gap-2">
+                <Link
+                  href="/text-counter"
+                  className="hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
+                >
+                  Text Counter
+                </Link>
+                <Link
+                  href="/diff-viewer"
+                  className="hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
+                >
+                  Diff Viewer
+                </Link>
+                <Link
+                  href="/case-converter"
+                  className="hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
+                >
+                  Case Converter
+                </Link>
+                <Link
+                  href="/text-sanitizer"
+                  className="hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
+                >
+                  Text Sanitizer
+                </Link>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <Link
+                  href="/json-wizard"
+                  className="hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
+                >
+                  JSON Wizard
+                </Link>
+                <Link
+                  href="/csv-json-converter"
+                  className="hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
+                >
+                  CSV / JSON Converter
+                </Link>
+                <Link
+                  href="/text-encoder"
+                  className="hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
+                >
+                  Text Encoder
+                </Link>
+                <Link
+                  href="/jwt-decoder"
+                  className="hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
+                >
+                  JWT Decoder
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col items-end md:justify-end gap-3">
             <Link
               href="/privacy"
               className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
             >
               Privacy Policy
             </Link>
+            <p className="text-sm text-zinc-600 dark:text-zinc-400">
+              © {new Date().getFullYear()} Texty Software
+            </p>
           </div>
         </div>
       </div>
