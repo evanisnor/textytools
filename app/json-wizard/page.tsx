@@ -780,14 +780,37 @@ export default function JSONWizard() {
         <div className="lg:col-span-3 space-y-6 flex flex-col">
           {/* Input */}
           <div>
-            <div className="flex items-center justify-between mb-2 min-h-9">
+            <div className="mb-2 grid grid-cols-[auto_1fr_auto] items-center gap-3 min-h-9">
               <label
                 htmlFor="json-wizard-input"
                 className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
               >
                 Input JSON
               </label>
-              {input.trim() && (
+              {input.trim() ? (
+                <div className="flex justify-center">
+                  <div
+                    className={`inline-flex h-full items-center gap-2 px-3 py-1.5 rounded border text-xs font-medium ${
+                      validation.isValid
+                        ? "bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800 text-green-800 dark:text-green-200"
+                        : "bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200"
+                    }`}
+                  >
+                    {validation.isValid ? "✓ Valid JSON" : "✗ Invalid JSON"}
+                    {!validation.isValid &&
+                      validation.lineNumber &&
+                      validation.columnNumber && (
+                        <span className="text-red-700 dark:text-red-300">
+                          (Line {validation.lineNumber}, Col{" "}
+                          {validation.columnNumber})
+                        </span>
+                      )}
+                  </div>
+                </div>
+              ) : (
+                <div />
+              )}
+              {input.trim() ? (
                 <button
                   onClick={() => {
                     trackClearEvent({
@@ -814,60 +837,39 @@ export default function JSONWizard() {
                   </svg>
                   Clear
                 </button>
+              ) : (
+                <div />
               )}
             </div>
-            <div className="relative">
-              {input.trim() && (
-                <div className="absolute top-3 right-3 z-10">
-                  <div
-                    className={`flex items-center gap-2 px-2 py-1 rounded border text-xs font-medium ${
-                      validation.isValid
-                        ? "bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800 text-green-800 dark:text-green-200"
-                        : "bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200"
-                    }`}
-                  >
-                    {validation.isValid ? "✓ Valid JSON" : "✗ Invalid JSON"}
-                    {!validation.isValid &&
-                      validation.lineNumber &&
-                      validation.columnNumber && (
-                        <span className="text-red-700 dark:text-red-300">
-                          (Line {validation.lineNumber}, Col{" "}
-                          {validation.columnNumber})
-                        </span>
-                      )}
-                  </div>
-                </div>
-              )}
-              <TextEditorContainer
-                id="json-wizard-input"
-                ref={inputEditorRef}
-                value={input}
-                onChange={setInput}
-                placeholder='Paste your JSON here, e.g., {"key": "value"}'
-                renderContent={
-                  !searchTerm && inputJsonSyntaxRenderer
-                    ? inputJsonSyntaxRenderer
-                    : undefined
-                }
-                renderLineContent={
-                  searchTerm
-                    ? (line, index) =>
-                        renderHighlightedText(
-                          line,
-                          index,
-                          false,
-                          undefined,
-                          inputSyntaxTheme,
-                        )
-                    : undefined
-                }
-                highlightLine={
-                  !validation.isValid && validation.lineNumber
-                    ? (lineNumber) => lineNumber === validation.lineNumber
-                    : undefined
-                }
-              />
-            </div>
+            <TextEditorContainer
+              id="json-wizard-input"
+              ref={inputEditorRef}
+              value={input}
+              onChange={setInput}
+              placeholder='Paste your JSON here, e.g., {"key": "value"}'
+              renderContent={
+                !searchTerm && inputJsonSyntaxRenderer
+                  ? inputJsonSyntaxRenderer
+                  : undefined
+              }
+              renderLineContent={
+                searchTerm
+                  ? (line, index) =>
+                      renderHighlightedText(
+                        line,
+                        index,
+                        false,
+                        undefined,
+                        inputSyntaxTheme,
+                      )
+                  : undefined
+              }
+              highlightLine={
+                !validation.isValid && validation.lineNumber
+                  ? (lineNumber) => lineNumber === validation.lineNumber
+                  : undefined
+              }
+            />
           </div>
 
           {/* Output */}
