@@ -316,7 +316,6 @@ export default function JSONWizard() {
   const inputJsonSyntax = useJsonSyntaxHighlighter({
     enabled: Boolean(input.trim()),
   });
-  const inputJsonSyntaxRenderer = inputJsonSyntax?.renderContent;
   const inputSyntaxTheme = inputJsonSyntax?.theme;
 
   const outputJsonSyntax = useJsonSyntaxHighlighter({
@@ -583,26 +582,22 @@ export default function JSONWizard() {
     currentLocalMatchIndex?: number,
     syntaxTheme?: JsonSyntaxTheme,
   ) => {
-    if (!searchTerm || lineIndex === undefined) {
-      if (syntaxTheme && text.trim()) {
-        const tokens = tokenizeJson(text);
-        return tokens.map((token, tokenIndex) => {
-          if (token.type === "plain") {
-            return <Fragment key={tokenIndex}>{token.text}</Fragment>;
-          }
-          return (
-            <span key={tokenIndex} className={syntaxTheme[token.type]}>
-              {token.text}
-            </span>
-          );
-        });
-      }
-      return text;
-    }
+    // 1. Identify Error on this line
+    const errorColIndex =
+      !useOutputMatches &&
+      !validation.isValid &&
+      validation.lineNumber === (lineIndex ?? -1) + 1 &&
+      validation.columnNumber
+        ? validation.columnNumber - 1
+        : -1;
 
+    // 2. Identify Search Matches on this line
     const positions = useOutputMatches ? outputMatchPositions : matchPositions;
-    const lineMatches = positions.get(lineIndex);
-    if (!lineMatches || lineMatches.size === 0) {
+    const lineMatches =
+      lineIndex !== undefined ? positions.get(lineIndex) : undefined;
+
+    // 3. If no error and no matches, return syntax highlighted text (fast path)
+    if (errorColIndex === -1 && (!lineMatches || lineMatches.size === 0)) {
       if (syntaxTheme && text.trim()) {
         const tokens = tokenizeJson(text);
         return tokens.map((token, tokenIndex) => {
@@ -619,33 +614,75 @@ export default function JSONWizard() {
       return text;
     }
 
-    // For output, use the provided mapped index, or currentMatchIndex for input
-    // If currentLocalMatchIndex is explicitly -1, it means no match found, so don't highlight
-    const matchIndexToHighlight =
-      currentLocalMatchIndex !== undefined && currentLocalMatchIndex >= 0
-        ? currentLocalMatchIndex
-        : currentLocalMatchIndex === undefined
-          ? currentMatchIndex
-          : -999;
+    // 4. Build mask for the line
+    // We use a mask array to handle overlapping highlights (error takes precedence)
+    const mask = new Array(text.length)
+      .fill(null)
+      .map(() => ({ type: "plain", matchIndex: -1 }));
 
-    const regex = new RegExp(
-      searchTerm.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
-      caseSensitive ? "g" : "gi",
-    );
+    // Apply matches
+    if (lineMatches && searchTerm) {
+      const len = searchTerm.length;
+      for (const [start, matchIndex] of lineMatches.entries()) {
+        for (let i = start; i < start + len && i < text.length; i++) {
+          mask[i] = { type: "match", matchIndex };
+        }
+      }
+    }
+
+    // Apply error (overrides matches)
+    let errorAtEnd = false;
+    if (errorColIndex !== -1) {
+      if (errorColIndex >= text.length) {
+        errorAtEnd = true;
+      } else {
+        for (let i = errorColIndex; i < text.length; i++) {
+          mask[i] = { type: "error", matchIndex: -1 };
+        }
+      }
+    }
+
+    // 5. Group consecutive identical mask items into parts
     const parts: Array<{
       text: string;
-      isMatch: boolean;
+      type: string;
       matchIndex: number;
       start: number;
     }> = [];
-    let lastIndex = 0;
-    let match;
+
+    if (text.length > 0) {
+      let currentType = mask[0].type;
+      let currentMatchIndex = mask[0].matchIndex;
+      let currentStart = 0;
+
+      for (let i = 1; i < text.length; i++) {
+        if (
+          mask[i].type !== currentType ||
+          mask[i].matchIndex !== currentMatchIndex
+        ) {
+          parts.push({
+            text: text.substring(currentStart, i),
+            type: currentType,
+            matchIndex: currentMatchIndex,
+            start: currentStart,
+          });
+          currentType = mask[i].type;
+          currentMatchIndex = mask[i].matchIndex;
+          currentStart = i;
+        }
+      }
+      parts.push({
+        text: text.substring(currentStart),
+        type: currentType,
+        matchIndex: currentMatchIndex,
+        start: currentStart,
+      });
+    }
+
+    // 6. Helper for syntax highlighting inside a part
     const syntaxTokens = syntaxTheme ? tokenizeJson(text) : null;
 
-    const renderWithSyntax = (
-      segment: string,
-      startIndex: number,
-    ): ReactNode => {
+    const renderPartContent = (segment: string, startIndex: number) => {
       if (!segment) return segment;
       if (!syntaxTokens || !syntaxTheme) return segment;
 
@@ -680,40 +717,27 @@ export default function JSONWizard() {
       return pieces.length > 0 ? pieces : segment;
     };
 
-    while ((match = regex.exec(text)) !== null) {
-      // Add text before match
-      if (match.index > lastIndex) {
-        parts.push({
-          text: text.substring(lastIndex, match.index),
-          isMatch: false,
-          matchIndex: -1,
-          start: lastIndex,
-        });
+    // 7. Render parts
+    const result = parts.map((part, index) => {
+      if (part.type === "error") {
+        return (
+          <span
+            key={index}
+            className="bg-red-500/30 decoration-red-500 underline decoration-wavy text-red-900 dark:text-red-100"
+          >
+            {renderPartContent(part.text, part.start)}
+          </span>
+        );
       }
-      // Add match - look up the pre-calculated match index
-      const globalMatchIndex = lineMatches.get(match.index) ?? -1;
-      parts.push({
-        text: match[0],
-        isMatch: true,
-        matchIndex: globalMatchIndex,
-        start: match.index,
-      });
-      lastIndex = match.index + match[0].length;
-    }
-
-    // Add remaining text
-    if (lastIndex < text.length) {
-      parts.push({
-        text: text.substring(lastIndex),
-        isMatch: false,
-        matchIndex: -1,
-        start: lastIndex,
-      });
-    }
-
-    return parts.map((part, index) => {
-      if (part.isMatch) {
+      if (part.type === "match") {
+        const matchIndexToHighlight =
+          currentLocalMatchIndex !== undefined && currentLocalMatchIndex >= 0
+            ? currentLocalMatchIndex
+            : currentLocalMatchIndex === undefined
+              ? currentMatchIndex
+              : -999;
         const isCurrentMatch = part.matchIndex === matchIndexToHighlight;
+
         return (
           <span
             key={index}
@@ -728,14 +752,29 @@ export default function JSONWizard() {
                 : "bg-yellow-300 dark:bg-yellow-600 text-black"
             }
           >
-            {renderWithSyntax(part.text, part.start)}
+            {renderPartContent(part.text, part.start)}
           </span>
         );
       }
-
-      const content = renderWithSyntax(part.text, part.start);
-      return <Fragment key={index}>{content}</Fragment>;
+      return (
+        <Fragment key={index}>
+          {renderPartContent(part.text, part.start)}
+        </Fragment>
+      );
     });
+
+    if (errorAtEnd) {
+      result.push(
+        <span
+          key="error-end"
+          className="bg-red-500/30 decoration-red-500 underline decoration-wavy text-red-900 dark:text-red-100"
+        >
+          &nbsp;
+        </span>,
+      );
+    }
+
+    return result;
   };
 
   return (
@@ -797,14 +836,7 @@ export default function JSONWizard() {
                     }`}
                   >
                     {validation.isValid ? "✓ Valid JSON" : "✗ Invalid JSON"}
-                    {!validation.isValid &&
-                      validation.lineNumber &&
-                      validation.columnNumber && (
-                        <span className="text-red-700 dark:text-red-300">
-                          (Line {validation.lineNumber}, Col{" "}
-                          {validation.columnNumber})
-                        </span>
-                      )}
+                    {/* Error location hidden, now highlighted in editor */}
                   </div>
                 </div>
               ) : (
@@ -847,27 +879,14 @@ export default function JSONWizard() {
               value={input}
               onChange={setInput}
               placeholder='Paste your JSON here, e.g., {"key": "value"}'
-              renderContent={
-                !searchTerm && inputJsonSyntaxRenderer
-                  ? inputJsonSyntaxRenderer
-                  : undefined
-              }
-              renderLineContent={
-                searchTerm
-                  ? (line, index) =>
-                      renderHighlightedText(
-                        line,
-                        index,
-                        false,
-                        undefined,
-                        inputSyntaxTheme,
-                      )
-                  : undefined
-              }
-              highlightLine={
-                !validation.isValid && validation.lineNumber
-                  ? (lineNumber) => lineNumber === validation.lineNumber
-                  : undefined
+              renderLineContent={(line, index) =>
+                renderHighlightedText(
+                  line,
+                  index,
+                  false,
+                  undefined,
+                  inputSyntaxTheme,
+                )
               }
             />
           </div>
