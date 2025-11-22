@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useRef, useEffect } from "react";
+import { diffLines } from "diff";
 import { useToast } from "@/app/components/Toast";
 import {
   TextEditorContainer,
@@ -29,110 +30,140 @@ interface SearchMatch {
   outputMatches: number[]; // Column positions of matches in output/right pane
 }
 
-// Simple line-by-line diff
-function computeDiff(input: string, output: string): DiffLine[] {
-  // Treat empty text as zero lines — prevent the placeholder/non-value
-  // from being interpreted as a single empty line in the diff.
-  const inputLines = input === "" ? [] : input.split("\n");
-  const outputLines = output === "" ? [] : output.split("\n");
-
-  const diffLines: DiffLine[] = [];
-
-  // Two-pointer approach to handle simple single-line insertions/deletions
-  let a = 0; // input index
-  let b = 0; // output index
-
-  while (a < inputLines.length || b < outputLines.length) {
-    const inLine = inputLines[a] ?? "";
-    const outLine = outputLines[b] ?? "";
-
-    // If both lines exist and are equal -> unchanged
-    if (a < inputLines.length && b < outputLines.length && inLine === outLine) {
-      diffLines.push({
-        type: "unchanged",
-        inputLineNumber: a + 1,
-        outputLineNumber: b + 1,
-        inputContent: inLine,
-        outputContent: outLine,
-      });
-      a++;
-      b++;
-      continue;
-    }
-
-    // Detect a removed line in input when the next input line matches current output
-    if (
-      a < inputLines.length &&
-      a + 1 < inputLines.length &&
-      b < outputLines.length &&
-      inputLines[a + 1] === outputLines[b]
-    ) {
-      // inputLines[a] was removed
-      diffLines.push({
-        type: "removed",
-        inputLineNumber: a + 1,
-        outputLineNumber: null,
-        inputContent: inputLines[a],
-        outputContent: "",
-      });
-      a++;
-      continue;
-    }
-
-    // Detect an added line in output when the next output line matches current input
-    if (
-      b < outputLines.length &&
-      b + 1 < outputLines.length &&
-      a < inputLines.length &&
-      outputLines[b + 1] === inputLines[a]
-    ) {
-      // outputLines[b] was added
-      diffLines.push({
-        type: "added",
-        inputLineNumber: null,
-        outputLineNumber: b + 1,
-        inputContent: "",
-        outputContent: outputLines[b],
-      });
-      b++;
-      continue;
-    }
-
-    // Fallback: treat as modified (both exist but differ), or leftover single-side lines
-    if (a < inputLines.length && b < outputLines.length) {
-      diffLines.push({
-        type: "modified",
-        inputLineNumber: a + 1,
-        outputLineNumber: b + 1,
-        inputContent: inputLines[a],
-        outputContent: outputLines[b],
-      });
-      a++;
-      b++;
-    } else if (a < inputLines.length) {
-      // Remaining input lines are removed
-      diffLines.push({
-        type: "removed",
-        inputLineNumber: a + 1,
-        outputLineNumber: null,
-        inputContent: inputLines[a],
-        outputContent: "",
-      });
-      a++;
-    } else if (b < outputLines.length) {
-      // Remaining output lines are added
-      diffLines.push({
-        type: "added",
-        inputLineNumber: null,
-        outputLineNumber: b + 1,
-        inputContent: "",
-        outputContent: outputLines[b],
-      });
-      b++;
-    }
+const splitIntoLines = (value: string, count?: number): string[] => {
+  if (value === "") {
+    return count ? Array.from({ length: count }, () => "") : [];
   }
 
-  return diffLines;
+  const lines = value.split("\n");
+  if (lines.length && lines[lines.length - 1] === "") {
+    lines.pop();
+  }
+
+  const expectedLength = count ?? lines.length;
+  while (lines.length < expectedLength) {
+    lines.push("");
+  }
+
+  return lines;
+};
+
+// Use a real diff algorithm so insertions/deletions no longer misalign all following lines.
+function computeDiff(input: string, output: string): DiffLine[] {
+  if (!input && !output) {
+    return [];
+  }
+
+  const structuredDiff = diffLines(input, output);
+  const result: DiffLine[] = [];
+
+  let inputLineNumber = 1;
+  let outputLineNumber = 1;
+
+  for (let i = 0; i < structuredDiff.length; i++) {
+    const part = structuredDiff[i];
+    const partLines = splitIntoLines(part.value, part.count);
+
+    // Pair removed blocks that are immediately followed by added blocks and treat them as modifications.
+    if (part.removed && structuredDiff[i + 1]?.added) {
+      const addedPart = structuredDiff[i + 1];
+      const addedLines = splitIntoLines(addedPart.value, addedPart.count);
+      const maxLen = Math.max(partLines.length, addedLines.length);
+
+      let localInputOffset = 0;
+      let localOutputOffset = 0;
+
+      for (let lineIndex = 0; lineIndex < maxLen; lineIndex++) {
+        const hasInput = lineIndex < partLines.length;
+        const hasOutput = lineIndex < addedLines.length;
+        const inputContent = hasInput ? partLines[lineIndex] : "";
+        const outputContent = hasOutput ? addedLines[lineIndex] : "";
+
+        const currentInputLine = hasInput
+          ? inputLineNumber + localInputOffset
+          : null;
+        const currentOutputLine = hasOutput
+          ? outputLineNumber + localOutputOffset
+          : null;
+
+        if (hasInput && hasOutput) {
+          result.push({
+            type: "modified",
+            inputLineNumber: currentInputLine,
+            outputLineNumber: currentOutputLine,
+            inputContent,
+            outputContent,
+          });
+        } else if (hasInput) {
+          result.push({
+            type: "removed",
+            inputLineNumber: currentInputLine,
+            outputLineNumber: null,
+            inputContent,
+            outputContent: "",
+          });
+        } else if (hasOutput) {
+          result.push({
+            type: "added",
+            inputLineNumber: null,
+            outputLineNumber: currentOutputLine,
+            inputContent: "",
+            outputContent,
+          });
+        }
+
+        if (hasInput) localInputOffset++;
+        if (hasOutput) localOutputOffset++;
+      }
+
+      inputLineNumber += partLines.length;
+      outputLineNumber += addedLines.length;
+      i++; // Skip the added block we just consumed
+      continue;
+    }
+
+    if (part.removed) {
+      partLines.forEach((line) => {
+        result.push({
+          type: "removed",
+          inputLineNumber,
+          outputLineNumber: null,
+          inputContent: line,
+          outputContent: "",
+        });
+        inputLineNumber++;
+      });
+      continue;
+    }
+
+    if (part.added) {
+      partLines.forEach((line) => {
+        result.push({
+          type: "added",
+          inputLineNumber: null,
+          outputLineNumber,
+          inputContent: "",
+          outputContent: line,
+        });
+        outputLineNumber++;
+      });
+      continue;
+    }
+
+    partLines.forEach((line) => {
+      result.push({
+        type: "unchanged",
+        inputLineNumber,
+        outputLineNumber,
+        inputContent: line,
+        outputContent: line,
+      });
+      inputLineNumber++;
+      outputLineNumber++;
+    });
+  }
+
+  return result;
 }
 
 export default function DiffViewer() {
