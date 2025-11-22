@@ -119,13 +119,22 @@ export default function CsvJsonConverter() {
         <div className="lg:col-span-3 space-y-6 flex flex-col">
           {/* Input */}
           <div>
-            <div className="mb-2 flex items-center justify-between min-h-9">
+            <div className="mb-2 grid grid-cols-[auto_1fr_auto] items-center min-h-9 gap-3">
               <label
                 htmlFor="csv-json-input"
                 className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
               >
                 Input
               </label>
+              {input.trim() && (
+                <div className="justify-self-center inline-flex items-center px-3 py-1.5 rounded bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700">
+                  <span className="text-xs font-medium text-zinc-900 dark:text-zinc-50">
+                    {result.detectedFormat === "json"
+                      ? "JSON → CSV"
+                      : "CSV → JSON"}
+                  </span>
+                </div>
+              )}
               {input.trim() && (
                 <button
                   onClick={() => {
@@ -140,7 +149,7 @@ export default function CsvJsonConverter() {
                     });
                     setInput("");
                   }}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 active:bg-zinc-300 dark:active:bg-zinc-600 transition-colors"
+                  className="justify-self-end inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 active:bg-zinc-300 dark:active:bg-zinc-600 transition-colors"
                 >
                   <svg
                     className="w-4 h-4"
@@ -159,18 +168,7 @@ export default function CsvJsonConverter() {
                 </button>
               )}
             </div>
-            <div className="relative bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-1">
-              {input.trim() && (
-                <div className="absolute top-3 right-3 z-10">
-                  <div className="px-2 py-1 rounded bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700">
-                    <span className="text-xs font-medium text-zinc-900 dark:text-zinc-50">
-                      {result.detectedFormat === "json"
-                        ? "JSON → CSV"
-                        : "CSV → JSON"}
-                    </span>
-                  </div>
-                </div>
-              )}
+            <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-1">
               <TextEditorContainer
                 id="csv-json-input"
                 value={input}
