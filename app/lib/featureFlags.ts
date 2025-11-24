@@ -27,9 +27,8 @@ function initializeToggle(flag: ToggleMode): () => boolean {
 /*
  * Define feature flags below.
  */
-
 const toggle = {
-  regexTester: Development,
+  regexTester: Production,
 } as const satisfies Record<string, ToggleMode>;
 
 export const isRegexTesterEnabled = initializeToggle(toggle.regexTester);
