@@ -132,7 +132,7 @@ function toUrlEncoding(str: string): string {
 
 function fromUrlEncoding(str: string): string {
   try {
-    return decodeURIComponent(str);
+    return decodeURIComponent(str.replace(/\+/g, " "));
   } catch {
     return "Error: Invalid URL encoding";
   }
