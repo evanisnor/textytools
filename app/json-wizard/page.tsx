@@ -932,6 +932,53 @@ export default function JSONWizard() {
               <div className="flex items-center gap-2">
                 {processedJSON &&
                   validation.isValid &&
+                  ["minified", "escaped"].includes(viewMode) && (
+                    <Link
+                      href="/text-encoder"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        trackToolConversion({
+                          sourceTool: "json-wizard",
+                          destinationTool: "text-encoder",
+                          viewMode,
+                          sortKeys,
+                        });
+                        sessionStorage.setItem(
+                          "json-wizard-state",
+                          JSON.stringify({
+                            input,
+                            viewMode,
+                            indentSize,
+                            sortKeys,
+                            caseSensitive,
+                          }),
+                        );
+                        sessionStorage.setItem(
+                          "cross-tool-input-text-encoder",
+                          processedJSON,
+                        );
+                        window.location.href = "/text-encoder";
+                      }}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-900 dark:text-purple-100 rounded hover:bg-purple-200 dark:hover:bg-purple-900/50 active:bg-purple-300 dark:active:bg-purple-900/70 transition-colors"
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 10l7-7m0 0l7 7m-7-7v18"
+                        />
+                      </svg>
+                      Open in Text Encoder
+                    </Link>
+                  )}
+                {processedJSON &&
+                  validation.isValid &&
                   viewMode !== "escaped" && (
                     <Link
                       href="/csv-json-converter"

@@ -973,6 +973,15 @@ export default function TextEncoderPage() {
   useEffect(() => {
     setTimeout(() => {
       setMounted(true);
+      const crossToolInput = sessionStorage.getItem(
+        "cross-tool-input-text-encoder",
+      );
+      if (crossToolInput) {
+        sessionStorage.removeItem("cross-tool-input-text-encoder");
+        setText(crossToolInput);
+        setMode("encode");
+        return;
+      }
       const persistedState = sessionStorage.getItem("text-encoder-state");
       if (persistedState) {
         try {
