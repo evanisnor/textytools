@@ -570,5 +570,5 @@ Alice and Bob went to Seattle
 - All processing happens client-side for privacy and speed
 - Named group extraction parses `(?<name>...)` syntax from pattern to build header mappings
 - CSV conversion follows RFC 4180 escaping rules (doubles quotes, wraps values containing commas/quotes/newlines)
-- Cross-tool integration with CSV/JSON Converter via localStorage for seamless data transfer
+- Cross-tool integration with CSV/JSON Converter via sessionStorage for seamless data transfer
 - Analytics tracking for tool-to-tool conversions to measure feature usage

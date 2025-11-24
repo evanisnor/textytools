@@ -45,10 +45,10 @@ export default function CsvJsonConverter() {
   const { showToast, ToastComponent } = useToast();
 
   React.useEffect(() => {
-    // Load from localStorage after mount to avoid hydration mismatch
-    const storedInput = localStorage.getItem("csv-json-converter-input");
+    // Load from sessionStorage after mount to avoid hydration mismatch
+    const storedInput = sessionStorage.getItem("csv-json-converter-input");
     if (storedInput) {
-      localStorage.removeItem("csv-json-converter-input");
+      sessionStorage.removeItem("csv-json-converter-input");
       // Use setTimeout to avoid synchronous setState in effect
       setTimeout(() => setInput(storedInput), 0);
     }
@@ -219,9 +219,12 @@ export default function CsvJsonConverter() {
                           includeHeaders,
                         });
                         // Save current CSV input for restoration on back navigation
-                        localStorage.setItem("csv-json-converter-input", input);
+                        sessionStorage.setItem(
+                          "csv-json-converter-input",
+                          input,
+                        );
                         // Save converted JSON for JSON Wizard
-                        localStorage.setItem(
+                        sessionStorage.setItem(
                           "json-wizard-input",
                           result.output,
                         );

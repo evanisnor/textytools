@@ -147,10 +147,10 @@ export default function JWTDecoder() {
   const { showToast, ToastComponent } = useToast();
 
   useEffect(() => {
-    // Load from localStorage after mount to avoid hydration mismatch
-    const storedInput = localStorage.getItem("jwt-decoder-input");
+    // Load from sessionStorage after mount to avoid hydration mismatch
+    const storedInput = sessionStorage.getItem("jwt-decoder-input");
     if (storedInput) {
-      localStorage.removeItem("jwt-decoder-input");
+      sessionStorage.removeItem("jwt-decoder-input");
       // Use setTimeout to avoid synchronous setState in effect
       setTimeout(() => setInput(storedInput), 0);
     }
@@ -364,9 +364,12 @@ export default function JWTDecoder() {
                       destinationTool: "json-wizard",
                     });
                     // Save current JWT input for restoration on back navigation
-                    localStorage.setItem("jwt-decoder-input", input);
+                    sessionStorage.setItem("jwt-decoder-input", input);
                     // Save formatted output for JSON Wizard
-                    localStorage.setItem("json-wizard-input", formattedOutput);
+                    sessionStorage.setItem(
+                      "json-wizard-input",
+                      formattedOutput,
+                    );
                     window.location.href = "/json-wizard";
                   }}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-900 dark:text-blue-100 rounded hover:bg-blue-200 dark:hover:bg-blue-900/50 active:bg-blue-300 dark:active:bg-blue-900/70 transition-colors"

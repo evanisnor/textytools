@@ -138,9 +138,9 @@ export default function JSONWizard() {
     // Use setTimeout to avoid synchronous setState in effect
     setTimeout(() => {
       setMounted(true);
-      const storedInput = localStorage.getItem("json-wizard-input");
+      const storedInput = sessionStorage.getItem("json-wizard-input");
       if (storedInput) {
-        localStorage.removeItem("json-wizard-input");
+        sessionStorage.removeItem("json-wizard-input");
         setInput(storedInput);
       }
     }, 0);
@@ -917,9 +917,9 @@ export default function JSONWizard() {
                           sortKeys,
                         });
                         // Save current JSON input for restoration on back navigation
-                        localStorage.setItem("json-wizard-input", input);
+                        sessionStorage.setItem("json-wizard-input", input);
                         // Save processed JSON for CSV Converter
-                        localStorage.setItem(
+                        sessionStorage.setItem(
                           "csv-json-converter-input",
                           processedJSON,
                         );
