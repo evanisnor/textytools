@@ -82,6 +82,50 @@ export default function RegexTester() {
     }
   };
 
+  const toSnakeCase = (str: string): string => {
+    return str
+      .replace(/([A-Z])/g, "_$1")
+      .toLowerCase()
+      .replace(/^_/, "")
+      .replace(/\s+/g, "_");
+  };
+
+  const convertToJson = () => {
+    if (matches.length === 0) return;
+
+    const hasGroups = matches[0].groups.length > 0;
+    if (!hasGroups) return;
+
+    // Build array of objects from matches
+    const jsonArray = matches.map((match) => {
+      const obj: Record<string, string> = {};
+
+      match.groups.forEach((group, idx) => {
+        const groupName = match.groupNames[idx];
+        const key = groupName ? toSnakeCase(groupName) : `group_${idx + 1}`;
+        obj[key] = group || "";
+      });
+
+      return obj;
+    });
+
+    const jsonOutput = JSON.stringify(jsonArray, null, 2);
+
+    // Save JSON for json-wizard
+    localStorage.setItem("json-wizard-input", jsonOutput);
+
+    // Track the conversion
+    trackToolConversion({
+      sourceTool: "regex-tester",
+      destinationTool: "json-wizard",
+      matchCount: matches.length,
+      hasNamedGroups: matches[0].groupNames.some((name) => name !== null),
+    });
+
+    // Navigate to json-wizard
+    window.location.href = "/json-wizard";
+  };
+
   const convertToCsv = () => {
     if (matches.length === 0) return;
 
@@ -372,29 +416,54 @@ export default function RegexTester() {
               </div>
               <div className="flex items-center gap-2">
                 {matches[0].groups.length > 0 && (
-                  <Link
-                    href="/csv-json-converter"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      convertToCsv();
-                    }}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-900 dark:text-blue-100 rounded hover:bg-blue-200 dark:hover:bg-blue-900/50 active:bg-blue-300 dark:active:bg-blue-900/70 transition-colors cursor-pointer"
-                  >
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+                  <>
+                    <Link
+                      href="/json-wizard"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        convertToJson();
+                      }}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-900 dark:text-blue-100 rounded hover:bg-blue-200 dark:hover:bg-blue-900/50 active:bg-blue-300 dark:active:bg-blue-900/70 transition-colors cursor-pointer"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                      />
-                    </svg>
-                    Convert to CSV
-                  </Link>
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 10l7-7m0 0l7 7m-7-7v18"
+                        />
+                      </svg>
+                      Convert to JSON
+                    </Link>
+                    <Link
+                      href="/csv-json-converter"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        convertToCsv();
+                      }}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-900 dark:text-blue-100 rounded hover:bg-blue-200 dark:hover:bg-blue-900/50 active:bg-blue-300 dark:active:bg-blue-900/70 transition-colors cursor-pointer"
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 10l7-7m0 0l7 7m-7-7v18"
+                        />
+                      </svg>
+                      Convert to CSV
+                    </Link>
+                  </>
                 )}
                 <button
                   onClick={copyMatches}
