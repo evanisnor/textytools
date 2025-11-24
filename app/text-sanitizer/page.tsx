@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/app/components/Toast";
 import { TextEditorContainer } from "@/app/components/TextEditorContainer";
 import { ToolFrame } from "@/app/components/ToolFrame";
@@ -171,7 +171,32 @@ function sanitizeText(text: string, options: SanitizationOption[]): string {
 export default function TextSanitizer() {
   const [text, setText] = useState("");
   const [options, setOptions] = useState<SanitizationOption[]>(defaultOptions);
+  const [mounted, setMounted] = useState(false);
   const { showToast, ToastComponent } = useToast();
+
+  // Load persisted state on mount
+  useEffect(() => {
+    setTimeout(() => {
+      setMounted(true);
+      const persistedState = sessionStorage.getItem("text-sanitizer-state");
+      if (persistedState) {
+        try {
+          const state = JSON.parse(persistedState);
+          if (state.text !== undefined) setText(state.text);
+          if (state.options !== undefined) setOptions(state.options);
+        } catch (err) {
+          console.error("Failed to load persisted state:", err);
+        }
+      }
+    }, 0);
+  }, []);
+
+  // Persist state whenever inputs change
+  useEffect(() => {
+    if (!mounted) return;
+    const state = { text, options };
+    sessionStorage.setItem("text-sanitizer-state", JSON.stringify(state));
+  }, [text, options, mounted]);
 
   const sanitizedText = sanitizeText(text, options);
 

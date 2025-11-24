@@ -11,6 +11,31 @@ import { TOOL_NAMES } from "@/app/lib/constants";
 export default function TextCounter() {
   const [text, setText] = useState("");
   const [textTrimmed, setTextTrimmed] = useState("");
+  const [mounted, setMounted] = useState(false);
+
+  // Load persisted state on mount
+  useEffect(() => {
+    setTimeout(() => {
+      setMounted(true);
+      const persistedState = sessionStorage.getItem("text-counter-state");
+      if (persistedState) {
+        try {
+          const state = JSON.parse(persistedState);
+          if (state.text !== undefined) setText(state.text);
+        } catch (err) {
+          console.error("Failed to load persisted state:", err);
+        }
+      }
+    }, 0);
+  }, []);
+
+  // Persist state whenever text changes
+  useEffect(() => {
+    if (!mounted) return;
+    const state = { text };
+    sessionStorage.setItem("text-counter-state", JSON.stringify(state));
+  }, [text, mounted]);
+
   useEffect(() => {
     setTextTrimmed(text.trim());
   }, [text]);

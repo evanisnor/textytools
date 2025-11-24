@@ -42,17 +42,44 @@ export default function CsvJsonConverter() {
   const [input, setInput] = useState("");
   const [delimiter, setDelimiter] = useState(",");
   const [includeHeaders, setIncludeHeaders] = useState(true);
+  const [mounted, setMounted] = useState(false);
   const { showToast, ToastComponent } = useToast();
 
   React.useEffect(() => {
     // Load from sessionStorage after mount to avoid hydration mismatch
-    const storedInput = sessionStorage.getItem("csv-json-converter-input");
-    if (storedInput) {
-      sessionStorage.removeItem("csv-json-converter-input");
-      // Use setTimeout to avoid synchronous setState in effect
-      setTimeout(() => setInput(storedInput), 0);
-    }
+    setTimeout(() => {
+      setMounted(true);
+
+      // Check for cross-tool data first (takes precedence)
+      const storedInput = sessionStorage.getItem("csv-json-converter-input");
+      if (storedInput) {
+        sessionStorage.removeItem("csv-json-converter-input");
+        setInput(storedInput);
+        return;
+      }
+
+      // Load persisted state from sessionStorage
+      const persistedState = sessionStorage.getItem("csv-json-converter-state");
+      if (persistedState) {
+        try {
+          const state = JSON.parse(persistedState);
+          if (state.input !== undefined) setInput(state.input);
+          if (state.delimiter !== undefined) setDelimiter(state.delimiter);
+          if (state.includeHeaders !== undefined)
+            setIncludeHeaders(state.includeHeaders);
+        } catch (err) {
+          console.error("Failed to load persisted state:", err);
+        }
+      }
+    }, 0);
   }, []);
+
+  // Persist state whenever inputs change
+  React.useEffect(() => {
+    if (!mounted) return;
+    const state = { input, delimiter, includeHeaders };
+    sessionStorage.setItem("csv-json-converter-state", JSON.stringify(state));
+  }, [input, delimiter, includeHeaders, mounted]);
 
   const result = useMemo(() => {
     if (!input.trim()) {

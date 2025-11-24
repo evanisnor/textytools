@@ -966,7 +966,34 @@ export default function TextEncoderPage() {
     useState<EncodingType>("base64");
   const [mode, setMode] = useState<"encode" | "decode">("encode");
   const [outputText, setOutputText] = useState("");
+  const [mounted, setMounted] = useState(false);
   const { showToast, ToastComponent } = useToast();
+
+  // Load persisted state on mount
+  useEffect(() => {
+    setTimeout(() => {
+      setMounted(true);
+      const persistedState = sessionStorage.getItem("text-encoder-state");
+      if (persistedState) {
+        try {
+          const state = JSON.parse(persistedState);
+          if (state.text !== undefined) setText(state.text);
+          if (state.selectedEncoding !== undefined)
+            setSelectedEncoding(state.selectedEncoding);
+          if (state.mode !== undefined) setMode(state.mode);
+        } catch (err) {
+          console.error("Failed to load persisted state:", err);
+        }
+      }
+    }, 0);
+  }, []);
+
+  // Persist state whenever inputs change
+  useEffect(() => {
+    if (!mounted) return;
+    const state = { text, selectedEncoding, mode };
+    sessionStorage.setItem("text-encoder-state", JSON.stringify(state));
+  }, [text, selectedEncoding, mode, mounted]);
 
   const handleModeChange = (newMode: "encode" | "decode") => {
     setMode(newMode);

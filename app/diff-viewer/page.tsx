@@ -172,10 +172,38 @@ export default function DiffViewer() {
   const [searchTerm, setSearchTerm] = useState("");
   const [caseSensitive, setCaseSensitive] = useState(false);
   const [currentMatchIndex, setCurrentMatchIndex] = useState(0);
+  const [mounted, setMounted] = useState(false);
 
   const inputEditorRef = useRef<TextEditorContainerRef>(null);
   const outputEditorRef = useRef<TextEditorContainerRef>(null);
   const { ToastComponent } = useToast();
+
+  // Load persisted state on mount
+  useEffect(() => {
+    setTimeout(() => {
+      setMounted(true);
+      const persistedState = sessionStorage.getItem("diff-viewer-state");
+      if (persistedState) {
+        try {
+          const state = JSON.parse(persistedState);
+          if (state.input !== undefined) setInput(state.input);
+          if (state.output !== undefined) setOutput(state.output);
+          if (state.searchTerm !== undefined) setSearchTerm(state.searchTerm);
+          if (state.caseSensitive !== undefined)
+            setCaseSensitive(state.caseSensitive);
+        } catch (err) {
+          console.error("Failed to load persisted state:", err);
+        }
+      }
+    }, 0);
+  }, []);
+
+  // Persist state whenever inputs change
+  useEffect(() => {
+    if (!mounted) return;
+    const state = { input, output, searchTerm, caseSensitive };
+    sessionStorage.setItem("diff-viewer-state", JSON.stringify(state));
+  }, [input, output, searchTerm, caseSensitive, mounted]);
 
   // Compute diff
   const diffLines = useMemo(() => {

@@ -144,17 +144,41 @@ function isNotYetValid(notBefore: Date | undefined): boolean {
 
 export default function JWTDecoder() {
   const [input, setInput] = useState("");
+  const [mounted, setMounted] = useState(false);
   const { showToast, ToastComponent } = useToast();
 
   useEffect(() => {
     // Load from sessionStorage after mount to avoid hydration mismatch
-    const storedInput = sessionStorage.getItem("jwt-decoder-input");
-    if (storedInput) {
-      sessionStorage.removeItem("jwt-decoder-input");
-      // Use setTimeout to avoid synchronous setState in effect
-      setTimeout(() => setInput(storedInput), 0);
-    }
+    setTimeout(() => {
+      setMounted(true);
+
+      // Check for cross-tool data first (takes precedence)
+      const storedInput = sessionStorage.getItem("jwt-decoder-input");
+      if (storedInput) {
+        sessionStorage.removeItem("jwt-decoder-input");
+        setInput(storedInput);
+        return;
+      }
+
+      // Load persisted state from sessionStorage
+      const persistedState = sessionStorage.getItem("jwt-decoder-state");
+      if (persistedState) {
+        try {
+          const state = JSON.parse(persistedState);
+          if (state.input !== undefined) setInput(state.input);
+        } catch (err) {
+          console.error("Failed to load persisted state:", err);
+        }
+      }
+    }, 0);
   }, []);
+
+  // Persist state whenever input changes
+  useEffect(() => {
+    if (!mounted) return;
+    const state = { input };
+    sessionStorage.setItem("jwt-decoder-state", JSON.stringify(state));
+  }, [input, mounted]);
 
   const result = useMemo(() => {
     if (!input.trim()) {
