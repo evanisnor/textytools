@@ -49,7 +49,7 @@ export function useRegexMatchHighlighter(
   text: string,
 ): RegexHighlighterResult {
   return useMemo(() => {
-    if (!pattern || !text) {
+    if (!pattern) {
       return {
         matches: [],
         error: null,
