@@ -140,9 +140,11 @@ export default function JSONWizard() {
       setMounted(true);
 
       // Check for cross-tool data first (takes precedence)
-      const storedInput = sessionStorage.getItem("json-wizard-input");
+      const storedInput = sessionStorage.getItem(
+        "cross-tool-input-json-wizard",
+      );
       if (storedInput) {
-        sessionStorage.removeItem("json-wizard-input");
+        sessionStorage.removeItem("cross-tool-input-json-wizard");
         setInput(storedInput);
         return;
       }
@@ -943,10 +945,19 @@ export default function JSONWizard() {
                           sortKeys,
                         });
                         // Save current JSON input for restoration on back navigation
-                        sessionStorage.setItem("json-wizard-input", input);
+                        sessionStorage.setItem(
+                          "json-wizard-state",
+                          JSON.stringify({
+                            input,
+                            viewMode,
+                            indentSize,
+                            sortKeys,
+                            caseSensitive,
+                          }),
+                        );
                         // Save processed JSON for CSV Converter
                         sessionStorage.setItem(
-                          "csv-json-converter-input",
+                          "cross-tool-input-csv-json-converter",
                           processedJSON,
                         );
                         window.location.href = "/csv-json-converter";

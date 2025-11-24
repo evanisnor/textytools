@@ -51,9 +51,11 @@ export default function CsvJsonConverter() {
       setMounted(true);
 
       // Check for cross-tool data first (takes precedence)
-      const storedInput = sessionStorage.getItem("csv-json-converter-input");
+      const storedInput = sessionStorage.getItem(
+        "cross-tool-input-csv-json-converter",
+      );
       if (storedInput) {
-        sessionStorage.removeItem("csv-json-converter-input");
+        sessionStorage.removeItem("cross-tool-input-csv-json-converter");
         setInput(storedInput);
         return;
       }

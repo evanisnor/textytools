@@ -153,9 +153,11 @@ export default function JWTDecoder() {
       setMounted(true);
 
       // Check for cross-tool data first (takes precedence)
-      const storedInput = sessionStorage.getItem("jwt-decoder-input");
+      const storedInput = sessionStorage.getItem(
+        "cross-tool-input-jwt-decoder",
+      );
       if (storedInput) {
-        sessionStorage.removeItem("jwt-decoder-input");
+        sessionStorage.removeItem("cross-tool-input-jwt-decoder");
         setInput(storedInput);
         return;
       }
@@ -388,10 +390,13 @@ export default function JWTDecoder() {
                       destinationTool: "json-wizard",
                     });
                     // Save current JWT input for restoration on back navigation
-                    sessionStorage.setItem("jwt-decoder-input", input);
+                    sessionStorage.setItem(
+                      "jwt-decoder-state",
+                      JSON.stringify({ input }),
+                    );
                     // Save formatted output for JSON Wizard
                     sessionStorage.setItem(
-                      "json-wizard-input",
+                      "cross-tool-input-json-wizard",
                       formattedOutput,
                     );
                     window.location.href = "/json-wizard";

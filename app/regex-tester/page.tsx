@@ -45,9 +45,11 @@ export default function RegexTester() {
       setMounted(true);
 
       // Check for cross-tool data first (takes precedence)
-      const crossToolInput = sessionStorage.getItem("regex-tester-input");
+      const crossToolInput = sessionStorage.getItem(
+        "cross-tool-input-regex-tester",
+      );
       if (crossToolInput) {
-        sessionStorage.removeItem("regex-tester-input");
+        sessionStorage.removeItem("cross-tool-input-regex-tester");
         setTestString(crossToolInput);
         return;
       }
@@ -153,7 +155,7 @@ export default function RegexTester() {
     const jsonOutput = JSON.stringify(jsonArray, null, 2);
 
     // Save JSON for json-wizard
-    sessionStorage.setItem("json-wizard-input", jsonOutput);
+    sessionStorage.setItem("cross-tool-input-json-wizard", jsonOutput);
 
     // Track the conversion
     trackToolConversion({
@@ -206,7 +208,7 @@ export default function RegexTester() {
     const csvOutput = lines.join("\n");
 
     // Save CSV for csv-json-converter
-    sessionStorage.setItem("csv-json-converter-input", csvOutput);
+    sessionStorage.setItem("cross-tool-input-csv-json-converter", csvOutput);
 
     // Track the conversion
     trackToolConversion({
