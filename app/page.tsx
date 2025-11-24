@@ -3,7 +3,7 @@
 import { useState } from "react";
 import ToolCard from "./components/ToolCard";
 import { FeedbackModal } from "./components/FeedbackModal";
-import { isFeatureEnabled } from "./lib/featureFlags";
+import { isRegexTesterEnabled } from "./lib/featureFlags";
 
 export default function Home() {
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
@@ -153,7 +153,7 @@ export default function Home() {
               description="Decode and inspect JSON Web Tokens with validation"
             />
 
-            {isFeatureEnabled("regexTester") && (
+            {isRegexTesterEnabled() && (
               <ToolCard
                 href="/regex-tester"
                 title="Regex Tester"

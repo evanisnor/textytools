@@ -18,17 +18,16 @@ const featureFlags = {
 export type FeatureFlags = typeof featureFlags;
 
 /**
- * Check if a feature flag is enabled.
+ * Initializes a runtime toggle for a given feature flag.
  *
- * @example
- * if (isFeatureEnabled('feedbackForm')) {
- *   // Show feedback form
- * }
+ * @param flag - The feature flag value.
+ * @returns A function that returns true if the feature is enabled, false otherwise.
  */
-export function isFeatureEnabled(feature: keyof FeatureFlags): boolean {
-  const flag = featureFlags[feature];
-  return (
+function initializeToggle(flag: FeatureFlagValue): () => boolean {
+  return () =>
     flag === "production" ||
-    (flag === "development" && process.env.NODE_ENV === "development")
-  );
+    (flag === "development" && process.env.NODE_ENV === "development");
 }
+
+// Auto-generate typed flag checker functions
+export const isRegexTesterEnabled = initializeToggle(featureFlags.regexTester);

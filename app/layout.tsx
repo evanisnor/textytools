@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
 import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google";
+import { isRegexTesterEnabled } from "./lib/featureFlags";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -106,6 +107,14 @@ function Footer() {
                 >
                   Text Sanitizer
                 </Link>
+                {isRegexTesterEnabled() && (
+                  <Link
+                    href="/regex-tester"
+                    className="hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
+                  >
+                    Regex Tester
+                  </Link>
+                )}
               </div>
 
               <div className="flex flex-col gap-2">
