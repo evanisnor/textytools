@@ -3,6 +3,8 @@ import { useMemo } from "react";
 export interface RegexMatch {
   fullMatch: string;
   groups: string[];
+  namedGroups: Record<string, string | undefined>;
+  groupNames: (string | null)[]; // Array mapping group index to name (null if unnamed)
   index: number;
   length: number;
 }
@@ -61,12 +63,41 @@ export function useRegexMatchHighlighter(
       const matchResults: RegexMatch[] = [];
       let match;
 
+      // Extract group names from the pattern by parsing (?<name>...)
+      const groupNamePattern = /\(\?<([^>]+)>/g;
+      const extractedGroupNames: string[] = [];
+      let nameMatch;
+      while ((nameMatch = groupNamePattern.exec(pattern)) !== null) {
+        extractedGroupNames.push(nameMatch[1]);
+      }
+
+      // Build a mapping of group index to name
+      // We need to count all groups (named and unnamed) to get the correct indices
+      const allGroupsPattern = /\((?!\?:)(?!\?=)(?!\?!)(?!\?<=)(?!\?<!)/g;
+      const groupMatches = [...pattern.matchAll(allGroupsPattern)];
+      const groupNames: (string | null)[] = new Array(groupMatches.length).fill(
+        null,
+      );
+
+      // Map named groups to their positions
+      let namedGroupIndex = 0;
+      for (let i = 0; i < groupMatches.length; i++) {
+        const groupStart = groupMatches[i].index!;
+        // Check if this is a named group
+        if (pattern.slice(groupStart, groupStart + 3) === "(?<") {
+          groupNames[i] = extractedGroupNames[namedGroupIndex];
+          namedGroupIndex++;
+        }
+      }
+
       if (flags.includes("g")) {
         // Global flag - find all matches
         while ((match = regex.exec(text)) !== null) {
           matchResults.push({
             fullMatch: match[0],
             groups: match.slice(1),
+            namedGroups: match.groups || {},
+            groupNames,
             index: match.index,
             length: match[0].length,
           });
@@ -82,6 +113,8 @@ export function useRegexMatchHighlighter(
           matchResults.push({
             fullMatch: match[0],
             groups: match.slice(1),
+            namedGroups: match.groups || {},
+            groupNames,
             index: match.index,
             length: match[0].length,
           });

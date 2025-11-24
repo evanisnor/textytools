@@ -369,14 +369,17 @@ export default function RegexTester() {
                         <td className="px-4 py-3 font-mono text-zinc-600 dark:text-zinc-400">
                           {match.groups.length > 0 ? (
                             <div className="space-y-1">
-                              {match.groups.map((group, gIdx) => (
-                                <div key={gIdx}>
-                                  <span className="text-zinc-500">
-                                    Group {gIdx + 1}:
-                                  </span>{" "}
-                                  {group || "(empty)"}
-                                </div>
-                              ))}
+                              {match.groups.map((group, gIdx) => {
+                                const groupName = match.groupNames[gIdx];
+                                return (
+                                  <div key={gIdx}>
+                                    <span className="text-zinc-500">
+                                      {groupName || `Group ${gIdx + 1}`}:
+                                    </span>{" "}
+                                    {group || "(empty)"}
+                                  </div>
+                                );
+                              })}
                             </div>
                           ) : (
                             <span className="text-zinc-400 dark:text-zinc-600">
