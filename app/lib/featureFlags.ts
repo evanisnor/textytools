@@ -1,21 +1,14 @@
-type FeatureFlagValue = "off" | "development" | "production";
-
-/**
- * Add feature flags here.
- * - "off": always disabled
- * - "development": enabled only in development
- * - "production": always enabled
- *
- * @example
- * {
- *   feedbackForm: "development"
- * }
+/*
+ * Feature flag (Toggle) management for the application.
  */
-const featureFlags = {
-  regexTester: "development" as FeatureFlagValue,
-} as const satisfies Record<string, FeatureFlagValue>;
 
-export type FeatureFlags = typeof featureFlags;
+enum ToggleMode {
+  Off,
+  Development,
+  Production,
+}
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const { Off, Development, Production } = ToggleMode;
 
 /**
  * Initializes a runtime toggle for a given feature flag.
@@ -23,11 +16,20 @@ export type FeatureFlags = typeof featureFlags;
  * @param flag - The feature flag value.
  * @returns A function that returns true if the feature is enabled, false otherwise.
  */
-function initializeToggle(flag: FeatureFlagValue): () => boolean {
+function initializeToggle(flag: ToggleMode): () => boolean {
   return () =>
-    flag === "production" ||
-    (flag === "development" && process.env.NODE_ENV === "development");
+    flag === Production ||
+    (flag === Development && process.env.NODE_ENV === "development");
 }
 
-// Auto-generate typed flag checker functions
-export const isRegexTesterEnabled = initializeToggle(featureFlags.regexTester);
+/*****************************************************************************/
+
+/*
+ * Define feature flags below.
+ */
+
+const toggle = {
+  regexTester: Development,
+} as const satisfies Record<string, ToggleMode>;
+
+export const isRegexTesterEnabled = initializeToggle(toggle.regexTester);
