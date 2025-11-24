@@ -128,7 +128,7 @@ No issues found
 - **Match Count:** 3
 - **Matches:**
   1. `ERROR` (index: 0)
-  2. `error` (index: 33)
+  2. `error` (index: 34)
   3. `error` (index: 58)
 
 ---

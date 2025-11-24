@@ -145,15 +145,40 @@ export default function RegexTester() {
               <span className="text-2xl text-zinc-400 dark:text-zinc-600">
                 /
               </span>
-              <input
-                id="regex-pattern"
-                type="text"
-                value={pattern}
-                onChange={(e) => setPattern(e.target.value)}
-                placeholder="Enter your regex pattern..."
-                className="flex-1 px-4 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg text-zinc-900 dark:text-zinc-50 placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-50 font-mono"
-                spellCheck={false}
-              />
+              <div className="relative flex-1">
+                <input
+                  id="regex-pattern"
+                  type="text"
+                  value={pattern}
+                  onChange={(e) => setPattern(e.target.value)}
+                  placeholder="Enter your regex pattern..."
+                  className="w-full px-4 py-2 pr-10 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg text-zinc-900 dark:text-zinc-50 placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-50 font-mono"
+                  spellCheck={false}
+                />
+                {pattern && (
+                  <button
+                    onClick={() => setPattern("")}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors cursor-pointer"
+                    title="Clear pattern"
+                    type="button"
+                  >
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                )}
+              </div>
               <span className="text-2xl text-zinc-400 dark:text-zinc-600">
                 /
               </span>
@@ -204,12 +229,20 @@ export default function RegexTester() {
         {/* Test String with Inline Highlighting */}
         <div>
           <div className="flex items-center justify-between mb-2 min-h-9">
-            <label
-              htmlFor="regex-test-string"
-              className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
-            >
-              Test String
-            </label>
+            <div className="flex items-center gap-2">
+              <label
+                htmlFor="regex-test-string"
+                className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+              >
+                Test String
+              </label>
+              {matches.length > 0 && (
+                <div className="text-xs px-2 py-1 rounded border bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800 text-green-800 dark:text-green-200">
+                  ✓ {matches.length}{" "}
+                  {matches.length === 1 ? "match" : "matches"}
+                </div>
+              )}
+            </div>
             <div className="flex items-center gap-2">
               {matches.length > 0 && (
                 <>
@@ -266,6 +299,8 @@ export default function RegexTester() {
             onChange={setTestString}
             placeholder="Enter text to test against your regex..."
             height="h-96"
+            showLineNumbers={true}
+            wrap={true}
             renderContent={pattern && testString ? renderContent : undefined}
           />
         </div>
