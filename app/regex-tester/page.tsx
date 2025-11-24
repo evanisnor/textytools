@@ -139,7 +139,7 @@ export default function RegexTester() {
               htmlFor="regex-pattern"
               className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
             >
-              Regular Expression Pattern
+              Pattern
             </label>
             <div className="flex items-center gap-2">
               <span className="text-2xl text-zinc-400 dark:text-zinc-600">
