@@ -455,7 +455,7 @@ export default function RegexTester() {
           <div>
             <div className="flex items-center justify-between mb-2">
               <div className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                Match Details ({matches.length})
+                Match Details
               </div>
               <div className="flex items-center gap-2">
                 {matches[0].groups.length > 0 && (
