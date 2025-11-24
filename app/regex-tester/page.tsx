@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useToast } from "@/app/components/Toast";
 import { TextEditorContainer } from "@/app/components/TextEditorContainer";
@@ -38,6 +38,12 @@ export default function RegexTester() {
 
   const { matches, error, isHighlighted, getMatchIndex } =
     useRegexMatchHighlighter(pattern, flags, testString);
+
+  const captureGroupCount = useMemo(() => {
+    if (!pattern) return 0;
+    const capturingGroupPattern = /\((?!\?:)(?!\?=)(?!\?\!)(?!\?<=)(?!\?<!)/g;
+    return pattern.match(capturingGroupPattern)?.length ?? 0;
+  }, [pattern]);
 
   // Load persisted state on mount
   useEffect(() => {
@@ -275,6 +281,26 @@ export default function RegexTester() {
       title="Regex Tester"
       description="Test regular expressions with real-time match highlighting and capture group extraction."
       toolName={TOOL_NAMES.REGEX_TESTER}
+      headerRight={
+        <div className="grid grid-cols-2 gap-3 min-w-[220px]">
+          <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-3">
+            <div className="text-xs text-zinc-600 dark:text-zinc-400">
+              Matches
+            </div>
+            <div className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
+              {mounted ? matches.length.toLocaleString() : "—"}
+            </div>
+          </div>
+          <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-3">
+            <div className="text-xs text-zinc-600 dark:text-zinc-400">
+              Groups
+            </div>
+            <div className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
+              {mounted ? captureGroupCount.toLocaleString() : "—"}
+            </div>
+          </div>
+        </div>
+      }
     >
       <div className="space-y-6">
         {/* Pattern and Flags Input */}
@@ -381,12 +407,6 @@ export default function RegexTester() {
               >
                 Test String
               </label>
-              {matches.length > 0 && (
-                <div className="text-xs px-2 py-1 rounded border bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800 text-green-800 dark:text-green-200">
-                  ✓ {matches.length}{" "}
-                  {matches.length === 1 ? "match" : "matches"}
-                </div>
-              )}
             </div>
             <div className="flex items-center gap-2">
               {matches.length > 0 && (
