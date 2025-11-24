@@ -22,7 +22,8 @@ export default function ToolCard({
   const bgClass = backgroundColor || defaultBg;
   const hoverBgClass = backgroundColor ? "" : defaultHoverBg;
 
-  const className = `flex flex-col rounded-lg border border-zinc-200 dark:border-zinc-800 ${bgClass} p-6 hover:border-zinc-300 dark:hover:border-zinc-700 ${hoverBgClass} transition-colors ${onClick ? "cursor-pointer" : ""}`;
+  const isInteractive = Boolean(onClick || href);
+  const className = `flex flex-col rounded-lg border border-zinc-200 dark:border-zinc-800 ${bgClass} p-6 hover:border-zinc-300 dark:hover:border-zinc-700 ${hoverBgClass} transition-colors ${isInteractive ? "cursor-pointer" : ""}`;
 
   const content = (
     <>

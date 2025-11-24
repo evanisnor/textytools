@@ -39,7 +39,7 @@ export function ToolFrame({
         <div className="mb-8 flex items-center justify-between">
           <Link
             href="/"
-            className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
+            className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors cursor-pointer"
           >
             ← back to textytools.dev
           </Link>

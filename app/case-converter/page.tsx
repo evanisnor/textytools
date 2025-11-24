@@ -240,7 +240,7 @@ export default function CaseConverter() {
                     });
                     setText("");
                   }}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 active:bg-zinc-300 dark:active:bg-zinc-600 transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 active:bg-zinc-300 dark:active:bg-zinc-600 transition-colors cursor-pointer"
                 >
                   <svg
                     className="w-4 h-4"
@@ -281,7 +281,7 @@ export default function CaseConverter() {
               {convertedText && (
                 <button
                   onClick={copyToClipboard}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 active:bg-zinc-300 dark:active:bg-zinc-600 transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 active:bg-zinc-300 dark:active:bg-zinc-600 transition-colors cursor-pointer"
                 >
                   <svg
                     className="w-4 h-4"
@@ -323,7 +323,7 @@ export default function CaseConverter() {
               <button
                 key={option.id}
                 onClick={() => setSelectedCase(option.id)}
-                className={`w-full text-left p-4 rounded-lg border transition-colors ${
+                className={`w-full text-left p-4 rounded-lg border transition-colors cursor-pointer ${
                   selectedCase === option.id
                     ? "border-zinc-900 dark:border-zinc-50 bg-zinc-100 dark:bg-zinc-800"
                     : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-zinc-300 dark:hover:border-zinc-700"

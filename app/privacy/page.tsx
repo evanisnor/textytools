@@ -28,7 +28,7 @@ export default function PrivacyPolicy() {
         <div className="mb-8">
           <Link
             href="/"
-            className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
+            className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors cursor-pointer"
           >
             ← back to textytools.dev
           </Link>
@@ -53,7 +53,10 @@ export default function PrivacyPolicy() {
                 Welcome to <strong>textytools.dev</strong> (“we,” “our,” or
                 “us”). This Privacy Policy describes how we handle information
                 when you visit our website{" "}
-                <a className="underline" href="https://textytools.dev">
+                <a
+                  className="underline cursor-pointer"
+                  href="https://textytools.dev"
+                >
                   https://textytools.dev
                 </a>{" "}
                 (the “Site”).
@@ -284,13 +287,19 @@ export default function PrivacyPolicy() {
               <ul>
                 <li>
                   <strong>Website:</strong>{" "}
-                  <a className="underline" href="https://textytools.dev">
+                  <a
+                    className="underline cursor-pointer"
+                    href="https://textytools.dev"
+                  >
                     https://textytools.dev
                   </a>
                 </li>
                 <li>
                   <strong>Email:</strong>{" "}
-                  <a className="underline" href="mailto:contact@textytools.dev">
+                  <a
+                    className="underline cursor-pointer"
+                    href="mailto:contact@textytools.dev"
+                  >
                     contact@textytools.dev
                   </a>
                 </li>

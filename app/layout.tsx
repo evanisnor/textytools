@@ -85,32 +85,32 @@ function Footer() {
               <div className="flex flex-col gap-2">
                 <Link
                   href="/text-counter"
-                  className="hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
+                  className="hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors cursor-pointer"
                 >
                   Text Counter
                 </Link>
                 <Link
                   href="/diff-viewer"
-                  className="hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
+                  className="hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors cursor-pointer"
                 >
                   Diff Viewer
                 </Link>
                 <Link
                   href="/case-converter"
-                  className="hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
+                  className="hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors cursor-pointer"
                 >
                   Case Converter
                 </Link>
                 <Link
                   href="/text-sanitizer"
-                  className="hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
+                  className="hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors cursor-pointer"
                 >
                   Text Sanitizer
                 </Link>
                 {isRegexTesterEnabled() && (
                   <Link
                     href="/regex-tester"
-                    className="hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
+                    className="hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors cursor-pointer"
                   >
                     Regex Tester
                   </Link>
@@ -120,25 +120,25 @@ function Footer() {
               <div className="flex flex-col gap-2">
                 <Link
                   href="/json-wizard"
-                  className="hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
+                  className="hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors cursor-pointer"
                 >
                   JSON Wizard
                 </Link>
                 <Link
                   href="/csv-json-converter"
-                  className="hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
+                  className="hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors cursor-pointer"
                 >
                   CSV / JSON Converter
                 </Link>
                 <Link
                   href="/text-encoder"
-                  className="hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
+                  className="hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors cursor-pointer"
                 >
                   Text Encoder
                 </Link>
                 <Link
                   href="/jwt-decoder"
-                  className="hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
+                  className="hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors cursor-pointer"
                 >
                   JWT Decoder
                 </Link>
@@ -149,7 +149,7 @@ function Footer() {
           <div className="flex flex-col items-end md:justify-end gap-3">
             <Link
               href="/privacy"
-              className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
+              className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors cursor-pointer"
             >
               Privacy Policy
             </Link>

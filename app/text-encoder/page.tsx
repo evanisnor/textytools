@@ -1056,7 +1056,7 @@ export default function TextEncoderPage() {
                 mode === "encode"
                   ? "bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900"
                   : "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700"
-              }`}
+              } cursor-pointer`}
             >
               Encode
             </button>
@@ -1066,7 +1066,7 @@ export default function TextEncoderPage() {
                 mode === "decode"
                   ? "bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900"
                   : "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700"
-              }`}
+              } cursor-pointer`}
             >
               Decode
             </button>
@@ -1083,7 +1083,7 @@ export default function TextEncoderPage() {
               {text.trim() && (
                 <button
                   onClick={() => setText("")}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 active:bg-zinc-300 dark:active:bg-zinc-600 transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 active:bg-zinc-300 dark:active:bg-zinc-600 transition-colors cursor-pointer"
                 >
                   <svg
                     className="w-4 h-4"
@@ -1128,7 +1128,7 @@ export default function TextEncoderPage() {
               {outputText && !outputText.startsWith("Error:") && (
                 <button
                   onClick={copyToClipboard}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 active:bg-zinc-300 dark:active:bg-zinc-600 transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 active:bg-zinc-300 dark:active:bg-zinc-600 transition-colors cursor-pointer"
                 >
                   <svg
                     className="w-4 h-4"
@@ -1193,8 +1193,8 @@ export default function TextEncoderPage() {
                     isDisabled
                       ? "opacity-50 cursor-not-allowed border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-900"
                       : selectedEncoding === option.id
-                        ? "border-zinc-900 dark:border-zinc-50 bg-zinc-100 dark:bg-zinc-800"
-                        : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-zinc-300 dark:hover:border-zinc-700"
+                        ? "border-zinc-900 dark:border-zinc-50 bg-zinc-100 dark:bg-zinc-800 cursor-pointer"
+                        : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-zinc-300 dark:hover:border-zinc-700 cursor-pointer"
                   }`}
                 >
                   <div className="font-medium text-zinc-900 dark:text-zinc-50 mb-1">

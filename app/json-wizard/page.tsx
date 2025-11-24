@@ -880,7 +880,7 @@ export default function JSONWizard() {
                     });
                     setInput("");
                   }}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 active:bg-zinc-300 dark:active:bg-zinc-600 transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 active:bg-zinc-300 dark:active:bg-zinc-600 transition-colors cursor-pointer"
                 >
                   <svg
                     className="w-4 h-4"
@@ -959,7 +959,7 @@ export default function JSONWizard() {
                         );
                         window.location.href = "/text-encoder";
                       }}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-900 dark:text-purple-100 rounded hover:bg-purple-200 dark:hover:bg-purple-900/50 active:bg-purple-300 dark:active:bg-purple-900/70 transition-colors"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-900 dark:text-purple-100 rounded hover:bg-purple-200 dark:hover:bg-purple-900/50 active:bg-purple-300 dark:active:bg-purple-900/70 transition-colors cursor-pointer"
                     >
                       <svg
                         className="w-4 h-4"
@@ -1009,7 +1009,7 @@ export default function JSONWizard() {
                         );
                         window.location.href = "/csv-json-converter";
                       }}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-900 dark:text-blue-100 rounded hover:bg-blue-200 dark:hover:bg-blue-900/50 active:bg-blue-300 dark:active:bg-blue-900/70 transition-colors"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-900 dark:text-blue-100 rounded hover:bg-blue-200 dark:hover:bg-blue-900/50 active:bg-blue-300 dark:active:bg-blue-900/70 transition-colors cursor-pointer"
                     >
                       <svg
                         className="w-4 h-4"
@@ -1030,7 +1030,7 @@ export default function JSONWizard() {
                 {processedJSON && validation.isValid && (
                   <button
                     onClick={copyToClipboard}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 active:bg-zinc-300 dark:active:bg-zinc-600 transition-colors"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 active:bg-zinc-300 dark:active:bg-zinc-600 transition-colors cursor-pointer"
                   >
                     <svg
                       className="w-4 h-4"
@@ -1132,7 +1132,7 @@ export default function JSONWizard() {
                   <button
                     onClick={goToPreviousMatch}
                     disabled={!searchTerm || totalMatches === 0}
-                    className="p-2 rounded border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="p-2 rounded border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors text-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     title="Previous match"
                   >
                     ←
@@ -1145,7 +1145,7 @@ export default function JSONWizard() {
                   <button
                     onClick={goToNextMatch}
                     disabled={!searchTerm || totalMatches === 0}
-                    className="p-2 rounded border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="p-2 rounded border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors text-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     title="Next match"
                   >
                     →
@@ -1169,7 +1169,7 @@ export default function JSONWizard() {
                   viewMode === "pretty"
                     ? "border-zinc-900 dark:border-zinc-50 bg-zinc-100 dark:bg-zinc-800"
                     : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-zinc-300 dark:hover:border-zinc-700"
-                } ${!validation.isValid ? "opacity-50 cursor-not-allowed" : ""}`}
+                } ${!validation.isValid ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
               >
                 <div className="font-medium text-sm text-zinc-900 dark:text-zinc-50">
                   Pretty Print
@@ -1182,7 +1182,7 @@ export default function JSONWizard() {
                   viewMode === "minified"
                     ? "border-zinc-900 dark:border-zinc-50 bg-zinc-100 dark:bg-zinc-800"
                     : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-zinc-300 dark:hover:border-zinc-700"
-                } ${!validation.isValid ? "opacity-50 cursor-not-allowed" : ""}`}
+                } ${!validation.isValid ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
               >
                 <div className="font-medium text-sm text-zinc-900 dark:text-zinc-50">
                   Minified
@@ -1195,7 +1195,7 @@ export default function JSONWizard() {
                   viewMode === "escaped"
                     ? "border-zinc-900 dark:border-zinc-50 bg-zinc-100 dark:bg-zinc-800"
                     : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-zinc-300 dark:hover:border-zinc-700"
-                } ${!validation.isValid || !input.trim() ? "opacity-50 cursor-not-allowed" : ""}`}
+                } ${!validation.isValid || !input.trim() ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
               >
                 <div className="font-medium text-sm text-zinc-900 dark:text-zinc-50">
                   Escaped
