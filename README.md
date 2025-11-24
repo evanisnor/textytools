@@ -95,11 +95,46 @@ Test regular expressions with real-time match highlighting and capture group ext
   - Support for all JavaScript regex flags (g, i, m, s, u, y)
   - Interactive flag toggles with descriptions
   - Match details table showing full matches, indices, and capture groups
-  - Visual match highlighting in output with ⟪⟫ delimiters
+  - Named capture group support with automatic CSV header generation
+  - Visual match highlighting in output with current match navigation
   - Error messages for invalid regex patterns
   - Copy all matches to clipboard
+  - Convert capture groups to CSV (only shown when groups are present)
   - Match count display
 - **Implementation**: Client-side regex execution with comprehensive error handling, useMemo for performance optimization
+- **CSV Conversion**: When matches contain capture groups, a "Convert to CSV" button appears that:
+  - Extracts capture groups from each match as CSV rows
+  - Uses named group names as column headers (e.g., `(?<name>...)` becomes "name" header)
+  - Omits headers when groups are unnamed (since "Group 1", "Group 2" isn't helpful)
+  - Properly escapes CSV values containing commas, quotes, or newlines
+  - Integrates with CSV/JSON Converter tool for further processing
+
+**Example test data for CSV conversion:**
+
+Pattern with named groups:
+
+```
+(?<name>[A-Z][a-z]+)\s+(?<age>\d+)\s+(?<city>[A-Z][a-z]+)
+```
+
+Test string:
+
+```
+Alice 30 Seattle
+Bob 25 Portland
+Charlie 35 Denver
+Diana 28 Austin
+```
+
+This will produce CSV with headers:
+
+```
+name,age,city
+Alice,30,Seattle
+Bob,25,Portland
+Charlie,35,Denver
+Diana,28,Austin
+```
 
 ## Project Structure
 

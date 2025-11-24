@@ -1,10 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { useToast } from "@/app/components/Toast";
 import { TextEditorContainer } from "@/app/components/TextEditorContainer";
 import { ToolFrame } from "@/app/components/ToolFrame";
-import { trackCopyEvent, trackClearEvent } from "@/app/lib/analytics";
+import {
+  trackCopyEvent,
+  trackClearEvent,
+  trackToolConversion,
+} from "@/app/lib/analytics";
 import { TOOL_NAMES } from "@/app/lib/constants";
 import { useRegexMatchHighlighter } from "@/app/hooks/useRegexMatchHighlighter";
 
@@ -75,6 +80,59 @@ export default function RegexTester() {
     } catch (err) {
       console.error("Failed to copy:", err);
     }
+  };
+
+  const convertToCsv = () => {
+    if (matches.length === 0) return;
+
+    // Check if we have named groups
+    const hasNamedGroups = matches[0].groupNames.some((name) => name !== null);
+    const hasGroups = matches[0].groups.length > 0;
+
+    if (!hasGroups) return;
+
+    const lines: string[] = [];
+
+    // Add header row if we have named groups
+    if (hasNamedGroups) {
+      const headers = matches[0].groupNames
+        .map((name, idx) => name || `Group ${idx + 1}`)
+        .filter((_, idx) => matches[0].groupNames[idx] !== null);
+      lines.push(headers.join(","));
+    }
+
+    // Add data rows
+    for (const match of matches) {
+      const values = match.groups.map((group) => {
+        const value = group || "";
+        // Escape CSV values - quote if contains comma, newline, or quotes
+        if (
+          value.includes(",") ||
+          value.includes("\n") ||
+          value.includes('"')
+        ) {
+          return `"${value.replace(/"/g, '""')}"`;
+        }
+        return value;
+      });
+      lines.push(values.join(","));
+    }
+
+    const csvOutput = lines.join("\n");
+
+    // Save CSV for csv-json-converter
+    localStorage.setItem("csv-json-converter-input", csvOutput);
+
+    // Track the conversion
+    trackToolConversion({
+      sourceTool: "regex-tester",
+      destinationTool: "csv-json-converter",
+      matchCount: matches.length,
+      hasNamedGroups,
+    });
+
+    // Navigate to csv-json-converter
+    window.location.href = "/csv-json-converter";
   };
 
   // Custom renderer for highlighting matches
@@ -312,25 +370,52 @@ export default function RegexTester() {
               <div className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
                 Match Details ({matches.length})
               </div>
-              <button
-                onClick={copyMatches}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 active:bg-zinc-300 dark:active:bg-zinc-600 transition-colors cursor-pointer"
-              >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+              <div className="flex items-center gap-2">
+                {matches[0].groups.length > 0 && (
+                  <Link
+                    href="/csv-json-converter"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      convertToCsv();
+                    }}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-900 dark:text-blue-100 rounded hover:bg-blue-200 dark:hover:bg-blue-900/50 active:bg-blue-300 dark:active:bg-blue-900/70 transition-colors cursor-pointer"
+                  >
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
+                    </svg>
+                    Convert to CSV
+                  </Link>
+                )}
+                <button
+                  onClick={copyMatches}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 active:bg-zinc-300 dark:active:bg-zinc-600 transition-colors cursor-pointer"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                  />
-                </svg>
-                Copy All Matches
-              </button>
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                    />
+                  </svg>
+                  Copy All Matches
+                </button>
+              </div>
             </div>
             <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden">
               <div className="overflow-x-auto">

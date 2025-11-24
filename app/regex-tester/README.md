@@ -27,9 +27,12 @@ Common use cases:
 - Support for all JavaScript regex flags (g, i, m, s, u, y)
 - Interactive flag toggles with clear descriptions
 - Match details table showing full matches, indices, and capture groups
-- Visual match highlighting in output using ⟪⟫ delimiters
+- Named capture group support with automatic CSV header generation
+- Visual match highlighting in output with current match navigation
 - Error messages for invalid regex patterns
 - Copy all matches to clipboard functionality
+- Convert capture groups to CSV (only shown when groups are present)
+- Cross-tool integration with CSV/JSON Converter
 - Match count display
 - Client-side processing for privacy and speed
 
@@ -337,15 +340,225 @@ Feeling happy 😊
 
 ---
 
+### Test Case 11: CSV Conversion with Named Groups
+
+**Input Pattern:**
+
+```
+(?<name>[A-Z][a-z]+)\s+(?<age>\d+)\s+(?<city>[A-Z][a-z]+)
+```
+
+**Flags:** `g`
+
+**Test String:**
+
+```
+Alice 30 Seattle
+Bob 25 Portland
+Charlie 35 Denver
+Diana 28 Austin
+```
+
+**Expected Output:**
+
+- **Match Count:** 4
+- **"Convert to CSV" Button:** Should be visible (groups are present)
+- **Match 1:**
+  - Full Match: `Alice 30 Seattle` (index: 0)
+  - name: `Alice`
+  - age: `30`
+  - city: `Seattle`
+- **Match 2:**
+  - Full Match: `Bob 25 Portland` (index: 17)
+  - name: `Bob`
+  - age: `25`
+  - city: `Portland`
+- **Match 3:**
+  - Full Match: `Charlie 35 Denver` (index: 33)
+  - name: `Charlie`
+  - age: `35`
+  - city: `Denver`
+- **Match 4:**
+  - Full Match: `Diana 28 Austin` (index: 52)
+  - name: `Diana`
+  - age: `28`
+  - city: `Austin`
+
+**CSV Conversion Output:**
+
+Clicking "Convert to CSV" should navigate to CSV/JSON Converter with:
+
+```
+name,age,city
+Alice,30,Seattle
+Bob,25,Portland
+Charlie,35,Denver
+Diana,28,Austin
+```
+
+**Verification Steps:**
+
+1. Enter the pattern and test string
+2. Verify "Convert to CSV" button appears next to "Copy All Matches"
+3. Verify button has blue styling (matching JSON Wizard integration)
+4. Click "Convert to CSV" button
+5. Verify navigation to `/csv-json-converter`
+6. Verify CSV data is loaded in the input field
+7. Verify headers use the named group names (name, age, city)
+8. Verify CSV format is correct with proper escaping
+
+---
+
+### Test Case 12: CSV Conversion with Unnamed Groups
+
+**Input Pattern:**
+
+```
+(\d{4})-(\d{2})-(\d{2})
+```
+
+**Flags:** `g`
+
+**Test String:**
+
+```
+2024-01-15
+2024-03-22
+2024-12-01
+```
+
+**Expected Output:**
+
+- **Match Count:** 3
+- **"Convert to CSV" Button:** Should be visible (groups are present)
+- **Match 1:**
+  - Full Match: `2024-01-15` (index: 0)
+  - Group 1: `2024`
+  - Group 2: `01`
+  - Group 3: `15`
+- **Match 2:**
+  - Full Match: `2024-03-22` (index: 11)
+  - Group 1: `2024`
+  - Group 2: `03`
+  - Group 3: `22`
+- **Match 3:**
+  - Full Match: `2024-12-01` (index: 22)
+  - Group 1: `2024`
+  - Group 2: `12`
+  - Group 3: `01`
+
+**CSV Conversion Output:**
+
+Clicking "Convert to CSV" should navigate to CSV/JSON Converter with:
+
+```
+2024,01,15
+2024,03,22
+2024,12,01
+```
+
+**Note:** No header row is included because the groups are unnamed (generic "Group 1", "Group 2" headers aren't helpful).
+
+**Verification Steps:**
+
+1. Enter the pattern and test string
+2. Verify "Convert to CSV" button appears
+3. Click "Convert to CSV" button
+4. Verify navigation to `/csv-json-converter`
+5. Verify CSV data has NO header row (starts directly with data)
+6. Verify three rows of data are present
+
+---
+
+### Test Case 13: CSV Conversion with Special Characters
+
+**Input Pattern:**
+
+```
+(?<product>[^,]+),\s*(?<price>\$[\d.]+),\s*(?<description>.+)
+```
+
+**Flags:** `g`
+
+**Test String:**
+
+```
+Widget A, $19.99, "High quality, durable"
+Gadget B, $49.99, Contains "special" features
+Tool C, $29.99, Made with care
+```
+
+**Expected Output:**
+
+- **Match Count:** 3
+- **"Convert to CSV" Button:** Should be visible
+- **CSV Output Should Properly Escape:**
+  - Commas in descriptions
+  - Quotes in descriptions
+  - Values should be wrapped in quotes when necessary
+
+**CSV Conversion Output:**
+
+```
+product,price,description
+Widget A,$19.99,"""High quality, durable"""
+Gadget B,$49.99,"Contains ""special"" features"
+Tool C,$29.99,Made with care
+```
+
+**Verification Steps:**
+
+1. Enter the pattern and test string
+2. Click "Convert to CSV" button
+3. Verify CSV properly escapes commas and quotes per RFC 4180
+4. Verify values with commas or quotes are wrapped in double quotes
+5. Verify quotes are escaped by doubling them
+
+---
+
+### Test Case 14: No Groups - CSV Button Hidden
+
+**Input Pattern:**
+
+```
+\b[A-Z][a-z]+\b
+```
+
+**Flags:** `g`
+
+**Test String:**
+
+```
+Alice and Bob went to Seattle
+```
+
+**Expected Output:**
+
+- **Match Count:** 4 (Alice, Bob, Seattle)
+- **"Convert to CSV" Button:** Should NOT be visible (no capture groups)
+- Only "Copy All Matches" button should appear
+
+**Verification Steps:**
+
+1. Enter the pattern and test string without capture groups
+2. Verify matches are displayed correctly
+3. Verify "Convert to CSV" button does NOT appear
+4. Verify "Copy All Matches" button still works
+
+---
+
 ## Edge Cases to Test
 
-1. **Empty Pattern** - Should show no matches
-2. **Empty Test String** - Should show no matches
-3. **Global Flag Off** - Should only show first match
+1. **Empty Pattern** - Should show no matches, CSV button should not appear
+2. **Empty Test String** - Should show no matches, CSV button should not appear
+3. **Global Flag Off** - Should only show first match, CSV button appears if that match has groups
 4. **Zero-length Matches** - Pattern like `\b` should handle without infinite loops
 5. **Very Long Text** - Performance with large inputs (10,000+ characters)
 6. **Special Characters** - Patterns with `\`, `$`, `^`, etc.
 7. **Unicode Characters** - Emoji, accented characters, non-Latin scripts
+8. **CSV with Newlines in Groups** - Groups containing `\n` should be properly escaped in CSV output
+9. **Mixed Named and Unnamed Groups** - Only named groups should appear in CSV headers
+10. **Empty Capture Groups** - Groups that match empty strings should appear as empty CSV fields
 
 ## Implementation Notes
 
@@ -353,5 +566,9 @@ Feeling happy 😊
 - `useMemo` hook for performance optimization on pattern/text changes
 - Prevents infinite loops on zero-length matches by incrementing `lastIndex`
 - Error handling with try/catch for invalid patterns
-- Visual match highlighting using ⟪⟫ delimiters (easier to spot than background colors in text)
+- Visual match highlighting in the editor with yellow background for matches and green for current match
 - All processing happens client-side for privacy and speed
+- Named group extraction parses `(?<name>...)` syntax from pattern to build header mappings
+- CSV conversion follows RFC 4180 escaping rules (doubles quotes, wraps values containing commas/quotes/newlines)
+- Cross-tool integration with CSV/JSON Converter via localStorage for seamless data transfer
+- Analytics tracking for tool-to-tool conversions to measure feature usage
