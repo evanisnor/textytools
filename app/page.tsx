@@ -3,6 +3,7 @@
 import { useState } from "react";
 import ToolCard from "./components/ToolCard";
 import { FeedbackModal } from "./components/FeedbackModal";
+import { isFeatureEnabled } from "./lib/featureFlags";
 
 export default function Home() {
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
@@ -76,6 +77,13 @@ export default function Home() {
         description:
           "Compare two text blocks with side-by-side diff highlighting and search",
       },
+      {
+        "@type": "WebPage",
+        name: "Regex Tester",
+        url: "https://textytools.dev/regex-tester",
+        description:
+          "Test regular expressions with real-time match highlighting and capture groups",
+      },
     ],
   };
 
@@ -144,6 +152,14 @@ export default function Home() {
               title="JWT Decoder"
               description="Decode and inspect JSON Web Tokens with validation"
             />
+
+            {isFeatureEnabled("regexTester") && (
+              <ToolCard
+                href="/regex-tester"
+                title="Regex Tester"
+                description="Test regular expressions with real-time match highlighting"
+              />
+            )}
 
             <ToolCard
               title="&lt;Something New&gt;"

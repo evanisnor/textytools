@@ -11,7 +11,9 @@ type FeatureFlagValue = "off" | "development" | "production";
  *   feedbackForm: "development"
  * }
  */
-const featureFlags = {} as const satisfies Record<string, FeatureFlagValue>;
+const featureFlags = {
+  regexTester: "development" as FeatureFlagValue,
+} as const satisfies Record<string, FeatureFlagValue>;
 
 export type FeatureFlags = typeof featureFlags;
 

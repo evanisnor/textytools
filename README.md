@@ -85,6 +85,22 @@ Decode and inspect JSON Web Tokens (JWT) with syntax highlighting and automatic 
   - Copy decoded output to clipboard
 - **Implementation**: Client-side base64url decoding, RFC 7519 compliant parsing, no server communication for security
 
+### Regex Tester
+
+Test regular expressions with real-time match highlighting and capture group extraction.
+
+- **Location**: [/regex-tester](app/regex-tester/page.tsx)
+- **Features**:
+  - Real-time regex pattern testing with match highlighting
+  - Support for all JavaScript regex flags (g, i, m, s, u, y)
+  - Interactive flag toggles with descriptions
+  - Match details table showing full matches, indices, and capture groups
+  - Visual match highlighting in output with ⟪⟫ delimiters
+  - Error messages for invalid regex patterns
+  - Copy all matches to clipboard
+  - Match count display
+- **Implementation**: Client-side regex execution with comprehensive error handling, useMemo for performance optimization
+
 ## Project Structure
 
 ```
@@ -106,7 +122,9 @@ utility-apps/
 │   │   └── page.tsx
 │   ├── text-encoder/
 │   │   └── page.tsx
-│   └── jwt-decoder/
+│   ├── jwt-decoder/
+│   │   └── page.tsx
+│   └── regex-tester/
 │       └── page.tsx
 ├── package.json
 ├── tsconfig.json
@@ -350,8 +368,6 @@ All utilities run entirely in the browser with no backend dependencies. Modern b
 
 Potential additions to consider:
 
-- **Diff Viewer**: Compare two text blocks
-- **Regex Tester**: Test regular expressions with highlighting
 - **Markdown Previewer**: Live markdown rendering
 - **Color Converter**: HEX, RGB, HSL conversions
 - **UUID Generator**: Generate UUIDs with various versions

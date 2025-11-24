@@ -8,6 +8,7 @@ export const TOOL_NAMES = {
   CSV_JSON_CONVERTER: "csv-json-converter",
   JSON_WIZARD: "json-wizard",
   JWT_DECODER: "jwt-decoder",
+  REGEX_TESTER: "regex-tester",
   TEXT_COUNTER: "text-counter",
   TEXT_ENCODER: "text-encoder",
   TEXT_SANITIZER: "text-sanitizer",
