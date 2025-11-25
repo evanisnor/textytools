@@ -175,9 +175,9 @@ export default function RootLayout({
       >
         <div className="flex-1">{children}</div>
         <Footer />
+        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GOOGLE_ID || ""} />
+        <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID || ""} />
       </body>
-      <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GOOGLE_ID || ""} />
-      <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GOOGLE_ID || ""} />
     </html>
   );
 }

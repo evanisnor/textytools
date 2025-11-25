@@ -14,9 +14,31 @@ interface ToolConversionParams {
 }
 
 /**
- * Check if we're in development mode
+ * Analytics enablement flag.
+ * By default only enabled in production, but can be forced on in development
+ * by setting `NEXT_PUBLIC_ENABLE_ANALYTICS=true` in your environment.
  */
-const isDevelopment = process.env.NODE_ENV === "development";
+const analyticsEnabled =
+  process.env.NODE_ENV === "production" ||
+  process.env.NEXT_PUBLIC_ENABLE_ANALYTICS === "true";
+
+/**
+ * Send an event to gtag (GA4) when available.
+ */
+function sendEvent(name: string, params: Record<string, unknown>) {
+  if (typeof window === "undefined") return;
+
+  const gtag = (window as unknown as { gtag?: (...args: unknown[]) => void })
+    .gtag;
+  if (typeof gtag === "function") {
+    try {
+      gtag("event", name, params);
+    } catch (err) {
+      // don't let analytics failures break the app
+      console.warn("gtag('event') failed", err);
+    }
+  }
+}
 
 /**
  * Track a copy button click event
@@ -27,20 +49,14 @@ const isDevelopment = process.env.NODE_ENV === "development";
  * trackCopyEvent({ tool: "json-wizard", format: "pretty" })
  */
 export function trackCopyEvent(params: BaseEventParams) {
-  // Skip tracking in development mode
-  if (isDevelopment) {
-    console.log("[Analytics - Dev Mode - Copy]", params);
+  // Skip tracking unless analytics is enabled
+  if (!analyticsEnabled) {
+    console.log("[Analytics - Disabled] copy", params);
     return;
   }
 
-  if (typeof window !== "undefined" && window.dataLayer) {
-    const { tool, ...customParams } = params;
-    window.dataLayer.push({
-      event: "copy_button_click",
-      tool_name: tool,
-      ...customParams,
-    });
-  }
+  const { tool, ...customParams } = params;
+  sendEvent("copy_button_click", { tool_name: tool, ...customParams });
 }
 
 /**
@@ -52,22 +68,19 @@ export function trackCopyEvent(params: BaseEventParams) {
  * trackToolConversion({ sourceTool: "json-wizard", destinationTool: "csv-json-converter", viewMode: "pretty" })
  */
 export function trackToolConversion(params: ToolConversionParams) {
-  // Skip tracking in development mode
-  if (isDevelopment) {
-    console.log("[Analytics - Dev Mode - Conversion]", params);
+  // Skip tracking unless analytics is enabled
+  if (!analyticsEnabled) {
+    console.log("[Analytics - Disabled] conversion", params);
     return;
   }
 
-  if (typeof window !== "undefined" && window.dataLayer) {
-    const { sourceTool, destinationTool, ...customParams } = params;
-    window.dataLayer.push({
-      event: "tool_conversion",
-      source_tool: sourceTool,
-      destination_tool: destinationTool,
-      workflow: `${sourceTool}_to_${destinationTool}`,
-      ...customParams,
-    });
-  }
+  const { sourceTool, destinationTool, ...customParams } = params;
+  sendEvent("tool_conversion", {
+    source_tool: sourceTool,
+    destination_tool: destinationTool,
+    workflow: `${sourceTool}_to_${destinationTool}`,
+    ...customParams,
+  });
 }
 
 /**
@@ -79,20 +92,14 @@ export function trackToolConversion(params: ToolConversionParams) {
  * trackClearEvent({ tool: "text-encoder", mode: "encode" })
  */
 export function trackClearEvent(params: BaseEventParams) {
-  // Skip tracking in development mode
-  if (isDevelopment) {
-    console.log("[Analytics - Dev Mode - Clear]", params);
+  // Skip tracking unless analytics is enabled
+  if (!analyticsEnabled) {
+    console.log("[Analytics - Disabled] clear", params);
     return;
   }
 
-  if (typeof window !== "undefined" && window.dataLayer) {
-    const { tool, ...customParams } = params;
-    window.dataLayer.push({
-      event: "clear_button_click",
-      tool_name: tool,
-      ...customParams,
-    });
-  }
+  const { tool, ...customParams } = params;
+  sendEvent("clear_button_click", { tool_name: tool, ...customParams });
 }
 
 /**
@@ -106,21 +113,14 @@ export function trackClearEvent(params: BaseEventParams) {
 export function trackToggleAllEvent(
   params: BaseEventParams & { action: "enable" | "disable" },
 ) {
-  // Skip tracking in development mode
-  if (isDevelopment) {
-    console.log("[Analytics - Dev Mode - Toggle All]", params);
+  // Skip tracking unless analytics is enabled
+  if (!analyticsEnabled) {
+    console.log("[Analytics - Disabled] toggle_all", params);
     return;
   }
 
-  if (typeof window !== "undefined" && window.dataLayer) {
-    const { tool, action, ...customParams } = params;
-    window.dataLayer.push({
-      event: "toggle_all_click",
-      tool_name: tool,
-      action,
-      ...customParams,
-    });
-  }
+  const { tool, action, ...customParams } = params;
+  sendEvent("toggle_all_click", { tool_name: tool, action, ...customParams });
 }
 
 /**
@@ -131,20 +131,14 @@ export function trackToggleAllEvent(
  * trackFeedbackOpen({ tool: "json-wizard" })
  */
 export function trackFeedbackOpen(params: BaseEventParams) {
-  // Skip tracking in development mode
-  if (isDevelopment) {
-    console.log("[Analytics - Dev Mode - Feedback Open]", params);
+  // Skip tracking unless analytics is enabled
+  if (!analyticsEnabled) {
+    console.log("[Analytics - Disabled] feedback_open", params);
     return;
   }
 
-  if (typeof window !== "undefined" && window.dataLayer) {
-    const { tool, ...customParams } = params;
-    window.dataLayer.push({
-      event: "feedback_open",
-      tool_name: tool,
-      ...customParams,
-    });
-  }
+  const { tool, ...customParams } = params;
+  sendEvent("feedback_open", { tool_name: tool, ...customParams });
 }
 
 /**
@@ -155,18 +149,12 @@ export function trackFeedbackOpen(params: BaseEventParams) {
  * trackFeedbackSubmit({ tool: "json-wizard" })
  */
 export function trackFeedbackSubmit(params: BaseEventParams) {
-  // Skip tracking in development mode
-  if (isDevelopment) {
-    console.log("[Analytics - Dev Mode - Feedback Submit]", params);
+  // Skip tracking unless analytics is enabled
+  if (!analyticsEnabled) {
+    console.log("[Analytics - Disabled] feedback_submit", params);
     return;
   }
 
-  if (typeof window !== "undefined" && window.dataLayer) {
-    const { tool, ...customParams } = params;
-    window.dataLayer.push({
-      event: "feedback_submit",
-      tool_name: tool,
-      ...customParams,
-    });
-  }
+  const { tool, ...customParams } = params;
+  sendEvent("feedback_submit", { tool_name: tool, ...customParams });
 }
