@@ -27,6 +27,7 @@ import {
   tokenizeJson,
   type JsonSyntaxTheme,
 } from "@/app/hooks/useJsonSyntaxHighlighter";
+import { findJsonSyntaxError } from "@/app/lib/jsonSyntaxError";
 
 type ViewMode = "pretty" | "minified" | "escaped";
 
@@ -47,17 +48,32 @@ function validateJSON(text: string): ValidationResult {
     return { isValid: true };
   } catch (error) {
     if (error instanceof SyntaxError) {
-      const match = error.message.match(/position (\d+)/);
-      const position = match ? parseInt(match[1]) : undefined;
+      const positionMatch = error.message.match(/position (\d+)/i);
+      let derivedPosition = positionMatch
+        ? parseInt(positionMatch[1], 10)
+        : undefined;
+      let derivedMessage: string | undefined;
 
-      if (position !== undefined) {
-        const lines = text.substring(0, position).split("\n");
+      if (Number.isNaN(derivedPosition)) {
+        derivedPosition = undefined;
+      }
+
+      if (derivedPosition === undefined) {
+        const fallback = findJsonSyntaxError(text);
+        if (fallback) {
+          derivedPosition = fallback.position;
+          derivedMessage = fallback.message;
+        }
+      }
+
+      if (derivedPosition !== undefined) {
+        const lines = text.substring(0, derivedPosition).split("\n");
         const lineNumber = lines.length;
         const columnNumber = lines[lines.length - 1].length + 1;
 
         return {
           isValid: false,
-          error: error.message,
+          error: derivedMessage ?? error.message,
           lineNumber,
           columnNumber,
         };
@@ -65,7 +81,7 @@ function validateJSON(text: string): ValidationResult {
 
       return {
         isValid: false,
-        error: error.message,
+        error: derivedMessage ?? error.message,
       };
     }
     return {
