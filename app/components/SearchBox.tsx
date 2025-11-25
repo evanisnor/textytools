@@ -1,5 +1,7 @@
 "use client";
 
+import type { ReactNode } from "react";
+
 export interface SearchBoxProps {
   id: string;
   value: string;
@@ -8,6 +10,7 @@ export interface SearchBoxProps {
   placeholder?: string;
   disabled?: boolean;
   className?: string;
+  endAdornment?: ReactNode;
 }
 
 /**
@@ -38,7 +41,11 @@ export function SearchBox({
   placeholder = "Search...",
   disabled = false,
   className = "",
+  endAdornment,
 }: SearchBoxProps) {
+  const hasAdornment = Boolean(endAdornment);
+  const inputPaddingClasses = hasAdornment ? "pr-40" : "pr-10";
+
   return (
     <div className={`relative ${className}`}>
       <input
@@ -54,30 +61,35 @@ export function SearchBox({
         }}
         placeholder={placeholder}
         disabled={disabled}
-        className="w-full p-2 pr-8 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-50"
+        className={`w-full p-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-50 ${inputPaddingClasses}`}
       />
-      {value && !disabled && (
-        <button
-          onClick={() => onChange("")}
-          className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors cursor-pointer"
-          title="Clear search"
-          type="button"
-        >
-          <svg
-            className="w-4 h-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-        </button>
+      {(hasAdornment || (value && !disabled)) && (
+        <div className="absolute inset-y-0 right-2 flex items-center gap-2">
+          {hasAdornment && endAdornment}
+          {value && !disabled && (
+            <button
+              onClick={() => onChange("")}
+              className="p-1 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors cursor-pointer"
+              title="Clear search"
+              type="button"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          )}
+        </div>
       )}
     </div>
   );

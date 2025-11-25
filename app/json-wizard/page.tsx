@@ -805,6 +805,8 @@ export default function JSONWizard() {
     return result;
   };
 
+  const canSearch = validation.isValid && Boolean(input.trim());
+
   return (
     <ToolFrame
       title="JSON Wizard"
@@ -843,34 +845,164 @@ export default function JSONWizard() {
         </div>
       }
     >
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:items-start">
-        <div className="lg:col-span-3 space-y-6 flex flex-col">
-          {/* Input */}
-          <div>
-            <div className="mb-2 grid grid-cols-[auto_1fr_auto] items-center gap-3 min-h-9">
+      <div className="space-y-6">
+        {/* Search, Mode, and Options - Single-row responsive layout */}
+        <div className="flex flex-wrap items-center gap-4">
+          {/* Search Group */}
+          <div className="flex flex-1 min-w-[280px] flex-wrap items-center gap-2 lg:flex-nowrap">
+            <div className="flex-1 min-w-[200px] max-w-full xl:max-w-[440px]">
+              <SearchBox
+                id="json-search"
+                value={searchTerm}
+                onChange={(value) => {
+                  setSearchTerm(value);
+                  setCurrentMatchIndex(0);
+                }}
+                onEnter={goToNextMatch}
+                placeholder="Search in JSON..."
+                disabled={!canSearch}
+                endAdornment={
+                  canSearch && searchTerm && totalMatches > 0 ? (
+                    <div className="flex items-center gap-1 text-xs text-zinc-600 dark:text-zinc-400">
+                      <button
+                        onClick={goToPreviousMatch}
+                        className="px-1.5 py-1 rounded border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+                        title="Previous match"
+                        type="button"
+                      >
+                        ←
+                      </button>
+                      <span className="min-w-[60px] text-center text-[11px] font-medium">
+                        {currentMatchIndex + 1} / {totalMatches}
+                      </span>
+                      <button
+                        onClick={goToNextMatch}
+                        className="px-1.5 py-1 rounded border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+                        title="Next match"
+                        type="button"
+                      >
+                        →
+                      </button>
+                    </div>
+                  ) : null
+                }
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setCaseSensitive((prev) => !prev);
+                setCurrentMatchIndex(0);
+              }}
+              disabled={!validation.isValid}
+              aria-label="Case sensitive search"
+              title="Case sensitive search"
+              aria-pressed={caseSensitive}
+              className={`px-3 py-2 rounded-lg border text-sm font-semibold transition-colors ${
+                caseSensitive
+                  ? "bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900 border-zinc-900 dark:border-zinc-50"
+                  : "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700"
+              } ${!validation.isValid ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+            >
+              Aa
+            </button>
+          </div>
+
+          {/* Divider */}
+          <div className="hidden xl:block h-10 w-px bg-zinc-200 dark:bg-zinc-800"></div>
+
+          {/* Mode & Options Group */}
+          <div className="flex flex-none items-center gap-2 flex-wrap w-full xl:w-auto">
+            <button
+              onClick={() => setViewMode("pretty")}
+              disabled={!validation.isValid}
+              className={`px-3 py-2 rounded-lg border text-sm transition-colors ${
+                viewMode === "pretty"
+                  ? "bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900 border-zinc-900 dark:border-zinc-50"
+                  : "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700"
+              } ${!validation.isValid ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+            >
+              Pretty Print
+            </button>
+            <button
+              onClick={() => setViewMode("minified")}
+              disabled={!validation.isValid}
+              className={`px-3 py-2 rounded-lg border text-sm transition-colors ${
+                viewMode === "minified"
+                  ? "bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900 border-zinc-900 dark:border-zinc-50"
+                  : "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700"
+              } ${!validation.isValid ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+            >
+              Minified
+            </button>
+            <button
+              onClick={() => setViewMode("escaped")}
+              disabled={!validation.isValid || !input.trim()}
+              className={`px-3 py-2 rounded-lg border text-sm transition-colors ${
+                viewMode === "escaped"
+                  ? "bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900 border-zinc-900 dark:border-zinc-50"
+                  : "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700"
+              } ${!validation.isValid || !input.trim() ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+            >
+              Escaped
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setSortKeys((prev) => !prev)}
+              disabled={!validation.isValid}
+              aria-pressed={sortKeys}
+              className={`inline-flex items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
+                sortKeys
+                  ? "bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900 border-zinc-900 dark:border-zinc-50"
+                  : "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 border-transparent hover:bg-zinc-200 dark:hover:bg-zinc-700"
+              } ${!validation.isValid ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+            >
+              <span className="font-semibold tracking-wide">Sort Keys</span>
+            </button>
+
+            <div className="flex items-center gap-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-3 py-2 min-w-[200px]">
               <label
-                htmlFor="json-wizard-input"
-                className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+                htmlFor="indent-size"
+                className="text-sm text-zinc-900 dark:text-zinc-50 whitespace-nowrap"
               >
-                Input JSON
+                Indent: {indentSize}
               </label>
-              {input.trim() ? (
-                <div className="flex justify-center">
+              <input
+                id="indent-size"
+                type="range"
+                min="2"
+                max="8"
+                step="2"
+                value={indentSize}
+                onChange={(e) => setIndentSize(Number(e.target.value))}
+                disabled={viewMode !== "pretty" || !validation.isValid}
+                className="flex-1 sm:w-28"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Editor controls and panes */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Input Editor Column */}
+          <div className="space-y-1.5">
+            <div className="flex flex-wrap items-center gap-2 min-h-10">
+              <div className="flex flex-wrap items-center gap-2">
+                {input.trim() && (
                   <div
-                    className={`inline-flex h-full items-center gap-2 px-3 py-1.5 rounded border text-xs font-medium ${
+                    className={`inline-flex items-center gap-2 px-2 py-1 rounded border text-xs font-medium ${
                       validation.isValid
                         ? "bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800 text-green-800 dark:text-green-200"
                         : "bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200"
                     }`}
                   >
-                    {validation.isValid ? "✓ Valid JSON" : "✗ Invalid JSON"}
-                    {/* Error location hidden, now highlighted in editor */}
+                    {validation.isValid ? "✓ Valid" : "✗ Invalid"}
                   </div>
-                </div>
-              ) : (
-                <div />
-              )}
-              {input.trim() ? (
+                )}
+              </div>
+              <div className="flex-1"></div>
+              {input.trim() && (
                 <button
                   onClick={() => {
                     trackClearEvent({
@@ -880,7 +1012,7 @@ export default function JSONWizard() {
                     });
                     setInput("");
                   }}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 active:bg-zinc-300 dark:active:bg-zinc-600 transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 active:bg-zinc-300 dark:active:bg-zinc-600 transition-colors cursor-pointer whitespace-nowrap"
                 >
                   <svg
                     className="w-4 h-4"
@@ -897,140 +1029,64 @@ export default function JSONWizard() {
                   </svg>
                   Clear
                 </button>
-              ) : (
-                <div />
               )}
             </div>
-            <TextEditorContainer
-              id="json-wizard-input"
-              ref={inputEditorRef}
-              value={input}
-              onChange={setInput}
-              wrap={true}
-              placeholder='Paste your JSON here, e.g., {"key": "value"}'
-              renderLineContent={(line, index) =>
-                renderHighlightedText(
-                  line,
-                  index,
-                  false,
-                  undefined,
-                  inputSyntaxTheme,
-                )
-              }
-            />
+            <div>
+              <TextEditorContainer
+                id="json-wizard-input"
+                ref={inputEditorRef}
+                value={input}
+                onChange={setInput}
+                wrap={true}
+                height="h-[calc(100vh-400px)] min-h-[360px]"
+                placeholder='Paste your JSON here, e.g., {"key": "value"}'
+                renderLineContent={(line, index) =>
+                  renderHighlightedText(
+                    line,
+                    index,
+                    false,
+                    undefined,
+                    inputSyntaxTheme,
+                  )
+                }
+              />
+            </div>
           </div>
 
-          {/* Output */}
-          <div>
-            <div className="flex items-center justify-between mb-2 min-h-9">
-              <label
-                htmlFor="json-wizard-output"
-                className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
-              >
-                Output
-              </label>
-              <div className="flex items-center gap-2">
-                {processedJSON &&
-                  validation.isValid &&
-                  ["minified", "escaped"].includes(viewMode) && (
-                    <Link
-                      href="/text-encoder"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        trackToolConversion({
-                          sourceTool: "json-wizard",
-                          destinationTool: "text-encoder",
+          {/* Output Editor Column */}
+          <div className="space-y-1.5">
+            <div className="flex flex-wrap items-center gap-2 min-h-10">
+              <div className="flex-1"></div>
+              {processedJSON &&
+                validation.isValid &&
+                ["minified", "escaped"].includes(viewMode) && (
+                  <Link
+                    href="/text-encoder"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      trackToolConversion({
+                        sourceTool: "json-wizard",
+                        destinationTool: "text-encoder",
+                        viewMode,
+                        sortKeys,
+                      });
+                      sessionStorage.setItem(
+                        "json-wizard-state",
+                        JSON.stringify({
+                          input,
                           viewMode,
+                          indentSize,
                           sortKeys,
-                        });
-                        sessionStorage.setItem(
-                          "json-wizard-state",
-                          JSON.stringify({
-                            input,
-                            viewMode,
-                            indentSize,
-                            sortKeys,
-                            caseSensitive,
-                          }),
-                        );
-                        sessionStorage.setItem(
-                          "cross-tool-input-text-encoder",
-                          processedJSON,
-                        );
-                        window.location.href = "/text-encoder";
-                      }}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-900 dark:text-purple-100 rounded hover:bg-purple-200 dark:hover:bg-purple-900/50 active:bg-purple-300 dark:active:bg-purple-900/70 transition-colors cursor-pointer"
-                    >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M5 10l7-7m0 0l7 7m-7-7v18"
-                        />
-                      </svg>
-                      Open in Text Encoder
-                    </Link>
-                  )}
-                {processedJSON &&
-                  validation.isValid &&
-                  viewMode !== "escaped" && (
-                    <Link
-                      href="/csv-json-converter"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        // Track cross-tool conversion
-                        trackToolConversion({
-                          sourceTool: "json-wizard",
-                          destinationTool: "csv-json-converter",
-                          viewMode,
-                          sortKeys,
-                        });
-                        // Save current JSON input for restoration on back navigation
-                        sessionStorage.setItem(
-                          "json-wizard-state",
-                          JSON.stringify({
-                            input,
-                            viewMode,
-                            indentSize,
-                            sortKeys,
-                            caseSensitive,
-                          }),
-                        );
-                        // Save processed JSON for CSV Converter
-                        sessionStorage.setItem(
-                          "cross-tool-input-csv-json-converter",
-                          processedJSON,
-                        );
-                        window.location.href = "/csv-json-converter";
-                      }}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-900 dark:text-blue-100 rounded hover:bg-blue-200 dark:hover:bg-blue-900/50 active:bg-blue-300 dark:active:bg-blue-900/70 transition-colors cursor-pointer"
-                    >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M5 10l7-7m0 0l7 7m-7-7v18"
-                        />
-                      </svg>
-                      Convert to CSV
-                    </Link>
-                  )}
-                {processedJSON && validation.isValid && (
-                  <button
-                    onClick={copyToClipboard}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 active:bg-zinc-300 dark:active:bg-zinc-600 transition-colors cursor-pointer"
+                          caseSensitive,
+                        }),
+                      );
+                      sessionStorage.setItem(
+                        "cross-tool-input-text-encoder",
+                        processedJSON,
+                      );
+                      window.location.href = "/text-encoder";
+                    }}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-900 dark:text-purple-100 rounded hover:bg-purple-200 dark:hover:bg-purple-900/50 active:bg-purple-300 dark:active:bg-purple-900/70 transition-colors cursor-pointer whitespace-nowrap"
                   >
                     <svg
                       className="w-4 h-4"
@@ -1042,213 +1098,111 @@ export default function JSONWizard() {
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth={2}
-                        d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                        d="M5 10l7-7m0 0l7 7m-7-7v18"
                       />
                     </svg>
-                    Copy
-                  </button>
+                    Open in Text Encoder
+                  </Link>
                 )}
-              </div>
-            </div>
-            <TextEditorContainer
-              id="json-wizard-output"
-              ref={outputEditorRef}
-              value={processedJSON || ""}
-              readOnly
-              placeholder="Formatted JSON will appear here..."
-              height="h-64"
-              wrap={viewMode === "minified" || viewMode === "escaped"}
-              renderContent={
-                !searchTerm && outputJsonSyntaxRenderer
-                  ? outputJsonSyntaxRenderer
-                  : undefined
-              }
-              renderLineContent={
-                searchTerm && processedJSON
-                  ? (line, index) => {
-                      const outputMatchIndex =
-                        inputToOutputMatchMap.get(currentMatchIndex) ?? -1;
-                      return renderHighlightedText(
-                        line,
-                        index,
-                        true,
-                        outputMatchIndex,
-                        outputSyntaxTheme,
+              {processedJSON &&
+                validation.isValid &&
+                viewMode !== "escaped" && (
+                  <Link
+                    href="/csv-json-converter"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      trackToolConversion({
+                        sourceTool: "json-wizard",
+                        destinationTool: "csv-json-converter",
+                        viewMode,
+                        sortKeys,
+                      });
+                      sessionStorage.setItem(
+                        "json-wizard-state",
+                        JSON.stringify({
+                          input,
+                          viewMode,
+                          indentSize,
+                          sortKeys,
+                          caseSensitive,
+                        }),
                       );
-                    }
-                  : undefined
-              }
-            />
-          </div>
-        </div>
-
-        {/* Controls Panel */}
-        <div className="flex flex-col h-full">
-          {/* Search */}
-          <div>
-            <div className="mb-2 min-h-9">
-              <label
-                htmlFor="json-search"
-                className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
-              >
-                Search
-              </label>
-            </div>
-            <div className="space-y-2">
-              <SearchBox
-                id="json-search"
-                value={searchTerm}
-                onChange={(value) => {
-                  setSearchTerm(value);
-                  setCurrentMatchIndex(0);
-                }}
-                onEnter={goToNextMatch}
-                placeholder="Search in JSON..."
-                disabled={!validation.isValid || !input.trim()}
-              />
-
-              <div className="flex items-center justify-between gap-2">
-                <label
-                  htmlFor="case-sensitive"
-                  className="flex items-center gap-2 cursor-pointer"
-                >
-                  <input
-                    id="case-sensitive"
-                    type="checkbox"
-                    checked={caseSensitive}
-                    onChange={(e) => {
-                      setCaseSensitive(e.target.checked);
-                      setCurrentMatchIndex(0);
+                      sessionStorage.setItem(
+                        "cross-tool-input-csv-json-converter",
+                        processedJSON,
+                      );
+                      window.location.href = "/csv-json-converter";
                     }}
-                    disabled={!validation.isValid}
-                    className="h-4 w-4 rounded border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-50 focus:ring-zinc-900 dark:focus:ring-zinc-50"
-                  />
-                  <span className="text-sm text-zinc-600 dark:text-zinc-400">
-                    Case Sensitive
-                  </span>
-                </label>
-
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={goToPreviousMatch}
-                    disabled={!searchTerm || totalMatches === 0}
-                    className="p-2 rounded border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors text-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                    title="Previous match"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-900 dark:text-blue-100 rounded hover:bg-blue-200 dark:hover:bg-blue-900/50 active:bg-blue-300 dark:active:bg-blue-900/70 transition-colors cursor-pointer whitespace-nowrap"
                   >
-                    ←
-                  </button>
-                  <span className="text-xs text-zinc-600 dark:text-zinc-400 min-w-[60px] text-center">
-                    {searchTerm && totalMatches > 0
-                      ? `${currentMatchIndex + 1} / ${totalMatches}`
-                      : "0 / 0"}
-                  </span>
-                  <button
-                    onClick={goToNextMatch}
-                    disabled={!searchTerm || totalMatches === 0}
-                    className="p-2 rounded border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors text-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                    title="Next match"
-                  >
-                    →
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-4">
-            <div className="mb-2 min-h-9">
-              <div className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                Modify
-              </div>
-            </div>
-            <div className="space-y-2">
-              <button
-                onClick={() => setViewMode("pretty")}
-                disabled={!validation.isValid}
-                className={`w-full text-left p-3 rounded-lg border transition-colors ${
-                  viewMode === "pretty"
-                    ? "border-zinc-900 dark:border-zinc-50 bg-zinc-100 dark:bg-zinc-800"
-                    : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-zinc-300 dark:hover:border-zinc-700"
-                } ${!validation.isValid ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
-              >
-                <div className="font-medium text-sm text-zinc-900 dark:text-zinc-50">
-                  Pretty Print
-                </div>
-              </button>
-              <button
-                onClick={() => setViewMode("minified")}
-                disabled={!validation.isValid}
-                className={`w-full text-left p-3 rounded-lg border transition-colors ${
-                  viewMode === "minified"
-                    ? "border-zinc-900 dark:border-zinc-50 bg-zinc-100 dark:bg-zinc-800"
-                    : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-zinc-300 dark:hover:border-zinc-700"
-                } ${!validation.isValid ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
-              >
-                <div className="font-medium text-sm text-zinc-900 dark:text-zinc-50">
-                  Minified
-                </div>
-              </button>
-              <button
-                onClick={() => setViewMode("escaped")}
-                disabled={!validation.isValid || !input.trim()}
-                className={`w-full text-left p-3 rounded-lg border transition-colors ${
-                  viewMode === "escaped"
-                    ? "border-zinc-900 dark:border-zinc-50 bg-zinc-100 dark:bg-zinc-800"
-                    : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-zinc-300 dark:hover:border-zinc-700"
-                } ${!validation.isValid || !input.trim() ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
-              >
-                <div className="font-medium text-sm text-zinc-900 dark:text-zinc-50">
-                  Escaped
-                </div>
-              </button>
-            </div>
-          </div>
-
-          {/* Options */}
-          <div className="mt-4">
-            <div className="mb-2 min-h-9">
-              <div className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                Options
-              </div>
-            </div>
-            <div className="space-y-3">
-              <label
-                htmlFor="sort-keys"
-                className="flex items-center gap-2 p-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 cursor-pointer"
-              >
-                <input
-                  id="sort-keys"
-                  type="checkbox"
-                  checked={sortKeys}
-                  onChange={(e) => setSortKeys(e.target.checked)}
-                  disabled={!validation.isValid}
-                  className="h-4 w-4 rounded border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-50 focus:ring-zinc-900 dark:focus:ring-zinc-50"
-                />
-                <span className="text-sm text-zinc-900 dark:text-zinc-50">
-                  Sort Keys
-                </span>
-              </label>
-
-              {/* Indent Size */}
-              <div className="p-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
-                <label
-                  htmlFor="indent-size"
-                  className="block text-sm text-zinc-900 dark:text-zinc-50 mb-2"
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 10l7-7m0 0l7 7m-7-7v18"
+                      />
+                    </svg>
+                    Convert to CSV
+                  </Link>
+                )}
+              {processedJSON && validation.isValid && (
+                <button
+                  onClick={copyToClipboard}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 active:bg-zinc-300 dark:active:bg-zinc-600 transition-colors cursor-pointer whitespace-nowrap"
                 >
-                  Indent Size: {indentSize}
-                </label>
-                <input
-                  id="indent-size"
-                  type="range"
-                  min="2"
-                  max="8"
-                  step="2"
-                  value={indentSize}
-                  onChange={(e) => setIndentSize(Number(e.target.value))}
-                  disabled={viewMode !== "pretty" || !validation.isValid}
-                  className="w-full"
-                />
-              </div>
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                    />
+                  </svg>
+                  Copy
+                </button>
+              )}
+            </div>
+            <div>
+              <TextEditorContainer
+                id="json-wizard-output"
+                ref={outputEditorRef}
+                value={processedJSON || ""}
+                readOnly
+                placeholder="Formatted JSON will appear here..."
+                height="h-[calc(100vh-400px)] min-h-[360px]"
+                wrap={viewMode === "minified" || viewMode === "escaped"}
+                renderContent={
+                  !searchTerm && outputJsonSyntaxRenderer
+                    ? outputJsonSyntaxRenderer
+                    : undefined
+                }
+                renderLineContent={
+                  searchTerm && processedJSON
+                    ? (line, index) => {
+                        const outputMatchIndex =
+                          inputToOutputMatchMap.get(currentMatchIndex) ?? -1;
+                        return renderHighlightedText(
+                          line,
+                          index,
+                          true,
+                          outputMatchIndex,
+                          outputSyntaxTheme,
+                        );
+                      }
+                    : undefined
+                }
+              />
             </div>
           </div>
         </div>
