@@ -1,39 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { ToolFrame } from "@/shared/ui/tool-frame/ToolFrame";
 import { TOOL_NAMES } from "@/shared/lib/constants";
-import { JsonWizardShell, JsonWizardHeader } from "@/features/json-wizard";
-import { validateJSON } from "@/features/json-wizard/lib/validators";
-import { getJSONStats } from "@/features/json-wizard/lib/stats";
+import { JsonWizardShell, JsonWizardHeader, useJsonWizard } from "@/features/json-wizard";
 
 export default function JSONWizard() {
-  const [input, setInput] = useState("");
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setTimeout(() => {
-      setMounted(true);
-      const storedInput = sessionStorage.getItem("cross-tool-input-json-wizard");
-      if (storedInput) {
-        sessionStorage.removeItem("cross-tool-input-json-wizard");
-        setInput(storedInput);
-        return;
-      }
-      const persistedState = sessionStorage.getItem("json-wizard-state");
-      if (persistedState) {
-        try {
-          const state = JSON.parse(persistedState);
-          if (state.input !== undefined) setInput(state.input);
-        } catch (err) {
-          console.error("Failed to load persisted state:", err);
-        }
-      }
-    }, 0);
-  }, []);
-
-  const validation = validateJSON(input);
-  const stats = getJSONStats(input);
+  const wizard = useJsonWizard();
 
   return (
     <ToolFrame
@@ -42,16 +14,42 @@ export default function JSONWizard() {
       toolName={TOOL_NAMES.JSON_WIZARD}
       headerRight={
         <JsonWizardHeader
-          keys={stats.keys}
-          depth={stats.depth}
-          size={stats.size}
-          isValid={validation.isValid}
-          hasInput={Boolean(input.trim())}
-          mounted={mounted}
+          keys={wizard.stats.keys}
+          depth={wizard.stats.depth}
+          size={wizard.stats.size}
+          isValid={wizard.validation.isValid}
+          hasInput={Boolean(wizard.input.trim())}
+          mounted={wizard.mounted}
         />
       }
     >
-      <JsonWizardShell />
+      <JsonWizardShell
+        input={wizard.input}
+        setInput={wizard.setInput}
+        viewMode={wizard.viewMode}
+        setViewMode={wizard.setViewMode}
+        indentSize={wizard.indentSize}
+        setIndentSize={wizard.setIndentSize}
+        searchTerm={wizard.searchTerm}
+        setSearchTerm={wizard.setSearchTerm}
+        caseSensitive={wizard.caseSensitive}
+        setCaseSensitive={wizard.setCaseSensitive}
+        sortKeys={wizard.sortKeys}
+        setSortKeys={wizard.setSortKeys}
+        currentMatchIndex={wizard.currentMatchIndex}
+        setCurrentMatchIndex={wizard.setCurrentMatchIndex}
+        validation={wizard.validation}
+        stats={wizard.stats}
+        processedJSON={wizard.processedJSON}
+        searchMatches={wizard.searchMatches}
+        matchPositions={wizard.matchPositions}
+        outputSearchMatches={wizard.outputSearchMatches}
+        inputToOutputMatchMap={wizard.inputToOutputMatchMap}
+        outputMatchPositions={wizard.outputMatchPositions}
+        totalMatches={wizard.totalMatches}
+        goToNextMatch={wizard.goToNextMatch}
+        goToPreviousMatch={wizard.goToPreviousMatch}
+      />
     </ToolFrame>
   );
 }

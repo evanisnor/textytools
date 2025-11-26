@@ -146,6 +146,7 @@ export function useJsonWizard() {
     setSortKeys,
     currentMatchIndex,
     setCurrentMatchIndex,
+    mounted,
     validation,
     stats,
     isEscapedString,
