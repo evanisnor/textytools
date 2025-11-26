@@ -3,7 +3,7 @@
 import { useState } from "react";
 import ToolCard from "./components/ToolCard";
 import { FeedbackModal } from "./components/FeedbackModal";
-import { isRegexTesterEnabled } from "./lib/featureFlags";
+import { isRegexTesterEnabled } from "@/shared/lib/featureFlags";
 
 export default function Home() {
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);

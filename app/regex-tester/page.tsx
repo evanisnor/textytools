@@ -9,8 +9,8 @@ import {
   trackCopyEvent,
   trackClearEvent,
   trackToolConversion,
-} from "@/app/lib/analytics";
-import { TOOL_NAMES } from "@/app/lib/constants";
+} from "@/shared/lib/analytics";
+import { TOOL_NAMES } from "@/shared/lib/constants";
 import { useRegexMatchHighlighter } from "@/app/hooks/useRegexMatchHighlighter";
 
 interface RegexFlag {

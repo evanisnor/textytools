@@ -5,8 +5,8 @@ import bs58 from "bs58";
 import { useToast } from "@/app/components/Toast";
 import { TextEditorContainer } from "@/app/components/TextEditorContainer";
 import { ToolFrame } from "@/app/components/ToolFrame";
-import { trackCopyEvent } from "@/app/lib/analytics";
-import { TOOL_NAMES } from "@/app/lib/constants";
+import { trackCopyEvent } from "@/shared/lib/analytics";
+import { TOOL_NAMES } from "@/shared/lib/constants";
 
 type EncodingType =
   | "base64"

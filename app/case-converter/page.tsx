@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import { useToast } from "@/app/components/Toast";
 import { TextEditorContainer } from "@/app/components/TextEditorContainer";
 import { ToolFrame } from "@/app/components/ToolFrame";
-import { trackCopyEvent, trackClearEvent } from "@/app/lib/analytics";
-import { TOOL_NAMES } from "@/app/lib/constants";
+import { trackCopyEvent, trackClearEvent } from "@/shared/lib/analytics";
+import { TOOL_NAMES } from "@/shared/lib/constants";
 
 type CaseType =
   | "upper"

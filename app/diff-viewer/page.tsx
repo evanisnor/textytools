@@ -9,8 +9,8 @@ import {
 } from "@/app/components/TextEditorContainer";
 import { ToolFrame } from "@/app/components/ToolFrame";
 import { SearchBox } from "@/app/components/SearchBox";
-import { trackClearEvent } from "@/app/lib/analytics";
-import { TOOL_NAMES } from "@/app/lib/constants";
+import { trackClearEvent } from "@/shared/lib/analytics";
+import { TOOL_NAMES } from "@/shared/lib/constants";
 
 // Diff types
 type DiffType = "unchanged" | "added" | "removed" | "modified";

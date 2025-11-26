@@ -3,7 +3,7 @@
 import { useState, FormEvent } from "react";
 import { Modal } from "./Modal";
 import { useToast } from "./Toast";
-import { trackFeedbackSubmit } from "../lib/analytics";
+import { trackFeedbackSubmit } from "@/shared/lib/analytics";
 
 interface FeedbackModalProps {
   isOpen: boolean;

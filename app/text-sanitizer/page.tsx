@@ -8,8 +8,8 @@ import {
   trackCopyEvent,
   trackClearEvent,
   trackToggleAllEvent,
-} from "@/app/lib/analytics";
-import { TOOL_NAMES } from "@/app/lib/constants";
+} from "@/shared/lib/analytics";
+import { TOOL_NAMES } from "@/shared/lib/constants";
 
 interface SanitizationOption {
   id: string;

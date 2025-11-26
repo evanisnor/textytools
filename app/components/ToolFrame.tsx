@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { ReactNode, useState } from "react";
 import { FeedbackModal } from "./FeedbackModal";
-import { trackFeedbackOpen } from "../lib/analytics";
+import { trackFeedbackOpen } from "@/shared/lib/analytics";
 
 interface ToolFrameProps {
   title: string;
