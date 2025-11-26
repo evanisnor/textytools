@@ -79,6 +79,59 @@ Use these segments where needed (FSD doesn't require every segment for small fea
 - Keep `app/<tool>/page.tsx` as the route entry. It should import the feature's public API (e.g. `import { CaseConverter } from '@/features/case-converter'`) and render it inside `ToolFrame`.
 - Avoid placing implementation logic inside `app/` routes — routes should orchestrate composition only.
 
+### Composing features with ToolFrame headerRight
+For features that need to display stats/info cards in the header (next to the title/description), split the feature UI into two components:
+
+1. **Header component** - Displays stats/metrics (e.g., `JwtDecoderHeader`, `TextCounterHeader`)
+2. **Shell component** - Main feature UI (e.g., `JwtDecoderShell`, `TextCounterShell`)
+
+The page then:
+- Calls the feature's hook (e.g., `useJwtDecoder()`) to get state
+- Passes state to the Header component via `ToolFrame`'s `headerRight` prop
+- Renders the Shell component as children
+
+**Example:**
+```tsx
+// app/jwt-decoder/page.tsx
+"use client";
+
+import { ToolFrame } from "@/shared/ui/tool-frame/ToolFrame";
+import { TOOL_NAMES } from "@/shared/lib/constants";
+import {
+  JwtDecoderShell,
+  JwtDecoderHeader,
+  useJwtDecoder,
+} from "@/features/jwt-decoder";
+
+export default function JWTDecoder() {
+  const { result } = useJwtDecoder();
+
+  return (
+    <ToolFrame
+      title="JWT Decoder"
+      description="Decode and inspect JSON Web Tokens (JWT) with real-time validation"
+      toolName={TOOL_NAMES.JWT_DECODER}
+      headerRight={<JwtDecoderHeader decoded={result.decoded} />}
+    >
+      <JwtDecoderShell />
+    </ToolFrame>
+  );
+}
+```
+
+**Feature structure:**
+```
+src/features/jwt-decoder/
+  ui/
+    JwtDecoderHeader.tsx    # Stats display (algorithm, issued at, expires at)
+    JwtDecoderShell.tsx     # Main UI (input/output editors)
+  model/
+    useJwtDecoder.ts        # Shared hook providing state
+  index.ts                  # Export Header, Shell, hook, and types
+```
+
+This pattern keeps the page layer thin while allowing features to control both header stats and main content presentation.
+
 ## Example mapping (concrete)
 - `app/components/ToolFrame.tsx` → `src/shared/ui/tool-frame/ToolFrame.tsx`
 - `app/lib/csv.ts` → `src/entities/csv/lib/convert.ts` (domain) or `src/shared/lib/csv.ts` (infrastructure) depending on use
