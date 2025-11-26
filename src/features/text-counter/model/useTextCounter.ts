@@ -75,7 +75,7 @@ export function useTextCounter() {
         try {
           const count = await estimateTokenCount(textTrimmed);
           setTokenCount(count.toLocaleString());
-        } catch (error) {
+        } catch {
           setTokenCount("ERR");
         }
         setIsTokenizing(false);
