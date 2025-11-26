@@ -2,9 +2,9 @@
 
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
-import { useToast } from "@/app/components/Toast";
-import { TextEditorContainer } from "@/app/components/TextEditorContainer";
-import { ToolFrame } from "@/app/components/ToolFrame";
+import { useToast } from "@/shared/ui/toast/Toast";
+import { TextEditorContainer } from "@/shared/ui/text-editor/TextEditorContainer";
+import { ToolFrame } from "@/shared/ui/tool-frame/ToolFrame";
 import {
   trackCopyEvent,
   trackToolConversion,

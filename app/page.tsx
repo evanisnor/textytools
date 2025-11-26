@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import ToolCard from "./components/ToolCard";
-import { FeedbackModal } from "./components/FeedbackModal";
+import ToolCard from "@/shared/ui/tool-card/ToolCard";
+import { FeedbackModal } from "@/shared/ui/tool-frame/FeedbackModal";
 import { isRegexTesterEnabled } from "@/shared/lib/featureFlags";
 
 export default function Home() {

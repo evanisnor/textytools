@@ -2,13 +2,13 @@
 
 import { useState, useMemo, useRef, useEffect } from "react";
 import { diffLines } from "diff";
-import { useToast } from "@/app/components/Toast";
+import { useToast } from "@/shared/ui/toast/Toast";
 import {
   TextEditorContainer,
   type TextEditorContainerRef,
-} from "@/app/components/TextEditorContainer";
-import { ToolFrame } from "@/app/components/ToolFrame";
-import { SearchBox } from "@/app/components/SearchBox";
+} from "@/shared/ui/text-editor/TextEditorContainer";
+import { ToolFrame } from "@/shared/ui/tool-frame/ToolFrame";
+import { SearchBox } from "@/shared/ui/search-box/SearchBox";
 import { trackClearEvent } from "@/shared/lib/analytics";
 import { TOOL_NAMES } from "@/shared/lib/constants";
 

@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import { debounce } from "lodash";
 import { Tiktoken } from "js-tiktoken/lite";
 import cl100k_base from "js-tiktoken/ranks/cl100k_base";
-import { TextEditorContainer } from "@/app/components/TextEditorContainer";
-import { ToolFrame } from "@/app/components/ToolFrame";
+import { TextEditorContainer } from "@/shared/ui/text-editor/TextEditorContainer";
+import { ToolFrame } from "@/shared/ui/tool-frame/ToolFrame";
 import { TOOL_NAMES } from "@/shared/lib/constants";
 
 export default function TextCounter() {
