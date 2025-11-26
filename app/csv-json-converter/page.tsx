@@ -11,9 +11,9 @@ import {
   trackClearEvent,
 } from "@/shared/lib/analytics";
 import { TOOL_NAMES } from "@/shared/lib/constants";
-import { useJsonSyntaxHighlighter } from "@/app/hooks/useJsonSyntaxHighlighter";
-import { useCsvSyntaxHighlighter } from "@/app/hooks/useCsvSyntaxHighlighter";
-import { parseCsvLine } from "@/app/lib/csv";
+import { useJsonSyntaxHighlighter } from "@/shared/hooks/useJsonSyntaxHighlighter";
+import { useCsvSyntaxHighlighter } from "@/shared/hooks/useCsvSyntaxHighlighter";
+import { parseCsvLine } from "@/entities/csv";
 
 interface JsonObject {
   [key: string]: unknown;

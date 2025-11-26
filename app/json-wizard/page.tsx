@@ -26,8 +26,8 @@ import {
   useJsonSyntaxHighlighter,
   tokenizeJson,
   type JsonSyntaxTheme,
-} from "@/app/hooks/useJsonSyntaxHighlighter";
-import { findJsonSyntaxError } from "@/app/lib/jsonSyntaxError";
+} from "@/shared/hooks/useJsonSyntaxHighlighter";
+import { findJsonSyntaxError } from "@/entities/json";
 
 type ViewMode = "pretty" | "minified" | "escaped";
 

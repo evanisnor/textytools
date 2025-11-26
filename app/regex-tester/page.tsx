@@ -11,7 +11,7 @@ import {
   trackToolConversion,
 } from "@/shared/lib/analytics";
 import { TOOL_NAMES } from "@/shared/lib/constants";
-import { useRegexMatchHighlighter } from "@/app/hooks/useRegexMatchHighlighter";
+import { useRegexMatchHighlighter } from "@/shared/hooks/useRegexMatchHighlighter";
 
 interface RegexFlag {
   id: string;

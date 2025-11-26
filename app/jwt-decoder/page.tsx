@@ -11,7 +11,7 @@ import {
   trackClearEvent,
 } from "@/shared/lib/analytics";
 import { TOOL_NAMES } from "@/shared/lib/constants";
-import { useJsonSyntaxHighlighter } from "@/app/hooks/useJsonSyntaxHighlighter";
+import { useJsonSyntaxHighlighter } from "@/shared/hooks/useJsonSyntaxHighlighter";
 
 interface JWTPayload {
   [key: string]: unknown;
