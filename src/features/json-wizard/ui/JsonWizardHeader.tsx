@@ -1,22 +1,12 @@
 "use client";
 
-interface JsonWizardHeaderProps {
-  keys: number;
-  depth: number;
-  size: number;
-  isValid: boolean;
-  hasInput: boolean;
-  mounted: boolean;
-}
+import { useJsonWizardContext } from "../model/JsonWizardProvider";
 
-export function JsonWizardHeader({
-  keys,
-  depth,
-  size,
-  isValid,
-  hasInput,
-  mounted,
-}: JsonWizardHeaderProps) {
+export function JsonWizardHeader() {
+  const { stats, validation, input, mounted } = useJsonWizardContext();
+  const { keys, depth, size } = stats;
+  const isValid = validation.isValid;
+  const hasInput = Boolean(input.trim());
   return (
     <div className="grid grid-cols-3 gap-3 lg:min-w-[400px]">
       <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-3">

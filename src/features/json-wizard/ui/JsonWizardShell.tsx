@@ -4,17 +4,15 @@ import Link from "next/link";
 import { useRef } from "react";
 
 import { renderHighlightedText } from "../lib/highlighter";
-import type { ViewMode, ValidationResult } from "../model/types";
+import { useJsonWizardContext } from "../model/JsonWizardProvider";
 
 import { EditorActions } from "./EditorActions";
 import { OptionsControls } from "./OptionsControls";
 import { SearchControls } from "./SearchControls";
 import { ViewModeControls } from "./ViewModeControls";
 
-import {
-  useJsonSyntaxHighlighter,
-  type JsonSyntaxTheme,
-} from "@/shared/hooks/useJsonSyntaxHighlighter";
+import type { JsonSyntaxTheme } from "@/shared/hooks/useJsonSyntaxHighlighter";
+import { useJsonSyntaxHighlighter } from "@/shared/hooks/useJsonSyntaxHighlighter";
 import {
   trackCopyEvent,
   trackToolConversion,
@@ -27,55 +25,31 @@ import {
 } from "@/shared/ui/text-editor/TextEditorContainer";
 import { useToast } from "@/shared/ui/toast/Toast";
 
-interface JsonWizardShellProps {
-  input: string;
-  setInput: (value: string) => void;
-  viewMode: ViewMode;
-  setViewMode: (mode: ViewMode) => void;
-  indentSize: number;
-  setIndentSize: (size: number) => void;
-  searchTerm: string;
-  setSearchTerm: (term: string) => void;
-  caseSensitive: boolean;
-  setCaseSensitive: (value: boolean) => void;
-  sortKeys: boolean;
-  setSortKeys: (value: boolean) => void;
-  currentMatchIndex: number;
-  setCurrentMatchIndex: (index: number) => void;
-  validation: ValidationResult;
-  processedJSON: string;
-  matchPositions: Map<number, Map<number, number>>;
-  inputToOutputMatchMap: Map<number, number>;
-  outputMatchPositions: Map<number, Map<number, number>>;
-  totalMatches: number;
-  goToNextMatch: () => void;
-  goToPreviousMatch: () => void;
-}
-
-export function JsonWizardShell({
-  input,
-  setInput,
-  viewMode,
-  setViewMode,
-  indentSize,
-  setIndentSize,
-  searchTerm,
-  setSearchTerm,
-  caseSensitive,
-  setCaseSensitive,
-  sortKeys,
-  setSortKeys,
-  currentMatchIndex,
-  setCurrentMatchIndex,
-  validation,
-  processedJSON,
-  matchPositions,
-  inputToOutputMatchMap,
-  outputMatchPositions,
-  totalMatches,
-  goToNextMatch,
-  goToPreviousMatch,
-}: JsonWizardShellProps) {
+export function JsonWizardShell() {
+  const {
+    input,
+    setInput,
+    viewMode,
+    setViewMode,
+    indentSize,
+    setIndentSize,
+    searchTerm,
+    setSearchTerm,
+    caseSensitive,
+    setCaseSensitive,
+    sortKeys,
+    setSortKeys,
+    currentMatchIndex,
+    setCurrentMatchIndex,
+    validation,
+    processedJSON,
+    matchPositions,
+    inputToOutputMatchMap,
+    outputMatchPositions,
+    totalMatches,
+    goToNextMatch,
+    goToPreviousMatch,
+  } = useJsonWizardContext();
   const inputEditorRef = useRef<TextEditorContainerRef>(null);
   const outputEditorRef = useRef<TextEditorContainerRef>(null);
   const { showToast, ToastComponent } = useToast();
