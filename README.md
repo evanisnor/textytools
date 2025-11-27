@@ -136,35 +136,87 @@ Charlie,35,Denver
 Diana,28,Austin
 ```
 
-## Project Structure
+## Architecture
+
+This project follows **[Feature-Sliced Design (FSD)](https://feature-sliced.design/)** principles to organize code by business value and maintain clear separation of concerns.
+
+### FSD Layer Structure
 
 ```
-utility-apps/
-├── app/
-│   ├── layout.tsx           # Root layout with Geist fonts
-│   ├── page.tsx             # Home page with utility grid
-│   ├── globals.css          # Tailwind imports and theme
-|   ├── components/          # Shared components
-│   ├── case-converter/
-│   │   └── page.tsx
-│   ├── text-counter/
-│   │   └── page.tsx
-│   ├── text-sanitizer/
-│   │   └── page.tsx
-│   ├── json-wizard/
-│   │   └── page.tsx
-│   ├── csv-json-converter/
-│   │   └── page.tsx
-│   ├── text-encoder/
-│   │   └── page.tsx
-│   ├── jwt-decoder/
-│   │   └── page.tsx
-│   └── regex-tester/
+textytools/
+├── app/                      # Next.js routing (thin composition layer)
+│   ├── layout.tsx
+│   ├── page.tsx             # Home page with tool grid
+│   ├── diff-viewer/
+│   │   └── page.tsx         # Composes DiffViewerProvider + components
+│   └── [other-tools]/
 │       └── page.tsx
+├── src/
+│   ├── features/            # Tool implementations (one per utility)
+│   │   ├── diff-viewer/
+│   │   │   ├── ui/          # Presentational components
+│   │   │   ├── model/       # State management (hooks, context, types)
+│   │   │   ├── lib/         # Feature-specific utilities
+│   │   │   └── index.ts     # Public API exports
+│   │   └── [other-tools]/
+│   ├── entities/            # Domain logic (CSV parsing, JSON validation, etc.)
+│   │   ├── csv/
+│   │   └── json/
+│   └── shared/              # Reusable infrastructure
+│       ├── ui/              # UI components (ToolFrame, TextEditor, Modal, etc.)
+│       ├── lib/             # Utilities (analytics, constants)
+│       └── hooks/           # Shared hooks
 ├── package.json
 ├── tsconfig.json
 └── next.config.ts
 ```
+
+### FSD Import Rules
+
+- **Layer hierarchy**: `app` → `features` → `entities` → `shared`
+- Features can import from `entities` and `shared`, but not from other features
+- All imports from a slice must use its public API (`index.ts`)
+- Pages import only from feature roots, never from internal segments
+
+### Context Provider Pattern
+
+Modern features use React Context to avoid prop drilling and keep pages minimal:
+
+**Example: diff-viewer**
+```tsx
+// app/diff-viewer/page.tsx (composition only)
+<DiffViewerProvider>
+  <ToolFrame headerRight={<DiffViewerHeader />}>
+    <DiffViewerShell />
+  </ToolFrame>
+</DiffViewerProvider>
+
+// src/features/diff-viewer/model/DiffViewerProvider.tsx
+export function DiffViewerProvider({ children }) {
+  const value = useDiffViewer(); // Hook with all state
+  return <Context.Provider value={value}>{children}</Context.Provider>;
+}
+
+// Components consume via context
+const { stats } = useDiffViewerContext();
+```
+
+**Benefits**:
+- Pages stay thin (just composition)
+- No prop drilling through `ToolFrame`
+- Components access only what they need
+- State management isolated in `model/` layer
+
+### Feature Structure
+
+Each tool is organized into standard segments:
+
+- **`ui/`** - Presentational components (Shell, Header)
+- **`model/`** - Business logic, hooks, context providers, types
+- **`lib/`** - Feature-specific utilities (algorithms, converters)
+- **`index.ts`** - Public API (only export what pages need)
+
+See [diff-viewer README](src/features/diff-viewer/README.md) for a complete implementation example.
 
 ## Technology Stack
 
@@ -231,66 +283,130 @@ All utilities use local React state (`useState`, `useMemo`) with client-side ren
 
 ## Adding New Utilities
 
-To add a new utility to the project:
+To add a new utility following FSD principles:
 
-### 1. Create the Utility Page
+### 1. Create the Feature Slice
 
-Create a new directory under `app/` with a `page.tsx` file:
+Create the feature directory structure under `src/features/`:
 
 ```bash
-mkdir app/your-utility
-touch app/your-utility/page.tsx
+mkdir -p src/features/your-utility/{ui,model,lib}
+touch src/features/your-utility/{index.ts,ui/YourUtilityShell.tsx,model/useYourUtility.ts}
 ```
 
-### 2. Follow the Standard Structure
+### 2. Implement the Hook (Model Layer)
 
-Use the `ToolFrame` component for consistent layout and the `TextEditorContainer` component for text input/output areas:
+Create state management in `model/useYourUtility.ts`:
 
 ```tsx
 "use client";
+import { useState, useMemo } from "react";
 
-import { useState } from "react";
-import { ToolFrame } from "@/app/components/ToolFrame";
-import { TextEditorContainer } from "@/app/components/TextEditorContainer";
-import { TOOL_NAMES } from "@/app/lib/constants";
-
-export default function YourUtility() {
+export function useYourUtility() {
   const [input, setInput] = useState("");
-  const [output, setOutput] = useState("");
+
+  const output = useMemo(() => {
+    // Your transformation logic
+    return input.toUpperCase();
+  }, [input]);
+
+  return { input, setInput, output };
+}
+```
+
+### 3. Create the Provider (Optional, for Complex State)
+
+For features with multiple components, use a context provider:
+
+```tsx
+// model/YourUtilityProvider.tsx
+"use client";
+import { createContext, useContext } from "react";
+import { useYourUtility } from "./useYourUtility";
+
+const Context = createContext(null);
+
+export function YourUtilityProvider({ children }) {
+  const value = useYourUtility();
+  return <Context.Provider value={value}>{children}</Context.Provider>;
+}
+
+export function useYourUtilityContext() {
+  const context = useContext(Context);
+  if (!context) throw new Error("Must be used within YourUtilityProvider");
+  return context;
+}
+```
+
+### 4. Build the UI Component
+
+Create `ui/YourUtilityShell.tsx`:
+
+```tsx
+"use client";
+import { useYourUtilityContext } from "../model/YourUtilityProvider";
+import { TextEditorContainer } from "@/shared/ui/text-editor/TextEditorContainer";
+
+export function YourUtilityShell() {
+  const { input, setInput, output } = useYourUtilityContext();
 
   return (
-    <ToolFrame
-      title="Your Utility Name"
-      description="Brief description of what this utility does"
-      toolName={TOOL_NAMES.YOUR_UTILITY}
-      maxWidth="7xl" // or "4xl", "5xl", "6xl" depending on your layout needs
-    >
-      {/* Main content */}
-      <div className="grid lg:grid-cols-2 gap-6">
-        {/* Input area */}
-        <TextEditorContainer
-          value={input}
-          onChange={setInput}
-          placeholder="Enter your text here..."
-          height="h-96"
-        />
-
-        {/* Output area */}
-        <TextEditorContainer
-          value={output}
-          readOnly
-          placeholder="Results will appear here..."
-          height="h-96"
-        />
-      </div>
-    </ToolFrame>
+    <div className="grid lg:grid-cols-2 gap-6">
+      <TextEditorContainer
+        value={input}
+        onChange={setInput}
+        placeholder="Enter your text here..."
+        height="h-96"
+      />
+      <TextEditorContainer
+        value={output}
+        readOnly
+        placeholder="Results will appear here..."
+        height="h-96"
+      />
+    </div>
   );
 }
 ```
 
-### 3. Add Tool Name Constant
+### 5. Export Public API
 
-Add your tool name to [app/lib/constants.ts](app/lib/constants.ts) for analytics tracking:
+Create `index.ts` to expose only what the page needs:
+
+```tsx
+export { YourUtilityProvider } from "./model/YourUtilityProvider";
+export { YourUtilityShell } from "./ui/YourUtilityShell";
+```
+
+### 6. Create the Page (Composition Layer)
+
+Create `app/your-utility/page.tsx`:
+
+```tsx
+"use client";
+import { YourUtilityProvider, YourUtilityShell } from "@/features/your-utility";
+import { ToolFrame } from "@/shared/ui/tool-frame/ToolFrame";
+import { TOOL_NAMES } from "@/shared/lib/constants";
+
+export default function YourUtility() {
+  return (
+    <YourUtilityProvider>
+      <ToolFrame
+        title="Your Utility Name"
+        description="Brief description of what this utility does"
+        toolName={TOOL_NAMES.YOUR_UTILITY}
+        maxWidth="7xl"
+      >
+        <YourUtilityShell />
+      </ToolFrame>
+    </YourUtilityProvider>
+  );
+}
+```
+
+### 7. Add Tool Name Constant
+
+Add your tool name to [src/shared/lib/constants.ts](src/shared/lib/constants.ts):
 
 ```tsx
 export const TOOL_NAMES = {
@@ -299,7 +415,7 @@ export const TOOL_NAMES = {
 } as const;
 ```
 
-### 4. Add to Home Page
+### 8. Add to Home Page
 
 Edit [app/page.tsx](app/page.tsx) to add your utility using the `ToolCard` component:
 
@@ -311,7 +427,7 @@ Edit [app/page.tsx](app/page.tsx) to add your utility using the `ToolCard` compo
 />
 ```
 
-### 5. Design Considerations
+### 9. Design Considerations
 
 **Keep it simple**: Focus on a single, well-defined task
 
@@ -343,7 +459,7 @@ Edit [app/page.tsx](app/page.tsx) to add your utility using the `ToolCard` compo
 - Large data sets (optimize rendering if needed)
 - Copy-to-clipboard functionality for outputs
 
-### 6. Common Patterns to Reuse
+### 10. Common Patterns to Reuse
 
 **TextEditor with Line Numbers**:
 
