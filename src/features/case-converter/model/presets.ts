@@ -1,4 +1,4 @@
-import type { CaseOption } from './types';
+import type { CaseOption } from "./types";
 
 export const caseOptions: CaseOption[] = [
   { id: "upper", label: "UPPER CASE", description: "ALL CHARACTERS UPPERCASE" },

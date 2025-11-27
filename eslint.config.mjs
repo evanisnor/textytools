@@ -56,7 +56,7 @@ const eslintConfig = defineConfig([
       "import/order": [
         "error",
         {
-          "pathGroups": [
+          pathGroups: [
             {
               pattern: "~/**",
               group: "internal",
@@ -83,9 +83,9 @@ const eslintConfig = defineConfig([
               position: "after",
             },
           ],
-          "pathGroupsExcludedImportTypes": ["builtin"],
+          pathGroupsExcludedImportTypes: ["builtin"],
           "newlines-between": "always",
-          "alphabetize": {
+          alphabetize: {
             order: "asc",
             caseInsensitive: true,
           },

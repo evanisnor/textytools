@@ -3,7 +3,11 @@
 import { useState, useMemo, useEffect } from "react";
 
 import { computeDiff } from "../lib/diff";
-import { findSearchMatches, createInputMatchMap, createOutputMatchMap } from "../lib/search";
+import {
+  findSearchMatches,
+  createInputMatchMap,
+  createOutputMatchMap,
+} from "../lib/search";
 
 export function useDiffViewer() {
   const [input, setInput] = useState("");
@@ -18,7 +22,9 @@ export function useDiffViewer() {
       setMounted(true);
 
       // Check for cross-tool data first
-      const storedInput = sessionStorage.getItem("cross-tool-input-diff-viewer");
+      const storedInput = sessionStorage.getItem(
+        "cross-tool-input-diff-viewer",
+      );
       if (storedInput) {
         sessionStorage.removeItem("cross-tool-input-diff-viewer");
         setInput(storedInput);
@@ -32,7 +38,8 @@ export function useDiffViewer() {
           const state = JSON.parse(persistedState);
           if (state.input !== undefined) setInput(state.input);
           if (state.output !== undefined) setOutput(state.output);
-          if (state.caseSensitive !== undefined) setCaseSensitive(state.caseSensitive);
+          if (state.caseSensitive !== undefined)
+            setCaseSensitive(state.caseSensitive);
         } catch (err) {
           console.error("Failed to load persisted state:", err);
         }

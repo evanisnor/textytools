@@ -13,7 +13,6 @@ import {
 } from "@/shared/ui/text-editor/TextEditorContainer";
 import { useToast } from "@/shared/ui/toast/Toast";
 
-
 interface DiffViewerShellProps {
   input: string;
   setInput: (value: string) => void;

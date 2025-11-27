@@ -35,7 +35,10 @@ import {
   toSha512,
 } from "./encoders";
 
-export async function encode(text: string, type: EncodingType): Promise<string> {
+export async function encode(
+  text: string,
+  type: EncodingType,
+): Promise<string> {
   if (!text) return "";
 
   switch (type) {

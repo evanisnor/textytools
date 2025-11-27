@@ -19,7 +19,5 @@ export function countParagraphs(text: string): number {
   const trimmed = text.trim();
   if (trimmed === "") return 0;
 
-  return trimmed
-    .split(/\n\s*\n/)
-    .filter((p) => p.trim().length > 0).length;
+  return trimmed.split(/\n\s*\n/).filter((p) => p.trim().length > 0).length;
 }

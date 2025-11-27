@@ -204,13 +204,7 @@ export function JsonWizardShell({
                 height="h-[calc(100vh-400px)] min-h-[360px]"
                 placeholder='Paste your JSON here, e.g., {"key": "value"}'
                 renderLineContent={(line, index) =>
-                  renderLine(
-                    line,
-                    index,
-                    false,
-                    undefined,
-                    inputSyntaxTheme,
-                  )
+                  renderLine(line, index, false, undefined, inputSyntaxTheme)
                 }
               />
             </div>

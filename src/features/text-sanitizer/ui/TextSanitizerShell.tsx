@@ -11,7 +11,6 @@ import { TOOL_NAMES } from "@/shared/lib/constants";
 import { TextEditorContainer } from "@/shared/ui/text-editor/TextEditorContainer";
 import { useToast } from "@/shared/ui/toast/Toast";
 
-
 export function TextSanitizerShell() {
   const {
     text,

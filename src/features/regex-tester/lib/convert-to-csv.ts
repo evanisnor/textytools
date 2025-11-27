@@ -24,11 +24,7 @@ export function convertMatchesToCsv(matches: RegexMatch[]): string {
     const values = match.groups.map((group) => {
       const value = group || "";
       // Escape CSV values - quote if contains comma, newline, or quotes
-      if (
-        value.includes(",") ||
-        value.includes("\n") ||
-        value.includes('"')
-      ) {
+      if (value.includes(",") || value.includes("\n") || value.includes('"')) {
         return `"${value.replace(/"/g, '""')}"`;
       }
       return value;

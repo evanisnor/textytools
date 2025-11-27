@@ -12,7 +12,12 @@ import {
 import { getJSONStats } from "../lib/stats";
 import { validateJSON } from "../lib/validators";
 
-import type { ViewMode, ValidationResult, JSONStats, SearchMatch } from "./types";
+import type {
+  ViewMode,
+  ValidationResult,
+  JSONStats,
+  SearchMatch,
+} from "./types";
 
 export function useJsonWizard() {
   const [input, setInput] = useState("");
@@ -63,7 +68,10 @@ export function useJsonWizard() {
     sessionStorage.setItem("json-wizard-state", JSON.stringify(state));
   }, [input, viewMode, indentSize, sortKeys, caseSensitive, mounted]);
 
-  const validation: ValidationResult = useMemo(() => validateJSON(input), [input]);
+  const validation: ValidationResult = useMemo(
+    () => validateJSON(input),
+    [input],
+  );
   const stats: JSONStats = useMemo(() => getJSONStats(input), [input]);
 
   const isEscapedString = useMemo(
@@ -96,7 +104,14 @@ export function useJsonWizard() {
         validation.isValid,
         isEscapedString,
       ),
-    [input, viewMode, indentSize, sortKeys, validation.isValid, isEscapedString],
+    [
+      input,
+      viewMode,
+      indentSize,
+      sortKeys,
+      validation.isValid,
+      isEscapedString,
+    ],
   );
 
   const outputMatchPaths = useMemo(
@@ -105,7 +120,13 @@ export function useJsonWizard() {
   );
 
   const outputSearchMatches: SearchMatch[] = useMemo(
-    () => findSearchMatches(processedJSON, searchTerm, caseSensitive, outputMatchPaths),
+    () =>
+      findSearchMatches(
+        processedJSON,
+        searchTerm,
+        caseSensitive,
+        outputMatchPaths,
+      ),
     [searchTerm, caseSensitive, processedJSON, outputMatchPaths],
   );
 

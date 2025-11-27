@@ -207,7 +207,9 @@ export function renderHighlightedText({
       );
     }
     return (
-      <Fragment key={index}>{renderPartContent(part.text, part.start)}</Fragment>
+      <Fragment key={index}>
+        {renderPartContent(part.text, part.start)}
+      </Fragment>
     );
   });
 

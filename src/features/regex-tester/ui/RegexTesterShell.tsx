@@ -11,10 +11,7 @@ import {
 import { FLAGS } from "../model/flags";
 import { useRegexTester } from "../model/useRegexTester";
 
-import {
-  trackCopyEvent,
-  trackClearEvent,
-} from "@/shared/lib/analytics";
+import { trackCopyEvent, trackClearEvent } from "@/shared/lib/analytics";
 import { TOOL_NAMES } from "@/shared/lib/constants";
 import { TextEditorContainer } from "@/shared/ui/text-editor/TextEditorContainer";
 import { useToast } from "@/shared/ui/toast/Toast";
