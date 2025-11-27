@@ -9,7 +9,7 @@ import {
   navigateToJsonWizard,
 } from "../lib/convert-to-json";
 import { FLAGS } from "../model/flags";
-import { useRegexTester } from "../model/useRegexTester";
+import { useRegexTesterContext } from "../model/RegexTesterProvider";
 
 import { trackCopyEvent, trackClearEvent } from "@/shared/lib/analytics";
 import { TOOL_NAMES } from "@/shared/lib/constants";
@@ -33,7 +33,7 @@ export function RegexTesterShell() {
     clearTestString,
     isHighlighted,
     getMatchIndex,
-  } = useRegexTester();
+  } = useRegexTesterContext();
 
   const { showToast, ToastComponent } = useToast();
 

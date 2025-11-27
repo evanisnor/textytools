@@ -1,14 +1,8 @@
-interface RegexTesterHeaderProps {
-  matchCount: number;
-  captureGroupCount: number;
-  mounted: boolean;
-}
+import { useRegexTesterContext } from "../model/RegexTesterProvider";
 
-export function RegexTesterHeader({
-  matchCount,
-  captureGroupCount,
-  mounted,
-}: RegexTesterHeaderProps) {
+export function RegexTesterHeader() {
+  const { matches, captureGroupCount, mounted } = useRegexTesterContext();
+  const matchCount = matches.length;
   return (
     <div className="grid grid-cols-2 gap-3 min-w-[220px]">
       <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-3">
