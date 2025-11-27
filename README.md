@@ -4,6 +4,14 @@ A collection of lightweight, browser-based productivity tools for programmers an
 
 https://textytools.dev
 
+## Setup
+
+After cloning the repository, configure git hooks:
+
+```bash
+git config core.hooksPath .githooks
+```
+
 ## Live Utilities
 
 ### Text Counter
