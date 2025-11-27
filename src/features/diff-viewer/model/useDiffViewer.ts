@@ -88,6 +88,15 @@ export function useDiffViewer() {
     }
   };
 
+  const stats = useMemo(
+    () => ({
+      added: diffLines.filter((l) => l.type === "added").length,
+      removed: diffLines.filter((l) => l.type === "removed").length,
+      modified: diffLines.filter((l) => l.type === "modified").length,
+    }),
+    [diffLines],
+  );
+
   return {
     input,
     setInput,
@@ -107,5 +116,6 @@ export function useDiffViewer() {
     outputMatchMap,
     goToNextMatch,
     goToPreviousMatch,
+    stats,
   };
 }
