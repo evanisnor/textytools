@@ -3,7 +3,7 @@
 import Link from "next/link";
 
 import { highlightJWT } from "../lib/highlighter";
-import { useJwtDecoder } from "../model/useJwtDecoder";
+import { useJwtDecoderContext } from "../model/JwtDecoderProvider";
 
 import { useJsonSyntaxHighlighter } from "@/shared/hooks/useJsonSyntaxHighlighter";
 import {
@@ -16,7 +16,7 @@ import { TextEditorContainer } from "@/shared/ui/text-editor/TextEditorContainer
 import { useToast } from "@/shared/ui/toast/Toast";
 
 export function JwtDecoderShell() {
-  const { input, setInput, result, formattedOutput } = useJwtDecoder();
+  const { input, setInput, result, formattedOutput } = useJwtDecoderContext();
   const { showToast, ToastComponent } = useToast();
 
   const decodedJsonSyntax = useJsonSyntaxHighlighter({

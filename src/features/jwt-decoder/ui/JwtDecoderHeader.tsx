@@ -1,13 +1,11 @@
 "use client";
 
 import { formatDate, isExpired, isNotYetValid } from "../lib/validators";
-import type { DecodedJWT } from "../model/types";
+import { useJwtDecoderContext } from "../model/JwtDecoderProvider";
 
-interface JwtDecoderHeaderProps {
-  decoded: DecodedJWT | null;
-}
-
-export function JwtDecoderHeader({ decoded }: JwtDecoderHeaderProps) {
+export function JwtDecoderHeader() {
+  const { result } = useJwtDecoderContext();
+  const decoded = result.decoded;
   const expired = decoded ? isExpired(decoded.expiresAt) : false;
   const notYetValid = decoded ? isNotYetValid(decoded.notBefore) : false;
 
