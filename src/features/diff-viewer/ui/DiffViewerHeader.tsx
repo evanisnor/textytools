@@ -1,14 +1,7 @@
-interface DiffStats {
-  added: number;
-  removed: number;
-  modified: number;
-}
+import { useDiffViewerContext } from "../model/DiffViewerProvider";
 
-interface DiffViewerHeaderProps {
-  stats: DiffStats;
-}
-
-export function DiffViewerHeader({ stats }: DiffViewerHeaderProps) {
+export function DiffViewerHeader() {
+  const { stats } = useDiffViewerContext();
   return (
     <div className="grid grid-cols-3 gap-3 lg:min-w-[350px]">
       <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-3">

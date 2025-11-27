@@ -2,7 +2,8 @@
 
 import { Fragment, useRef, useEffect, useMemo } from "react";
 
-import type { DiffLine, DiffType, SearchMatch } from "../model/types";
+import { useDiffViewerContext } from "../model/DiffViewerProvider";
+import type { DiffType } from "../model/types";
 
 import { trackClearEvent } from "@/shared/lib/analytics";
 import { TOOL_NAMES } from "@/shared/lib/constants";
@@ -13,45 +14,26 @@ import {
 } from "@/shared/ui/text-editor/TextEditorContainer";
 import { useToast } from "@/shared/ui/toast/Toast";
 
-interface DiffViewerShellProps {
-  input: string;
-  setInput: (value: string) => void;
-  output: string;
-  setOutput: (value: string) => void;
-  searchTerm: string;
-  setSearchTerm: (value: string) => void;
-  caseSensitive: boolean;
-  setCaseSensitive: (value: boolean) => void;
-  currentMatchIndex: number;
-  setCurrentMatchIndex: (index: number) => void;
-  diffLines: DiffLine[];
-  searchMatches: SearchMatch[];
-  totalMatches: number;
-  inputMatchMap: Map<number, Set<number>>;
-  outputMatchMap: Map<number, Set<number>>;
-  goToNextMatch: () => void;
-  goToPreviousMatch: () => void;
-}
-
-export function DiffViewerShell({
-  input,
-  setInput,
-  output,
-  setOutput,
-  searchTerm,
-  setSearchTerm,
-  caseSensitive,
-  setCaseSensitive,
-  currentMatchIndex,
-  setCurrentMatchIndex,
-  diffLines,
-  searchMatches,
-  totalMatches,
-  inputMatchMap,
-  outputMatchMap,
-  goToNextMatch,
-  goToPreviousMatch,
-}: DiffViewerShellProps) {
+export function DiffViewerShell() {
+  const {
+    input,
+    setInput,
+    output,
+    setOutput,
+    searchTerm,
+    setSearchTerm,
+    caseSensitive,
+    setCaseSensitive,
+    currentMatchIndex,
+    setCurrentMatchIndex,
+    diffLines,
+    searchMatches,
+    totalMatches,
+    inputMatchMap,
+    outputMatchMap,
+    goToNextMatch,
+    goToPreviousMatch,
+  } = useDiffViewerContext();
   const inputEditorRef = useRef<TextEditorContainerRef>(null);
   const outputEditorRef = useRef<TextEditorContainerRef>(null);
   const { ToastComponent } = useToast();
