@@ -1,15 +1,18 @@
 "use client";
 
 import { Fragment, useRef, useEffect, useMemo } from "react";
-import { useToast } from "@/shared/ui/toast/Toast";
+
+import type { DiffLine, DiffType, SearchMatch } from "../model/types";
+
+import { trackClearEvent } from "@/shared/lib/analytics";
+import { TOOL_NAMES } from "@/shared/lib/constants";
+import { SearchBox } from "@/shared/ui/search-box/SearchBox";
 import {
   TextEditorContainer,
   type TextEditorContainerRef,
 } from "@/shared/ui/text-editor/TextEditorContainer";
-import { SearchBox } from "@/shared/ui/search-box/SearchBox";
-import { trackClearEvent } from "@/shared/lib/analytics";
-import { TOOL_NAMES } from "@/shared/lib/constants";
-import type { DiffLine, DiffType, SearchMatch } from "../model/types";
+import { useToast } from "@/shared/ui/toast/Toast";
+
 
 interface DiffViewerShellProps {
   input: string;

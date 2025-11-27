@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
 import { debounce } from "lodash";
+import { useState, useEffect } from "react";
+
 import { countCharacters, countLines, countWords, countParagraphs } from "../lib/counters";
 import { estimateTokenCount } from "../lib/tokenizer";
 

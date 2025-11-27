@@ -1,5 +1,6 @@
-import { parseCsvLine } from "@/entities/csv";
 import type { JsonObject } from "../model/types";
+
+import { parseCsvLine } from "@/shared/lib/csv";
 
 // CSV to JSON conversion
 export function csvToJson(

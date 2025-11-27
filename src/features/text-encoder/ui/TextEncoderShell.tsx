@@ -1,11 +1,13 @@
 "use client";
 
-import { useToast } from "@/shared/ui/toast/Toast";
-import { TextEditorContainer } from "@/shared/ui/text-editor/TextEditorContainer";
+import { encodingOptions } from "../model/presets";
+import { useTextEncoder } from "../model/useTextEncoder";
+
 import { trackCopyEvent } from "@/shared/lib/analytics";
 import { TOOL_NAMES } from "@/shared/lib/constants";
-import { useTextEncoder } from "../model/useTextEncoder";
-import { encodingOptions } from "../model/presets";
+import { TextEditorContainer } from "@/shared/ui/text-editor/TextEditorContainer";
+import { useToast } from "@/shared/ui/toast/Toast";
+
 
 export function TextEncoderShell() {
   const {

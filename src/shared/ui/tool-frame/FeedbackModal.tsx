@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, FormEvent } from "react";
+
 import { Modal } from "../modal/Modal";
 import { useToast } from "../toast/Toast";
+
 import { trackFeedbackSubmit } from "@/shared/lib/analytics";
 
 interface FeedbackModalProps {

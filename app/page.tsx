@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
+
+import { isRegexTesterEnabled } from "@/shared/lib/featureFlags";
 import ToolCard from "@/shared/ui/tool-card/ToolCard";
 import { FeedbackModal } from "@/shared/ui/tool-frame/FeedbackModal";
-import { isRegexTesterEnabled } from "@/shared/lib/featureFlags";
 
 export default function Home() {
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);

@@ -1,8 +1,9 @@
 "use client";
 
-import { ToolFrame } from "@/shared/ui/tool-frame/ToolFrame";
-import { TOOL_NAMES } from "@/shared/lib/constants";
 import { TextCounterShell } from "@/features/text-counter";
+
+import { TOOL_NAMES } from "@/shared/lib/constants";
+import { ToolFrame } from "@/shared/ui/tool-frame/ToolFrame";
 
 export default function TextCounter() {
   return (

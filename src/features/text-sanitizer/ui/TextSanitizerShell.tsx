@@ -1,14 +1,16 @@
 "use client";
 
-import { useToast } from "@/shared/ui/toast/Toast";
-import { TextEditorContainer } from "@/shared/ui/text-editor/TextEditorContainer";
+import { useTextSanitizer } from "../model/useTextSanitizer";
+
 import {
   trackCopyEvent,
   trackClearEvent,
   trackToggleAllEvent,
 } from "@/shared/lib/analytics";
 import { TOOL_NAMES } from "@/shared/lib/constants";
-import { useTextSanitizer } from "../model/useTextSanitizer";
+import { TextEditorContainer } from "@/shared/ui/text-editor/TextEditorContainer";
+import { useToast } from "@/shared/ui/toast/Toast";
+
 
 export function TextSanitizerShell() {
   const {

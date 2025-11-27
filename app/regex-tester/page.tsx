@@ -1,12 +1,13 @@
 "use client";
 
-import { ToolFrame } from "@/shared/ui/tool-frame/ToolFrame";
-import { TOOL_NAMES } from "@/shared/lib/constants";
 import {
   RegexTesterShell,
   RegexTesterHeader,
   useRegexTester,
 } from "@/features/regex-tester";
+
+import { TOOL_NAMES } from "@/shared/lib/constants";
+import { ToolFrame } from "@/shared/ui/tool-frame/ToolFrame";
 
 export default function RegexTester() {
   const { matches, captureGroupCount, mounted } = useRegexTester();

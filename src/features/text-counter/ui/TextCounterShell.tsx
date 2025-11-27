@@ -1,7 +1,8 @@
 "use client";
 
-import { TextEditorContainer } from "@/shared/ui/text-editor/TextEditorContainer";
 import { useTextCounter } from "../model/useTextCounter";
+
+import { TextEditorContainer } from "@/shared/ui/text-editor/TextEditorContainer";
 
 export function TextCounterShell() {
   const {

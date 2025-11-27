@@ -1,5 +1,6 @@
-import { findJsonSyntaxError } from "@/entities/json";
 import type { ValidationResult } from "../model/types";
+
+import { findJsonSyntaxError } from "@/shared/lib/jsonSyntaxError";
 
 export function validateJSON(text: string): ValidationResult {
   if (!text.trim()) {

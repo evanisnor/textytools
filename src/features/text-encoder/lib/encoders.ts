@@ -1,4 +1,5 @@
 import bs58 from "bs58";
+
 import { MORSE_CODE, BASE91_ALPHABET, Z85_ALPHABET } from "./constants";
 import { md5cycle, md5blk, rhex } from "./hash-utils";
 

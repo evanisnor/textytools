@@ -1,6 +1,7 @@
-import { ToolFrame } from "@/shared/ui/tool-frame/ToolFrame";
-import { TOOL_NAMES } from "@/shared/lib/constants";
 import { CsvJsonConverterShell } from "@/features/csv-json-converter";
+
+import { TOOL_NAMES } from "@/shared/lib/constants";
+import { ToolFrame } from "@/shared/ui/tool-frame/ToolFrame";
 
 export default function CsvJsonConverter() {
   return (

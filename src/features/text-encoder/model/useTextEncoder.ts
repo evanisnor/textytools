@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
+
 import { encode, decode } from "../lib/codec";
+
 import type { EncodingType, EncodingMode } from "./types";
 
 export function useTextEncoder() {

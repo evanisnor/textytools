@@ -1,8 +1,9 @@
 "use client";
 
-import { ToolFrame } from "@/shared/ui/tool-frame/ToolFrame";
-import { TOOL_NAMES } from "@/shared/lib/constants";
 import { CaseConverterShell } from "@/features/case-converter";
+
+import { TOOL_NAMES } from "@/shared/lib/constants";
+import { ToolFrame } from "@/shared/ui/tool-frame/ToolFrame";
 
 export default function CaseConverter() {
   return (

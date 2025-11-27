@@ -1,17 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { useToast } from "@/shared/ui/toast/Toast";
-import { TextEditorContainer } from "@/shared/ui/text-editor/TextEditorContainer";
+
+import { useCsvJsonConverter } from "../model/useCsvJsonConverter";
+
+import { useCsvSyntaxHighlighter } from "@/shared/hooks/useCsvSyntaxHighlighter";
+import { useJsonSyntaxHighlighter } from "@/shared/hooks/useJsonSyntaxHighlighter";
 import {
   trackCopyEvent,
   trackToolConversion,
   trackClearEvent,
 } from "@/shared/lib/analytics";
 import { TOOL_NAMES } from "@/shared/lib/constants";
-import { useJsonSyntaxHighlighter } from "@/shared/hooks/useJsonSyntaxHighlighter";
-import { useCsvSyntaxHighlighter } from "@/shared/hooks/useCsvSyntaxHighlighter";
-import { useCsvJsonConverter } from "../model/useCsvJsonConverter";
+import { TextEditorContainer } from "@/shared/ui/text-editor/TextEditorContainer";
+import { useToast } from "@/shared/ui/toast/Toast";
+
 
 export function CsvJsonConverterShell() {
   const {

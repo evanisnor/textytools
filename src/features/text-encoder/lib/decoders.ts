@@ -1,4 +1,5 @@
 import bs58 from "bs58";
+
 import { MORSE_DECODE, BASE91_ALPHABET, Z85_ALPHABET } from "./constants";
 import { toRot13 } from "./encoders";
 

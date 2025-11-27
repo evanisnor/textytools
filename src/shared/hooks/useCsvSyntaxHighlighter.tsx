@@ -1,7 +1,8 @@
 "use client";
 
 import { Fragment, useMemo, type ReactNode } from "react";
-import { parseCsvLine } from "@/entities/csv";
+
+import { parseCsvLine } from "@/shared/lib/csv";
 
 const DEFAULT_COLUMN_COLORS = [
   "text-blue-700 dark:text-blue-300",

@@ -1,5 +1,6 @@
-import { toWords } from './detection';
 import type { CaseType } from '../model/types';
+
+import { toWords } from './detection';
 
 export function toTitleCase(str: string): string {
   return str.replace(

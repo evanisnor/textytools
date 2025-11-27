@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+
 import { useRegexMatchHighlighter } from "@/shared/hooks/useRegexMatchHighlighter";
 
 const STORAGE_KEY = "regex-tester-state";

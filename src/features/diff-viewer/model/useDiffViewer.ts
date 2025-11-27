@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import type { DiffLine, SearchMatch } from "./types";
+
 import { computeDiff } from "../lib/diff";
 import { findSearchMatches, createInputMatchMap, createOutputMatchMap } from "../lib/search";
 

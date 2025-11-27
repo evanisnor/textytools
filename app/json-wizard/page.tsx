@@ -1,8 +1,9 @@
 "use client";
 
-import { ToolFrame } from "@/shared/ui/tool-frame/ToolFrame";
-import { TOOL_NAMES } from "@/shared/lib/constants";
 import { JsonWizardShell, JsonWizardHeader, useJsonWizard } from "@/features/json-wizard";
+
+import { TOOL_NAMES } from "@/shared/lib/constants";
+import { ToolFrame } from "@/shared/ui/tool-frame/ToolFrame";
 
 export default function JSONWizard() {
   const wizard = useJsonWizard();
@@ -39,11 +40,8 @@ export default function JSONWizard() {
         currentMatchIndex={wizard.currentMatchIndex}
         setCurrentMatchIndex={wizard.setCurrentMatchIndex}
         validation={wizard.validation}
-        stats={wizard.stats}
         processedJSON={wizard.processedJSON}
-        searchMatches={wizard.searchMatches}
         matchPositions={wizard.matchPositions}
-        outputSearchMatches={wizard.outputSearchMatches}
         inputToOutputMatchMap={wizard.inputToOutputMatchMap}
         outputMatchPositions={wizard.outputMatchPositions}
         totalMatches={wizard.totalMatches}

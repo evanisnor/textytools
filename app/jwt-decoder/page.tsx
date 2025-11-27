@@ -1,12 +1,13 @@
 "use client";
 
-import { ToolFrame } from "@/shared/ui/tool-frame/ToolFrame";
-import { TOOL_NAMES } from "@/shared/lib/constants";
 import {
   JwtDecoderShell,
   JwtDecoderHeader,
   useJwtDecoder,
 } from "@/features/jwt-decoder";
+
+import { TOOL_NAMES } from "@/shared/lib/constants";
+import { ToolFrame } from "@/shared/ui/tool-frame/ToolFrame";
 
 export default function JWTDecoder() {
   const { result } = useJwtDecoder();

@@ -1,11 +1,13 @@
 "use client";
 
-import { useToast } from "@/shared/ui/toast/Toast";
-import { TextEditorContainer } from "@/shared/ui/text-editor/TextEditorContainer";
+import { caseOptions } from "../model/presets";
+import { useCaseConverter } from "../model/useCaseConverter";
+
 import { trackCopyEvent, trackClearEvent } from "@/shared/lib/analytics";
 import { TOOL_NAMES } from "@/shared/lib/constants";
-import { useCaseConverter } from "../model/useCaseConverter";
-import { caseOptions } from "../model/presets";
+import { TextEditorContainer } from "@/shared/ui/text-editor/TextEditorContainer";
+import { useToast } from "@/shared/ui/toast/Toast";
+
 
 export function CaseConverterShell() {
   const { text, setText, selectedCase, setSelectedCase, convertedText } =

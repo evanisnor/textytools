@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import type { ConversionResult } from "./types";
+
+import { csvToJson } from "../lib/csv-to-json";
 import { detectInputFormat } from "../lib/detection";
 import { jsonToCsv } from "../lib/json-to-csv";
-import { csvToJson } from "../lib/csv-to-json";
+
+import type { ConversionResult } from "./types";
 
 export function useCsvJsonConverter() {
   const [input, setInput] = useState("");

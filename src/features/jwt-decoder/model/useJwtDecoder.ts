@@ -1,5 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
+
 import { decodeJWT } from "../lib/decoder";
+
 import type { JWTDecodeResult } from "./types";
 
 export function useJwtDecoder() {

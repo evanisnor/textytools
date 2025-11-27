@@ -1,9 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import type { ViewMode, ValidationResult, JSONStats, SearchMatch } from "./types";
-import { validateJSON } from "../lib/validators";
-import { getJSONStats } from "../lib/stats";
+
 import { processJSON, checkIsEscapedString } from "../lib/formatter";
 import {
   findJSONMatchPaths,
@@ -11,6 +9,10 @@ import {
   createMatchPositionMap,
   mapInputToOutputMatches,
 } from "../lib/search";
+import { getJSONStats } from "../lib/stats";
+import { validateJSON } from "../lib/validators";
+
+import type { ViewMode, ValidationResult, JSONStats, SearchMatch } from "./types";
 
 export function useJsonWizard() {
   const [input, setInput] = useState("");

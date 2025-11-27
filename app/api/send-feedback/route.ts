@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
 import Mailgun from "mailgun.js";
+import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 

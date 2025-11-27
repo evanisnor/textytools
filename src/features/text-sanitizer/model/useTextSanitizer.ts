@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
-import { defaultOptions } from "./presets";
+
 import { sanitizeText } from "../lib/sanitizer";
+
+import { defaultOptions } from "./presets";
 import type { SanitizationOption } from "./types";
 
 export function useTextSanitizer() {

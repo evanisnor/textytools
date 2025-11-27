@@ -1,4 +1,20 @@
 import type { EncodingType } from "../model/types";
+
+import {
+  fromBase64,
+  fromBase58,
+  fromBase91,
+  fromAscii85,
+  fromZ85,
+  fromUrlEncoding,
+  fromHtmlEntities,
+  fromHex,
+  fromBinary,
+  fromUnicodeEscape,
+  fromQuotedPrintable,
+  fromRot13,
+  fromMorse,
+} from "./decoders";
 import {
   toBase64,
   toBase58,
@@ -18,21 +34,6 @@ import {
   toSha256,
   toSha512,
 } from "./encoders";
-import {
-  fromBase64,
-  fromBase58,
-  fromBase91,
-  fromAscii85,
-  fromZ85,
-  fromUrlEncoding,
-  fromHtmlEntities,
-  fromHex,
-  fromBinary,
-  fromUnicodeEscape,
-  fromQuotedPrintable,
-  fromRot13,
-  fromMorse,
-} from "./decoders";
 
 export async function encode(text: string, type: EncodingType): Promise<string> {
   if (!text) return "";

@@ -1,12 +1,20 @@
 "use client";
 
-import { useMemo, useRef } from "react";
 import Link from "next/link";
-import { useToast } from "@/shared/ui/toast/Toast";
+import { useRef } from "react";
+
+import { renderHighlightedText } from "../lib/highlighter";
+import type { ViewMode, ValidationResult } from "../model/types";
+
+import { EditorActions } from "./EditorActions";
+import { OptionsControls } from "./OptionsControls";
+import { SearchControls } from "./SearchControls";
+import { ViewModeControls } from "./ViewModeControls";
+
 import {
-  TextEditorContainer,
-  type TextEditorContainerRef,
-} from "@/shared/ui/text-editor/TextEditorContainer";
+  useJsonSyntaxHighlighter,
+  type JsonSyntaxTheme,
+} from "@/shared/hooks/useJsonSyntaxHighlighter";
 import {
   trackCopyEvent,
   trackToolConversion,
@@ -14,15 +22,10 @@ import {
 } from "@/shared/lib/analytics";
 import { TOOL_NAMES } from "@/shared/lib/constants";
 import {
-  useJsonSyntaxHighlighter,
-  type JsonSyntaxTheme,
-} from "@/shared/hooks/useJsonSyntaxHighlighter";
-import { renderHighlightedText } from "../lib/highlighter";
-import type { ViewMode, ValidationResult, JSONStats, SearchMatch } from "../model/types";
-import { SearchControls } from "./SearchControls";
-import { ViewModeControls } from "./ViewModeControls";
-import { OptionsControls } from "./OptionsControls";
-import { EditorActions } from "./EditorActions";
+  TextEditorContainer,
+  type TextEditorContainerRef,
+} from "@/shared/ui/text-editor/TextEditorContainer";
+import { useToast } from "@/shared/ui/toast/Toast";
 
 interface JsonWizardShellProps {
   input: string;
@@ -40,11 +43,8 @@ interface JsonWizardShellProps {
   currentMatchIndex: number;
   setCurrentMatchIndex: (index: number) => void;
   validation: ValidationResult;
-  stats: JSONStats;
   processedJSON: string;
-  searchMatches: SearchMatch[];
   matchPositions: Map<number, Map<number, number>>;
-  outputSearchMatches: SearchMatch[];
   inputToOutputMatchMap: Map<number, number>;
   outputMatchPositions: Map<number, Map<number, number>>;
   totalMatches: number;
@@ -68,11 +68,8 @@ export function JsonWizardShell({
   currentMatchIndex,
   setCurrentMatchIndex,
   validation,
-  stats,
   processedJSON,
-  searchMatches,
   matchPositions,
-  outputSearchMatches,
   inputToOutputMatchMap,
   outputMatchPositions,
   totalMatches,

@@ -1,17 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { useToast } from "@/shared/ui/toast/Toast";
-import { TextEditorContainer } from "@/shared/ui/text-editor/TextEditorContainer";
+
+import { highlightJWT } from "../lib/highlighter";
+import { useJwtDecoder } from "../model/useJwtDecoder";
+
+import { useJsonSyntaxHighlighter } from "@/shared/hooks/useJsonSyntaxHighlighter";
 import {
   trackCopyEvent,
   trackToolConversion,
   trackClearEvent,
 } from "@/shared/lib/analytics";
 import { TOOL_NAMES } from "@/shared/lib/constants";
-import { useJsonSyntaxHighlighter } from "@/shared/hooks/useJsonSyntaxHighlighter";
-import { useJwtDecoder } from "../model/useJwtDecoder";
-import { highlightJWT } from "../lib/highlighter";
+import { TextEditorContainer } from "@/shared/ui/text-editor/TextEditorContainer";
+import { useToast } from "@/shared/ui/toast/Toast";
+
 
 export function JwtDecoderShell() {
   const { input, setInput, result, formattedOutput } = useJwtDecoder();

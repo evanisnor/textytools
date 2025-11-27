@@ -1,4 +1,5 @@
 import { diffLines } from "diff";
+
 import type { DiffLine } from "../model/types";
 
 export const splitIntoLines = (value: string, count?: number): string[] => {

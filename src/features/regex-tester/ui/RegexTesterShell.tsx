@@ -1,13 +1,5 @@
 import Link from "next/link";
-import { useToast } from "@/shared/ui/toast/Toast";
-import { TextEditorContainer } from "@/shared/ui/text-editor/TextEditorContainer";
-import {
-  trackCopyEvent,
-  trackClearEvent,
-} from "@/shared/lib/analytics";
-import { TOOL_NAMES } from "@/shared/lib/constants";
-import { FLAGS } from "../model/flags";
-import { useRegexTester } from "../model/useRegexTester";
+
 import {
   convertMatchesToCsv,
   navigateToCsvConverter,
@@ -16,6 +8,16 @@ import {
   convertMatchesToJson,
   navigateToJsonWizard,
 } from "../lib/convert-to-json";
+import { FLAGS } from "../model/flags";
+import { useRegexTester } from "../model/useRegexTester";
+
+import {
+  trackCopyEvent,
+  trackClearEvent,
+} from "@/shared/lib/analytics";
+import { TOOL_NAMES } from "@/shared/lib/constants";
+import { TextEditorContainer } from "@/shared/ui/text-editor/TextEditorContainer";
+import { useToast } from "@/shared/ui/toast/Toast";
 
 export function RegexTesterShell() {
   const {

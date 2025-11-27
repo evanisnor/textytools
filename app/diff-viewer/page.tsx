@@ -1,8 +1,9 @@
 "use client";
 
-import { ToolFrame } from "@/shared/ui/tool-frame/ToolFrame";
 import { DiffViewerShell, useDiffViewer } from "@/features/diff-viewer";
+
 import { TOOL_NAMES } from "@/shared/lib/constants";
+import { ToolFrame } from "@/shared/ui/tool-frame/ToolFrame";
 
 export default function DiffViewer() {
   const diff = useDiffViewer();
