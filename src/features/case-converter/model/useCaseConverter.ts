@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 
-import { useCaseConversion, type CaseType } from "@/entities/text-case";
+import {
+  useCaseConversion,
+  type CaseType,
+} from "@/entities/converter/text-case";
 
 export function useCaseConverter() {
   const [text, setText] = useState("");

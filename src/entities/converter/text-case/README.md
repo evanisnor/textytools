@@ -26,7 +26,7 @@ text-case/
 ### Basic Case Conversion
 
 ```typescript
-import { convertCase } from "@/entities/text-case";
+import { convertCase } from "@/entities/converter/text-case";
 
 const result = convertCase("hello world", "camel");
 // Result: "helloWorld"
