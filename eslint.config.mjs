@@ -117,10 +117,7 @@ const eslintConfig = defineConfig([
             },
             {
               from: "entities",
-              allow: [
-                "shared",
-                ["entities", { entityName: "${from.entityName}" }],
-              ],
+              allow: ["entities", "shared"],
             },
             {
               from: "shared",
