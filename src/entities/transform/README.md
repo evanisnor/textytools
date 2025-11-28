@@ -1,15 +1,15 @@
-# Converter Entity
+# Transform Entity
 
 Domain logic for bidirectional data format conversion and text transformation. This entity provides a modular architecture for implementing various transformation types.
 
 ## Overview
 
-The converter entity is organized by transformation type, allowing for multiple converter implementations that can be composed and reused across features.
+The transform entity is organized by transformation type, allowing for multiple transform implementations that can be composed and reused across features.
 
 ## Structure
 
 ```
-converter/
+transform/
 ├── csv-json/           # CSV ↔ JSON conversion
 │   ├── lib/
 │   ├── model/
@@ -30,10 +30,10 @@ converter/
 │   ├── lib/
 │   ├── model/
 │   └── index.ts
-└── index.ts            # Public API aggregating all converters
+└── index.ts            # Public API aggregating all transforms
 ```
 
-## Current Converters
+## Current Transforms
 
 ### CSV-JSON Converter
 
@@ -43,7 +43,7 @@ Bidirectional conversion between CSV and JSON formats.
 
 **Usage:**
 ```typescript
-import { csvToJson, jsonToCsv, detectInputFormat } from "@/entities/converter";
+import { csvToJson, jsonToCsv, detectInputFormat } from "@/entities/transform";
 
 // Auto-detect format
 const format = detectInputFormat(input); // "csv" or "json"
@@ -63,7 +63,7 @@ JWT (JSON Web Token) decoding and standard claim parsing.
 
 **Usage:**
 ```typescript
-import { decodeJWT, isExpired, isNotYetValid } from "@/entities/converter";
+import { decodeJWT, isExpired, isNotYetValid } from "@/entities/transform";
 
 // Decode JWT
 const decoded = decodeJWT(token);
@@ -104,21 +104,21 @@ const sha256 = await toSha256("Hello");
 const sha512 = await toSha512("Hello");
 ```
 
-## Adding New Converters
+## Adding New Transforms
 
-To add a new X-to-Y converter:
+To add a new X-to-Y transform:
 
-1. Create a new subdirectory: `converter/x-y/`
+1. Create a new subdirectory: `transform/x-y/`
 2. Implement conversion logic in `x-y/lib/`
 3. Define types in `x-y/model/types.ts`
 4. Export public API via `x-y/index.ts`
-5. Re-export from `converter/index.ts`
+5. Re-export from `transform/index.ts`
 6. Add documentation in `x-y/README.md`
 
-**Example structure for a hypothetical YAML-JSON converter:**
+**Example structure for a hypothetical YAML-JSON transform:**
 
 ```
-converter/
+transform/
 ├── yaml-json/
 │   ├── lib/
 │   │   ├── yaml-to-json.ts
@@ -139,11 +139,11 @@ This entity composes lower-level domain entities:
 
 ## Design Principles
 
-- **Modularity**: Each converter is self-contained
-- **Composability**: Converters can use other entities
+- **Modularity**: Each transform is self-contained
+- **Composability**: Transforms can use other entities
 - **Type safety**: Full TypeScript support
-- **Bidirectional**: Most converters should support both directions
-- **Error handling**: Clear error messages for failed conversions
+- **Bidirectional**: Most transforms should support both directions
+- **Error handling**: Clear error messages for failed transformations
 
 ## Used By
 
