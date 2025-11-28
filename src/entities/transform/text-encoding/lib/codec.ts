@@ -1,44 +1,27 @@
+/**
+ * Codec functions for text encoding transformations
+ * Routes encoding/decoding requests to the appropriate transformation function
+ */
+
 import type { EncodingType } from "../model/types";
+import { toBase64, fromBase64 } from "./encoding/base64";
+import { toBase58, fromBase58 } from "./encoding/base58";
+import { toBase91, fromBase91 } from "./encoding/base91";
+import { toAscii85, fromAscii85 } from "./encoding/ascii85";
+import { toZ85, fromZ85 } from "./encoding/z85";
+import { toUrlEncoding, fromUrlEncoding } from "./text/url";
+import { toHtmlEntities, fromHtmlEntities } from "./text/html";
+import { toHex, fromHex } from "./text/hex";
+import { toBinary, fromBinary } from "./text/binary";
+import { toUnicodeEscape, fromUnicodeEscape } from "./text/unicode";
+import { toQuotedPrintable, fromQuotedPrintable } from "./text/quoted-printable";
+import { toRot13, fromRot13 } from "./text/rot13";
+import { toMorse, fromMorse } from "./text/morse";
 
-import {
-  fromBase64,
-  fromBase58,
-  fromBase91,
-  fromAscii85,
-  fromZ85,
-  fromUrlEncoding,
-  fromHtmlEntities,
-  fromHex,
-  fromBinary,
-  fromUnicodeEscape,
-  fromQuotedPrintable,
-  fromRot13,
-  fromMorse,
-} from "./decoders";
-import {
-  toBase64,
-  toBase58,
-  toBase91,
-  toAscii85,
-  toZ85,
-  toUrlEncoding,
-  toHtmlEntities,
-  toHex,
-  toBinary,
-  toUnicodeEscape,
-  toQuotedPrintable,
-  toRot13,
-  toMorse,
-  toMd5,
-  toSha1,
-  toSha256,
-  toSha512,
-} from "./encoders";
-
-export async function encode(
-  text: string,
-  type: EncodingType,
-): Promise<string> {
+/**
+ * Encode text using the specified encoding type
+ */
+export function encodeText(text: string, type: EncodingType): string {
   if (!text) return "";
 
   switch (type) {
@@ -68,26 +51,16 @@ export async function encode(
       return toRot13(text);
     case "morse":
       return toMorse(text);
-    case "md5":
-      return toMd5(text);
-    case "sha1":
-      return await toSha1(text);
-    case "sha256":
-      return await toSha256(text);
-    case "sha512":
-      return await toSha512(text);
     default:
       return text;
   }
 }
 
-export function decode(text: string, type: EncodingType): string {
+/**
+ * Decode text using the specified encoding type
+ */
+export function decodeText(text: string, type: EncodingType): string {
   if (!text) return "";
-
-  // Hash functions are one-way only
-  if (["md5", "sha1", "sha256", "sha512"].includes(type)) {
-    return "Error: Hash functions are one-way only (cannot be decoded)";
-  }
 
   switch (type) {
     case "base64":
@@ -119,4 +92,11 @@ export function decode(text: string, type: EncodingType): string {
     default:
       return text;
   }
+}
+
+/**
+ * Check if an encoding type supports decoding
+ */
+export function supportsDecoding(type: EncodingType): boolean {
+  return true; // All encoding types support bidirectional transformation
 }

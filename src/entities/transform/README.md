@@ -1,16 +1,32 @@
 # Converter Entity
 
-Domain logic for bidirectional data format conversion. This entity provides a modular architecture for implementing X-to-Y converters.
+Domain logic for bidirectional data format conversion and text transformation. This entity provides a modular architecture for implementing various transformation types.
 
 ## Overview
 
-The converter entity is organized by conversion type, allowing for multiple converter implementations that can be composed and reused across features.
+The converter entity is organized by transformation type, allowing for multiple converter implementations that can be composed and reused across features.
 
 ## Structure
 
 ```
 converter/
 ├── csv-json/           # CSV ↔ JSON conversion
+│   ├── lib/
+│   ├── model/
+│   └── index.ts
+├── jwt/                # JWT decoding
+│   ├── lib/
+│   ├── model/
+│   └── index.ts
+├── text-case/          # Text case transformations
+│   ├── lib/
+│   ├── model/
+│   └── index.ts
+├── text-encoding/      # Text encoding/decoding
+│   ├── lib/
+│   ├── model/
+│   └── index.ts
+├── text-hash/          # Cryptographic hashing
 │   ├── lib/
 │   ├── model/
 │   └── index.ts
@@ -55,6 +71,37 @@ const decoded = decodeJWT(token);
 // Validate claims
 const expired = isExpired(decoded.expiresAt);
 const notYet = isNotYetValid(decoded.notBefore);
+```
+
+### Text Encoding
+
+Bidirectional text encoding and decoding transformations (Base64, Base58, URL, HTML, Hex, Binary, Morse, etc.).
+
+**See**: [text-encoding/README.md](./text-encoding/README.md) for detailed documentation.
+
+**Usage:**
+```typescript
+import { toBase64, fromBase64, toHex, fromHex, toMorse } from "@/entities/transform";
+
+const encoded = toBase64("Hello");
+const decoded = fromBase64(encoded);
+const hex = toHex("ABC");
+const morse = toMorse("SOS");
+```
+
+### Text Hashing
+
+One-way cryptographic and non-cryptographic hash functions (MD5, SHA-1, SHA-256, SHA-512).
+
+**See**: [text-hash/README.md](./text-hash/README.md) for detailed documentation.
+
+**Usage:**
+```typescript
+import { toMd5, toSha256, toSha512 } from "@/entities/transform";
+
+const md5 = toMd5("Hello");
+const sha256 = await toSha256("Hello");
+const sha512 = await toSha512("Hello");
 ```
 
 ## Adding New Converters

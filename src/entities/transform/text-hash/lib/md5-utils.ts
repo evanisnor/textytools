@@ -1,3 +1,10 @@
+/**
+ * Internal utilities for MD5 hashing
+ * 
+ * These functions implement the MD5 algorithm's core operations.
+ * MD5 is cryptographically broken and should not be used for security purposes.
+ */
+
 export function md5cycle(x: number[], k: number[]) {
   let a = x[0],
     b = x[1],

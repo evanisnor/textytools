@@ -1,15 +1,17 @@
 import { useState, useEffect } from "react";
 
-import { encode, decode } from "../lib/codec";
-
+import { isHashType } from "./types";
 import type { EncodingType, EncodingMode } from "./types";
+
+import { useTextEncoding, useTextHashing } from "@/entities/transform";
+import type { EncodingType as EntityEncodingType } from "@/entities/transform/text-encoding";
+import type { HashType } from "@/entities/transform/text-hash";
 
 export function useTextEncoder() {
   const [text, setText] = useState("");
   const [selectedEncoding, setSelectedEncoding] =
     useState<EncodingType>("base64");
   const [mode, setMode] = useState<EncodingMode>("encode");
-  const [outputText, setOutputText] = useState("");
   const [mounted, setMounted] = useState(false);
 
   // Load persisted state on mount
@@ -50,25 +52,32 @@ export function useTextEncoder() {
   const handleModeChange = (newMode: EncodingMode) => {
     setMode(newMode);
     // Switch to base64 if switching to decode mode with a hash function selected
-    const hashFunctions: EncodingType[] = ["md5", "sha1", "sha256", "sha512"];
-    if (newMode === "decode" && hashFunctions.includes(selectedEncoding)) {
+    if (newMode === "decode" && isHashType(selectedEncoding)) {
       setSelectedEncoding("base64");
     }
   };
 
-  // Update output when inputs change
-  useEffect(() => {
-    const updateOutput = async () => {
-      if (mode === "encode") {
-        const result = await encode(text, selectedEncoding);
-        setOutputText(result);
-      } else {
-        const result = decode(text, selectedEncoding);
-        setOutputText(result);
-      }
-    };
-    updateOutput();
-  }, [text, selectedEncoding, mode]);
+  // Use entity hooks for transformations
+  const isHash = isHashType(selectedEncoding);
+
+  const encodingResult = useTextEncoding({
+    text,
+    type: selectedEncoding as EntityEncodingType,
+    direction: mode === "encode" ? "encode" : "decode",
+  });
+
+  const hashingResult = useTextHashing({
+    text,
+    type: selectedEncoding as HashType,
+  });
+
+  // Compute output based on mode and type
+  const outputText =
+    isHash && mode === "encode"
+      ? hashingResult.hash
+      : isHash && mode === "decode"
+        ? "Error: Hash functions are one-way only (cannot be decoded)"
+        : encodingResult.result;
 
   return {
     text,
