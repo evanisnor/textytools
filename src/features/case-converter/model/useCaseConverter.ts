@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-import { convertCase, type CaseType } from "@/entities/text-case";
+import { useCaseConversion, type CaseType } from "@/entities/text-case";
 
 export function useCaseConverter() {
   const [text, setText] = useState("");
@@ -32,7 +32,7 @@ export function useCaseConverter() {
     sessionStorage.setItem("case-converter-state", JSON.stringify(state));
   }, [text, selectedCase, mounted]);
 
-  const convertedText = convertCase(text, selectedCase);
+  const convertedText = useCaseConversion({ text, caseType: selectedCase });
 
   return {
     text,

@@ -17,3 +17,6 @@ export {
 
 // Word detection utilities
 export { toWords } from "./lib/word-detection";
+
+// Hooks
+export { useCaseConversion } from "./model/useCaseConversion";
