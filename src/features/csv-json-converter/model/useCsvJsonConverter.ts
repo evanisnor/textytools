@@ -7,7 +7,7 @@ import {
   detectInputFormat,
   jsonToCsv,
   type ConversionResult,
-} from "@/entities/converter";
+} from "@/entities/transform";
 
 export function useCsvJsonConverter() {
   const [input, setInput] = useState("");

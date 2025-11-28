@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import {
   useCaseConversion,
   type CaseType,
-} from "@/entities/converter/text-case";
+} from "@/entities/transform/text-case";
 
 export function useCaseConverter() {
   const [text, setText] = useState("");

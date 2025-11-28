@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 
-import { decodeJWT, type JWTDecodeResult } from "@/entities/converter/jwt";
+import { decodeJWT, type JWTDecodeResult } from "@/entities/transform/jwt";
 
 export function useJwtDecoder() {
   const [input, setInput] = useState("");

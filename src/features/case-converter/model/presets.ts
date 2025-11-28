@@ -1,4 +1,4 @@
-import type { CaseOption } from "@/entities/converter/text-case";
+import type { CaseOption } from "@/entities/transform/text-case";
 
 export const caseOptions: CaseOption[] = [
   { id: "upper", label: "UPPER CASE", description: "ALL CHARACTERS UPPERCASE" },
