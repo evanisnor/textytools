@@ -11,8 +11,11 @@ import { OptionsControls } from "./OptionsControls";
 import { SearchControls } from "./SearchControls";
 import { ViewModeControls } from "./ViewModeControls";
 
-import type { JsonSyntaxTheme } from "@/shared/hooks/useJsonSyntaxHighlighter";
-import { useJsonSyntaxHighlighter } from "@/shared/hooks/useJsonSyntaxHighlighter";
+import {
+  useJsonSyntaxHighlighter,
+  type JsonSyntaxTheme,
+} from "@/entities/json";
+
 import {
   trackCopyEvent,
   trackToolConversion,

@@ -1,6 +1,4 @@
-"use client";
-
-import { Fragment, useMemo, type ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 
 export type JsonSyntaxTokenType =
   | "key"
@@ -23,16 +21,6 @@ export type JsonSyntaxTheme = Record<
   string
 >;
 
-interface JsonSyntaxHighlighterOptions {
-  enabled?: boolean;
-  theme?: Partial<JsonSyntaxTheme>;
-}
-
-export interface JsonSyntaxRenderer {
-  renderContent: (content: string) => ReactNode;
-  theme: JsonSyntaxTheme;
-}
-
 const DEFAULT_THEME: JsonSyntaxTheme = {
   key: "text-sky-700 dark:text-sky-300",
   string: "text-emerald-700 dark:text-emerald-300",
@@ -45,6 +33,9 @@ const DEFAULT_THEME: JsonSyntaxTheme = {
 const JSON_TOKEN_REGEX =
   /("(?:\\.|[^"\\])*"(?=\s*:))|("(?:\\.|[^"\\])*")|(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)|(\btrue\b|\bfalse\b)|(\bnull\b)|([{}\[\],:])/g;
 
+/**
+ * Tokenizes JSON content into syntax tokens for highlighting.
+ */
 export function tokenizeJson(content: string): JsonSyntaxToken[] {
   JSON_TOKEN_REGEX.lastIndex = 0;
   const tokens: JsonSyntaxToken[] = [];
@@ -96,50 +87,34 @@ export function tokenizeJson(content: string): JsonSyntaxToken[] {
   return tokens;
 }
 
-export function useJsonSyntaxHighlighter({
-  enabled = true,
-  theme,
-}: JsonSyntaxHighlighterOptions = {}): JsonSyntaxRenderer | undefined {
-  const mergedTheme = useMemo(
-    () => ({
-      ...DEFAULT_THEME,
-      ...(theme ?? {}),
-    }),
-    [theme],
+/**
+ * Highlights JSON content with syntax coloring.
+ */
+export function highlightJson(
+  content: string,
+  theme: JsonSyntaxTheme = DEFAULT_THEME,
+): ReactNode {
+  if (!content.trim()) {
+    return content;
+  }
+
+  const tokens = tokenizeJson(content);
+  if (tokens.length === 0) {
+    return content;
+  }
+
+  return (
+    <>
+      {tokens.map((token, index) => {
+        if (token.type === "plain") {
+          return <Fragment key={index}>{token.text}</Fragment>;
+        }
+        return (
+          <span key={index} className={theme[token.type]}>
+            {token.text}
+          </span>
+        );
+      })}
+    </>
   );
-
-  return useMemo(() => {
-    if (!enabled) return undefined;
-
-    const highlightJson = (currentContent: string) => {
-      if (!currentContent.trim()) {
-        return currentContent;
-      }
-
-      const tokens = tokenizeJson(currentContent);
-      if (tokens.length === 0) {
-        return currentContent;
-      }
-
-      return (
-        <>
-          {tokens.map((token, index) => {
-            if (token.type === "plain") {
-              return <Fragment key={index}>{token.text}</Fragment>;
-            }
-            return (
-              <span key={index} className={mergedTheme[token.type]}>
-                {token.text}
-              </span>
-            );
-          })}
-        </>
-      );
-    };
-
-    return {
-      renderContent: highlightJson,
-      theme: mergedTheme,
-    };
-  }, [enabled, mergedTheme]);
 }

@@ -4,9 +4,9 @@ import Link from "next/link";
 
 import { useJwtDecoderContext } from "../model/JwtDecoderProvider";
 
+import { useJsonSyntaxHighlighter } from "@/entities/json";
 import { highlightJWT } from "@/entities/jwt";
 
-import { useJsonSyntaxHighlighter } from "@/shared/hooks/useJsonSyntaxHighlighter";
 import {
   trackCopyEvent,
   trackToolConversion,

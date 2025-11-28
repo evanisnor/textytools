@@ -2,10 +2,7 @@ import { Fragment, type ReactNode } from "react";
 
 import type { ValidationResult } from "../model/types";
 
-import {
-  tokenizeJson,
-  type JsonSyntaxTheme,
-} from "@/shared/hooks/useJsonSyntaxHighlighter";
+import { tokenizeJson, type JsonSyntaxTheme } from "@/entities/json";
 
 interface RenderHighlightedTextParams {
   text: string;
