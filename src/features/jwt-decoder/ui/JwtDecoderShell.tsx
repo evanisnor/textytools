@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useJwtDecoderContext } from "../model/JwtDecoderProvider";
 
 import { useJsonSyntaxHighlighter } from "@/entities/json";
-import { highlightJWT } from "@/entities/jwt";
+import { useJwtSyntaxHighlighter } from "@/entities/jwt";
 
 import {
   trackCopyEvent,
@@ -19,6 +19,10 @@ import { useToast } from "@/shared/ui/toast/Toast";
 export function JwtDecoderShell() {
   const { input, setInput, result, formattedOutput } = useJwtDecoderContext();
   const { showToast, ToastComponent } = useToast();
+
+  const jwtSyntax = useJwtSyntaxHighlighter({
+    enabled: Boolean(input.trim()) && !result.error,
+  });
 
   const decodedJsonSyntax = useJsonSyntaxHighlighter({
     enabled: result.success && Boolean(formattedOutput),
@@ -68,11 +72,7 @@ export function JwtDecoderShell() {
             onChange={setInput}
             placeholder={`Paste a JWT token here...\n\nExample:\neyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c`}
             height="h-[500px]"
-            renderContent={
-              input.trim() && !result.error
-                ? (content) => highlightJWT(content)
-                : undefined
-            }
+            renderContent={jwtSyntax?.renderContent}
             showLineNumbers={false}
             wrap={true}
           />
