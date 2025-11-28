@@ -1,4 +1,4 @@
-import type { SanitizationOption } from "@/entities/transform/text-sanitize";
+import type { SanitizationOption } from "./types";
 
 export const defaultOptions: SanitizationOption[] = [
   {

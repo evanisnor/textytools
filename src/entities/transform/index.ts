@@ -18,3 +18,11 @@ export type {
 export type { HashType } from "./text-hash";
 export { hashText, useTextHashing } from "./text-hash";
 export type { UseTextHashingOptions, UseTextHashingResult } from "./text-hash";
+
+// Text sanitization
+export type { SanitizationOption, SanitizationOptionId } from "./text-sanitize";
+export { sanitizeText, useTextSanitize } from "./text-sanitize";
+export type {
+  UseTextSanitizeOptions,
+  UseTextSanitizeResult,
+} from "./text-sanitize";
