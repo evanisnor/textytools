@@ -2,8 +2,10 @@
 
 import { createContext, useContext, ReactNode } from "react";
 
-import type { DiffLine, SearchMatch } from "./types";
+import type { SearchMatch } from "./types";
 import { useDiffViewer } from "./useDiffViewer";
+
+import type { DiffLine } from "@/entities/compare";
 
 interface DiffStats {
   added: number;

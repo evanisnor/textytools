@@ -3,7 +3,8 @@
 import { Fragment, useRef, useEffect, useMemo } from "react";
 
 import { useDiffViewerContext } from "../model/DiffViewerProvider";
-import type { DiffType } from "../model/types";
+
+import type { DiffType } from "@/entities/compare";
 
 import { trackClearEvent } from "@/shared/lib/analytics";
 import { TOOL_NAMES } from "@/shared/lib/constants";

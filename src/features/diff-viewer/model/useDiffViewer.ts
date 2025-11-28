@@ -2,12 +2,13 @@
 
 import { useState, useMemo, useEffect } from "react";
 
-import { computeDiff } from "../lib/diff";
 import {
   findSearchMatches,
   createInputMatchMap,
   createOutputMatchMap,
 } from "../lib/search";
+
+import { useTextDiff } from "@/entities/compare";
 
 export function useDiffViewer() {
   const [input, setInput] = useState("");
@@ -54,10 +55,7 @@ export function useDiffViewer() {
     sessionStorage.setItem("diff-viewer-state", JSON.stringify(state));
   }, [input, output, caseSensitive, mounted]);
 
-  const diffLines = useMemo(() => {
-    if (!input && !output) return [];
-    return computeDiff(input, output);
-  }, [input, output]);
+  const { diffLines, stats } = useTextDiff(input, output);
 
   const searchMatches = useMemo(
     () => findSearchMatches(searchTerm, caseSensitive, input, output),
@@ -87,15 +85,6 @@ export function useDiffViewer() {
       setCurrentMatchIndex((prev) => (prev - 1 + totalMatches) % totalMatches);
     }
   };
-
-  const stats = useMemo(
-    () => ({
-      added: diffLines.filter((l) => l.type === "added").length,
-      removed: diffLines.filter((l) => l.type === "removed").length,
-      modified: diffLines.filter((l) => l.type === "modified").length,
-    }),
-    [diffLines],
-  );
 
   return {
     input,

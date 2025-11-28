@@ -1,13 +1,3 @@
-export type DiffType = "unchanged" | "added" | "removed" | "modified";
-
-export interface DiffLine {
-  type: DiffType;
-  inputLineNumber: number | null; // null for added lines
-  outputLineNumber: number | null; // null for removed lines
-  inputContent: string;
-  outputContent: string;
-}
-
 export interface SearchMatch {
   lineIndex: number; // The line number where this match occurs
   matchIndex: number; // Global index of this match pair
