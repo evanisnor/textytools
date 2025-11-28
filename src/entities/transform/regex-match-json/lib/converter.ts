@@ -1,6 +1,4 @@
-import type { RegexMatch } from "../model/types";
-
-import { trackToolConversion } from "@/shared/lib/analytics";
+import type { RegexMatch } from "@/entities/regex";
 
 function toSnakeCase(str: string): string {
   return str
@@ -10,6 +8,11 @@ function toSnakeCase(str: string): string {
     .replace(/\s+/g, "_");
 }
 
+/**
+ * Convert regex matches to JSON format
+ * @param matches - Array of regex matches with capture groups
+ * @returns JSON string representation of the matches
+ */
 export function convertMatchesToJson(matches: RegexMatch[]): string {
   if (matches.length === 0 || matches[0].groups.length === 0) {
     return "";
@@ -29,25 +32,4 @@ export function convertMatchesToJson(matches: RegexMatch[]): string {
   });
 
   return JSON.stringify(jsonArray, null, 2);
-}
-
-export function navigateToJsonWizard(
-  matches: RegexMatch[],
-  jsonOutput: string,
-) {
-  const hasNamedGroups = matches[0]?.groupNames.some((name) => name !== null);
-
-  // Save JSON for json-wizard
-  sessionStorage.setItem("cross-tool-input-json-wizard", jsonOutput);
-
-  // Track the conversion
-  trackToolConversion({
-    sourceTool: "regex-tester",
-    destinationTool: "json-wizard",
-    matchCount: matches.length,
-    hasNamedGroups,
-  });
-
-  // Navigate to json-wizard
-  window.location.href = "/json-wizard";
 }

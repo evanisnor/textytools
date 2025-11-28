@@ -1,15 +1,4 @@
-export interface RegexFlag {
-  id: string;
-  label: string;
-  description: string;
-}
-
-export interface RegexMatch {
-  fullMatch: string;
-  index: number;
-  groups: string[];
-  groupNames: (string | null)[];
-}
+import type { RegexMatch } from "@/entities/regex";
 
 export interface RegexTesterState {
   pattern: string;

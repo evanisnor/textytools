@@ -1,15 +1,13 @@
 import Link from "next/link";
 
+import { navigateToCsvConverter, navigateToJsonWizard } from "../lib/navigate";
+import { useRegexTesterContext } from "../model/RegexTesterProvider";
+
+import { FLAGS } from "@/entities/regex";
 import {
   convertMatchesToCsv,
-  navigateToCsvConverter,
-} from "../lib/convert-to-csv";
-import {
   convertMatchesToJson,
-  navigateToJsonWizard,
-} from "../lib/convert-to-json";
-import { FLAGS } from "../model/flags";
-import { useRegexTesterContext } from "../model/RegexTesterProvider";
+} from "@/entities/transform";
 
 import { trackCopyEvent, trackClearEvent } from "@/shared/lib/analytics";
 import { TOOL_NAMES } from "@/shared/lib/constants";

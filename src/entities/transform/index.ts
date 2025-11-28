@@ -26,3 +26,7 @@ export type {
   UseTextSanitizeOptions,
   UseTextSanitizeResult,
 } from "./text-sanitize";
+
+// Regex match transformations
+export { convertMatchesToJson } from "./regex-match-json";
+export { convertMatchesToCsv } from "./regex-match-csv";

@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 
-import { useRegexMatchHighlighter } from "@/shared/hooks/useRegexMatchHighlighter";
+import { useRegexMatchHighlighter } from "@/entities/regex";
 
 const STORAGE_KEY = "regex-tester-state";
 const CROSS_TOOL_KEY = "cross-tool-input-regex-tester";

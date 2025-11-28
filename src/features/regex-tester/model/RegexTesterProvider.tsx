@@ -2,8 +2,9 @@
 
 import { createContext, useContext, ReactNode } from "react";
 
-import type { RegexMatch } from "./types";
 import { useRegexTester } from "./useRegexTester";
+
+import type { RegexMatch } from "@/entities/regex";
 
 interface RegexTesterContextValue {
   pattern: string;

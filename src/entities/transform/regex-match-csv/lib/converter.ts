@@ -1,7 +1,10 @@
-import type { RegexMatch } from "../model/types";
+import type { RegexMatch } from "@/entities/regex";
 
-import { trackToolConversion } from "@/shared/lib/analytics";
-
+/**
+ * Convert regex matches to CSV format
+ * @param matches - Array of regex matches with capture groups
+ * @returns CSV string representation of the matches
+ */
 export function convertMatchesToCsv(matches: RegexMatch[]): string {
   if (matches.length === 0 || matches[0].groups.length === 0) {
     return "";
@@ -33,25 +36,4 @@ export function convertMatchesToCsv(matches: RegexMatch[]): string {
   }
 
   return lines.join("\n");
-}
-
-export function navigateToCsvConverter(
-  matches: RegexMatch[],
-  csvOutput: string,
-) {
-  const hasNamedGroups = matches[0]?.groupNames.some((name) => name !== null);
-
-  // Save CSV for csv-json-converter
-  sessionStorage.setItem("cross-tool-input-csv-json-converter", csvOutput);
-
-  // Track the conversion
-  trackToolConversion({
-    sourceTool: "regex-tester",
-    destinationTool: "csv-json-converter",
-    matchCount: matches.length,
-    hasNamedGroups,
-  });
-
-  // Navigate to csv-json-converter
-  window.location.href = "/csv-json-converter";
 }
