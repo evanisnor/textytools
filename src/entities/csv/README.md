@@ -16,6 +16,8 @@ csv/
 ├── lib/
 │   ├── parser.ts           # CSV parsing and escaping
 │   └── column-generator.ts # Column letter generation
+├── ui/
+│   └── CsvHighlighter.tsx  # CSV syntax highlighting component
 └── index.ts                # Public API
 ```
 
@@ -54,6 +56,18 @@ generateColumnLetter(25);  // "z"
 generateColumnLetter(26);  // "aa"
 generateColumnLetter(27);  // "ab"
 ```
+
+### CSV Syntax Highlighting
+
+```typescript
+import { highlightCsvLine } from "@/entities/csv";
+
+function CsvDisplay({ line }: { line: string }) {
+  return <div>{highlightCsvLine(line, ",")}</div>;
+}
+```
+
+This returns a React element with color-coded columns. Each column gets a rotating color from a 20-color palette.
 
 ## API Reference
 
@@ -95,6 +109,16 @@ Generates Excel-style column letters.
 - `index` - Zero-based column index
 
 **Returns:** Column letter (a, b, ..., z, aa, ab, ...)
+
+### `highlightCsvLine(line: string, delimiter?: string): ReactNode`
+
+Highlights a CSV line with color-coded columns.
+
+**Parameters:**
+- `line` - CSV line to highlight
+- `delimiter` - Field delimiter (default: `","`)
+
+**Returns:** React element with highlighted columns. Uses a 20-color rotating palette.
 
 ## RFC 4180 Compliance
 

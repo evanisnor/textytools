@@ -4,8 +4,9 @@ import Link from "next/link";
 
 import { useCsvJsonConverter } from "../model/useCsvJsonConverter";
 
-import { useCsvSyntaxHighlighter } from "@/shared/hooks/useCsvSyntaxHighlighter";
-import { useJsonSyntaxHighlighter } from "@/shared/hooks/useJsonSyntaxHighlighter";
+import { useCsvSyntaxHighlighter } from "@/entities/csv";
+import { useJsonSyntaxHighlighter } from "@/entities/json";
+
 import {
   trackCopyEvent,
   trackToolConversion,
