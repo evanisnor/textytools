@@ -7,6 +7,10 @@ const JWT_SECTION_COLORS = {
   signature: "bg-purple-200/60 dark:bg-purple-800/40",
 };
 
+/**
+ * Highlights JWT token sections with color-coding.
+ * Returns the token as-is if it's not a valid 3-part JWT.
+ */
 export function highlightJWT(jwt: string): JSX.Element {
   const parts = jwt.split(".");
   if (parts.length !== 3) {

@@ -2,8 +2,9 @@
 
 import { createContext, useContext, ReactNode } from "react";
 
-import type { JWTDecodeResult } from "./types";
 import { useJwtDecoder } from "./useJwtDecoder";
+
+import type { JWTDecodeResult } from "@/entities/converter/jwt";
 
 interface JwtDecoderContextValue {
   input: string;

@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 
-import { highlightJWT } from "../lib/highlighter";
 import { useJwtDecoderContext } from "../model/JwtDecoderProvider";
+
+import { highlightJWT } from "@/entities/jwt";
 
 import { useJsonSyntaxHighlighter } from "@/shared/hooks/useJsonSyntaxHighlighter";
 import {

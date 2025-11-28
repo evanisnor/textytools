@@ -1,7 +1,8 @@
 "use client";
 
-import { formatDate, isExpired, isNotYetValid } from "../lib/validators";
 import { useJwtDecoderContext } from "../model/JwtDecoderProvider";
+
+import { formatDate, isExpired, isNotYetValid } from "@/entities/jwt";
 
 export function JwtDecoderHeader() {
   const { result } = useJwtDecoderContext();

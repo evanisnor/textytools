@@ -1,5 +1,9 @@
-import type { DecodedJWT } from "../model/types";
+import type { DecodedJWT } from "@/entities/jwt";
 
+/**
+ * Decodes a base64url-encoded string.
+ * Handles URL-safe characters and padding.
+ */
 function base64UrlDecode(str: string): string {
   // Replace URL-safe characters
   let base64 = str.replace(/-/g, "+").replace(/_/g, "/");
@@ -23,6 +27,10 @@ function base64UrlDecode(str: string): string {
   }
 }
 
+/**
+ * Decodes a JSON Web Token (JWT).
+ * Parses header, payload, and standard claims (exp, iat, nbf).
+ */
 export function decodeJWT(token: string): DecodedJWT {
   const parts = token.trim().split(".");
 

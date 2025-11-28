@@ -39,6 +39,24 @@ const result = csvToJson(csvData, ",", true);
 const result = jsonToCsv(jsonData, ",", true);
 ```
 
+### JWT Decoder
+
+JWT (JSON Web Token) decoding and standard claim parsing.
+
+**See**: [jwt/README.md](./jwt/README.md) for detailed documentation.
+
+**Usage:**
+```typescript
+import { decodeJWT, isExpired, isNotYetValid } from "@/entities/converter";
+
+// Decode JWT
+const decoded = decodeJWT(token);
+
+// Validate claims
+const expired = isExpired(decoded.expiresAt);
+const notYet = isNotYetValid(decoded.notBefore);
+```
+
 ## Adding New Converters
 
 To add a new X-to-Y converter:
@@ -70,6 +88,7 @@ converter/
 This entity composes lower-level domain entities:
 - `@/entities/csv` - CSV parsing and escaping
 - `@/entities/json` - JSON manipulation utilities
+- `@/entities/jwt` - JWT types and validation
 
 ## Design Principles
 
@@ -82,3 +101,4 @@ This entity composes lower-level domain entities:
 ## Used By
 
 - [csv-json-converter feature](../../features/csv-json-converter) - CSV/JSON conversion tool
+- [jwt-decoder feature](../../features/jwt-decoder) - JWT decoder tool
