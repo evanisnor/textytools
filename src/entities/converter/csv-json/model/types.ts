@@ -6,7 +6,3 @@ export interface ConversionResult {
   error: string | null;
   detectedFormat: FormatType;
 }
-
-export interface JsonObject {
-  [key: string]: unknown;
-}

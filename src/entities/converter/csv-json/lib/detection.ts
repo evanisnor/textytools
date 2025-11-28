@@ -1,5 +1,8 @@
 import type { FormatType } from "../model/types";
 
+/**
+ * Detects whether input is JSON or CSV format.
+ */
 export function detectInputFormat(input: string): FormatType {
   const trimmed = input.trim();
   if (!trimmed) return "csv";
