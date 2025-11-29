@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useCsvJsonConverter } from "../model/useCsvJsonConverter";
 
 import { useCsvSyntaxHighlighter } from "@/entities/csv";
+import { TextEditor } from "@/entities/editor";
 import { useJsonSyntaxHighlighter } from "@/entities/json";
 
 import { useCrossToolNavigation } from "@/shared/hooks";
@@ -14,7 +15,6 @@ import {
   trackClearEvent,
 } from "@/shared/lib/analytics";
 import { TOOL_NAMES } from "@/shared/lib/constants";
-import { TextEditorContainer } from "@/shared/ui/text-editor/TextEditorContainer";
 import { useToast } from "@/shared/ui/toast/Toast";
 
 export function CsvJsonConverterShell() {
@@ -111,7 +111,7 @@ export function CsvJsonConverterShell() {
               )}
             </div>
             <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-1">
-              <TextEditorContainer
+              <TextEditor
                 id="csv-json-input"
                 value={input}
                 onChange={setInput}
@@ -226,7 +226,7 @@ export function CsvJsonConverterShell() {
               </div>
             </div>
             <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-1">
-              <TextEditorContainer
+              <TextEditor
                 id="csv-json-output"
                 value={result.success ? result.output : ""}
                 readOnly

@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import { useJwtDecoderContext } from "../model/JwtDecoderProvider";
 
+import { TextEditor } from "@/entities/editor";
 import { useJsonSyntaxHighlighter } from "@/entities/json";
 import { useJwtSyntaxHighlighter } from "@/entities/jwt";
 
@@ -14,7 +15,6 @@ import {
   trackClearEvent,
 } from "@/shared/lib/analytics";
 import { TOOL_NAMES } from "@/shared/lib/constants";
-import { TextEditorContainer } from "@/shared/ui/text-editor/TextEditorContainer";
 import { useToast } from "@/shared/ui/toast/Toast";
 
 export function JwtDecoderShell() {
@@ -68,7 +68,7 @@ export function JwtDecoderShell() {
               </button>
             )}
           </div>
-          <TextEditorContainer
+          <TextEditor
             id="jwt-input"
             value={input}
             onChange={setInput}
@@ -156,7 +156,7 @@ export function JwtDecoderShell() {
               )}
             </div>
           </div>
-          <TextEditorContainer
+          <TextEditor
             id="jwt-output"
             value={result.success ? formattedOutput : ""}
             readOnly

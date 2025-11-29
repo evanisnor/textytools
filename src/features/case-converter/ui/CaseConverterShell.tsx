@@ -3,9 +3,10 @@
 import { caseOptions } from "../model/presets";
 import { useCaseConverter } from "../model/useCaseConverter";
 
+import { TextEditor } from "@/entities/editor";
+
 import { trackCopyEvent, trackClearEvent } from "@/shared/lib/analytics";
 import { TOOL_NAMES } from "@/shared/lib/constants";
-import { TextEditorContainer } from "@/shared/ui/text-editor/TextEditorContainer";
 import { useToast } from "@/shared/ui/toast/Toast";
 
 export function CaseConverterShell() {
@@ -66,7 +67,7 @@ export function CaseConverterShell() {
                 </button>
               )}
             </div>
-            <TextEditorContainer
+            <TextEditor
               id="case-converter-input"
               value={text}
               onChange={setText}
@@ -107,7 +108,7 @@ export function CaseConverterShell() {
                 </button>
               )}
             </div>
-            <TextEditorContainer
+            <TextEditor
               id="case-converter-output"
               value={convertedText}
               readOnly

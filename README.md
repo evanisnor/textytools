@@ -353,20 +353,20 @@ Create `ui/YourUtilityShell.tsx`:
 ```tsx
 "use client";
 import { useYourUtilityContext } from "../model/YourUtilityProvider";
-import { TextEditorContainer } from "@/shared/ui/text-editor/TextEditorContainer";
+import { TextEditor } from "@/entities/editor";
 
 export function YourUtilityShell() {
   const { input, setInput, output } = useYourUtilityContext();
 
   return (
     <div className="grid lg:grid-cols-2 gap-6">
-      <TextEditorContainer
+      <TextEditor
         value={input}
         onChange={setInput}
         placeholder="Enter your text here..."
         height="h-96"
       />
-      <TextEditorContainer
+      <TextEditor
         value={output}
         readOnly
         placeholder="Results will appear here..."

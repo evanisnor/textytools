@@ -11,6 +11,7 @@ import { OptionsControls } from "./OptionsControls";
 import { SearchControls } from "./SearchControls";
 import { ViewModeControls } from "./ViewModeControls";
 
+import { TextEditor, type TextEditorRef } from "@/entities/editor";
 import {
   useJsonSyntaxHighlighter,
   type JsonSyntaxTheme,
@@ -23,10 +24,6 @@ import {
   trackClearEvent,
 } from "@/shared/lib/analytics";
 import { TOOL_NAMES } from "@/shared/lib/constants";
-import {
-  TextEditorContainer,
-  type TextEditorContainerRef,
-} from "@/shared/ui/text-editor/TextEditorContainer";
 import { useToast } from "@/shared/ui/toast/Toast";
 
 export function JsonWizardShell() {
@@ -54,8 +51,8 @@ export function JsonWizardShell() {
     goToNextMatch,
     goToPreviousMatch,
   } = useJsonWizardContext();
-  const inputEditorRef = useRef<TextEditorContainerRef>(null);
-  const outputEditorRef = useRef<TextEditorContainerRef>(null);
+  const inputEditorRef = useRef<TextEditorRef>(null);
+  const outputEditorRef = useRef<TextEditorRef>(null);
   const { showToast, ToastComponent } = useToast();
   const { navigateToTool } = useCrossToolNavigation();
 
@@ -174,7 +171,7 @@ export function JsonWizardShell() {
               showValidation={true}
             />
             <div>
-              <TextEditorContainer
+              <TextEditor
                 id="json-wizard-input"
                 ref={inputEditorRef}
                 value={input}
@@ -182,7 +179,7 @@ export function JsonWizardShell() {
                 wrap={true}
                 height="h-[calc(100vh-400px)] min-h-[360px]"
                 placeholder='Paste your JSON here, e.g., {"key": "value"}'
-                renderLineContent={(line, index) =>
+                renderLineContent={(line: string, index: number) =>
                   renderLine(line, index, false, undefined, inputSyntaxTheme)
                 }
               />
@@ -297,7 +294,7 @@ export function JsonWizardShell() {
               />
             </div>
             <div>
-              <TextEditorContainer
+              <TextEditor
                 id="json-wizard-output"
                 ref={outputEditorRef}
                 value={processedJSON || ""}
@@ -312,7 +309,7 @@ export function JsonWizardShell() {
                 }
                 renderLineContent={
                   searchTerm && processedJSON
-                    ? (line, index) => {
+                    ? (line: string, index: number) => {
                         const outputMatchIndex =
                           inputToOutputMatchMap.get(currentMatchIndex) ?? -1;
                         return renderLine(

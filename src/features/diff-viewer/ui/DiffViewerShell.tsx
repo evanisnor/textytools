@@ -5,15 +5,12 @@ import { Fragment, useRef, useEffect, useMemo } from "react";
 import { useDiffViewerContext } from "../model/DiffViewerProvider";
 
 import type { DiffType } from "@/entities/compare";
+import { TextEditor, type TextEditorRef } from "@/entities/editor";
 import { HIGHLIGHT_COLORS } from "@/entities/search";
 
 import { trackClearEvent } from "@/shared/lib/analytics";
 import { TOOL_NAMES } from "@/shared/lib/constants";
 import { SearchBox } from "@/shared/ui/search-box/SearchBox";
-import {
-  TextEditorContainer,
-  type TextEditorContainerRef,
-} from "@/shared/ui/text-editor/TextEditorContainer";
 import { useToast } from "@/shared/ui/toast/Toast";
 
 export function DiffViewerShell() {
@@ -39,8 +36,8 @@ export function DiffViewerShell() {
     goToNextMatch,
     goToPreviousMatch,
   } = useDiffViewerContext();
-  const inputEditorRef = useRef<TextEditorContainerRef>(null);
-  const outputEditorRef = useRef<TextEditorContainerRef>(null);
+  const inputEditorRef = useRef<TextEditorRef>(null);
+  const outputEditorRef = useRef<TextEditorRef>(null);
   const { ToastComponent } = useToast();
 
   // Scroll to current match in both panes
@@ -53,7 +50,7 @@ export function DiffViewerShell() {
 
     setTimeout(() => {
       const scrollToLine = (
-        editorRef: React.RefObject<TextEditorContainerRef | null>,
+        editorRef: React.RefObject<TextEditorRef | null>,
       ) => {
         const container = editorRef.current?.getScrollContainer();
         if (!container) return;
@@ -260,7 +257,7 @@ export function DiffViewerShell() {
                   </button>
                 )}
               </div>
-              <TextEditorContainer
+              <TextEditor
                 id="diff-input"
                 ref={inputEditorRef}
                 value={input}
@@ -306,7 +303,7 @@ export function DiffViewerShell() {
                   </button>
                 )}
               </div>
-              <TextEditorContainer
+              <TextEditor
                 id="diff-output"
                 ref={outputEditorRef}
                 value={output}

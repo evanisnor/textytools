@@ -2,13 +2,14 @@
 
 import { useTextSanitizer } from "../model/useTextSanitizer";
 
+import { TextEditor } from "@/entities/editor";
+
 import {
   trackCopyEvent,
   trackClearEvent,
   trackToggleAllEvent,
 } from "@/shared/lib/analytics";
 import { TOOL_NAMES } from "@/shared/lib/constants";
-import { TextEditorContainer } from "@/shared/ui/text-editor/TextEditorContainer";
 import { useToast } from "@/shared/ui/toast/Toast";
 
 export function TextSanitizerShell() {
@@ -86,7 +87,7 @@ export function TextSanitizerShell() {
                 </button>
               )}
             </div>
-            <TextEditorContainer
+            <TextEditor
               id="text-sanitizer-input"
               value={text}
               onChange={setText}
@@ -132,7 +133,7 @@ export function TextSanitizerShell() {
                 </button>
               )}
             </div>
-            <TextEditorContainer
+            <TextEditor
               id="text-sanitizer-output"
               value={sanitizedText}
               readOnly

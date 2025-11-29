@@ -3,6 +3,7 @@ import Link from "next/link";
 import { navigateToCsvConverter, navigateToJsonWizard } from "../lib/navigate";
 import { useRegexTesterContext } from "../model/RegexTesterProvider";
 
+import { TextEditor } from "@/entities/editor";
 import { FLAGS } from "@/entities/regex";
 import {
   convertMatchesToCsv,
@@ -12,7 +13,6 @@ import {
 import { useCrossToolNavigation } from "@/shared/hooks";
 import { trackCopyEvent, trackClearEvent } from "@/shared/lib/analytics";
 import { TOOL_NAMES } from "@/shared/lib/constants";
-import { TextEditorContainer } from "@/shared/ui/text-editor/TextEditorContainer";
 import { useToast } from "@/shared/ui/toast/Toast";
 
 export function RegexTesterShell() {
@@ -270,7 +270,7 @@ export function RegexTesterShell() {
               )}
             </div>
           </div>
-          <TextEditorContainer
+          <TextEditor
             id="regex-test-string"
             value={testString}
             onChange={setTestString}

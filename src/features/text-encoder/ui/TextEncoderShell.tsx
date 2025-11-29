@@ -3,9 +3,10 @@
 import { encodingOptions } from "../model/presets";
 import { useTextEncoder } from "../model/useTextEncoder";
 
+import { TextEditor } from "@/entities/editor";
+
 import { trackCopyEvent } from "@/shared/lib/analytics";
 import { TOOL_NAMES } from "@/shared/lib/constants";
-import { TextEditorContainer } from "@/shared/ui/text-editor/TextEditorContainer";
 import { useToast } from "@/shared/ui/toast/Toast";
 
 export function TextEncoderShell() {
@@ -92,7 +93,7 @@ export function TextEncoderShell() {
                 </button>
               )}
             </div>
-            <TextEditorContainer
+            <TextEditor
               id="text-encoder-input"
               value={text}
               onChange={setText}
@@ -137,7 +138,7 @@ export function TextEncoderShell() {
                 </button>
               )}
             </div>
-            <TextEditorContainer
+            <TextEditor
               id="text-encoder-output"
               value={outputText}
               readOnly

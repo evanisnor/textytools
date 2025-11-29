@@ -2,7 +2,7 @@
 
 import { useTextCounter } from "../model/useTextCounter";
 
-import { TextEditorContainer } from "@/shared/ui/text-editor/TextEditorContainer";
+import { TextEditor } from "@/entities/editor";
 
 export function TextCounterShell() {
   const {
@@ -94,7 +94,7 @@ export function TextCounterShell() {
             </button>
           )}
         </div>
-        <TextEditorContainer
+        <TextEditor
           id="text-counter-input"
           value={text}
           onChange={setText}
