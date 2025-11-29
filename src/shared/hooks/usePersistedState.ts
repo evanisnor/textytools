@@ -21,10 +21,16 @@ interface UsePersistedStateOptions<T> {
   crossToolKey?: string;
 
   /**
-   * Optional callback when cross-tool data is loaded
-   * Use this to handle cross-tool data differently than persisted state
+   * Optional field name where cross-tool data should be stored
+   * When crossToolKey has data, it will be set to state[crossToolField]
+   *
+   * @example
+   * ```tsx
+   * crossToolKey: "cross-tool-input-json-wizard",
+   * crossToolField: "input"
+   * ```
    */
-  onCrossToolData?: (data: string) => void;
+  crossToolField?: keyof T;
 }
 
 /**
@@ -49,7 +55,7 @@ export function usePersistedState<T extends Record<string, unknown>>({
   storageKey,
   initialState,
   crossToolKey,
-  onCrossToolData,
+  crossToolField,
 }: UsePersistedStateOptions<T>) {
   const [state, setState] = useState<T>(initialState);
   const [mounted, setMounted] = useState(false);
@@ -57,26 +63,12 @@ export function usePersistedState<T extends Record<string, unknown>>({
   // Load state on mount
   useEffect(() => {
     setTimeout(() => {
-      setMounted(true);
-
-      // Check for cross-tool data first (takes precedence)
-      if (crossToolKey) {
-        const crossToolData = sessionStorage.getItem(crossToolKey);
-        if (crossToolData) {
-          sessionStorage.removeItem(crossToolKey);
-          if (onCrossToolData) {
-            onCrossToolData(crossToolData);
-          }
-          return;
-        }
-      }
-
-      // Load persisted state from sessionStorage
+      // Load persisted state from sessionStorage first
+      let loadedState = initialState;
       const persistedState = sessionStorage.getItem(storageKey);
       if (persistedState) {
         try {
-          const parsed = JSON.parse(persistedState);
-          setState(parsed);
+          loadedState = JSON.parse(persistedState);
         } catch (err) {
           console.error(
             `Failed to load persisted state from ${storageKey}:`,
@@ -84,6 +76,18 @@ export function usePersistedState<T extends Record<string, unknown>>({
           );
         }
       }
+
+      // Check for cross-tool data (takes precedence over persisted state)
+      if (crossToolKey && crossToolField) {
+        const crossToolData = sessionStorage.getItem(crossToolKey);
+        if (crossToolData) {
+          sessionStorage.removeItem(crossToolKey);
+          loadedState = { ...loadedState, [crossToolField]: crossToolData };
+        }
+      }
+
+      setState(loadedState);
+      setMounted(true);
     }, 0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
