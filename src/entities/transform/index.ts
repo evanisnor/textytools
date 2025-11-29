@@ -30,3 +30,7 @@ export type {
 // Regex match transformations
 export { convertMatchesToJson } from "./regex-match-json";
 export { convertMatchesToCsv } from "./regex-match-csv";
+
+// Text case conversions
+export type { CaseType } from "./text-case";
+export { convertCase } from "./text-case";
