@@ -166,7 +166,7 @@ export function CsvJsonConverterShell() {
                         );
                         // Save converted JSON for JSON Wizard
                         sessionStorage.setItem(
-                          "json-wizard-input",
+                          "cross-tool-input-json-wizard",
                           result.output,
                         );
                         window.location.href = "/json-wizard";

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 
 import { processJSON, checkIsEscapedString } from "../lib/formatter";
 import {
@@ -19,74 +19,53 @@ import type {
   SearchMatch,
 } from "./types";
 
+import { usePersistedState } from "@/shared/hooks";
+
 export function useJsonWizard() {
-  const [input, setInput] = useState("");
-  const [viewMode, setViewMode] = useState<ViewMode>("pretty");
-  const [indentSize, setIndentSize] = useState(2);
   const [searchTerm, setSearchTerm] = useState("");
   const [caseSensitive, setCaseSensitive] = useState(false);
-  const [sortKeys, setSortKeys] = useState(false);
   const [currentMatchIndex, setCurrentMatchIndex] = useState(0);
-  const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    setTimeout(() => {
-      setMounted(true);
-
-      // Check for cross-tool data first (takes precedence)
-      const storedInput = sessionStorage.getItem(
-        "cross-tool-input-json-wizard",
-      );
-      if (storedInput) {
-        sessionStorage.removeItem("cross-tool-input-json-wizard");
-        setInput(storedInput);
-        return;
-      }
-
-      // Load persisted state from sessionStorage
-      const persistedState = sessionStorage.getItem("json-wizard-state");
-      if (persistedState) {
-        try {
-          const state = JSON.parse(persistedState);
-          if (state.input !== undefined) setInput(state.input);
-          if (state.viewMode !== undefined) setViewMode(state.viewMode);
-          if (state.indentSize !== undefined) setIndentSize(state.indentSize);
-          if (state.sortKeys !== undefined) setSortKeys(state.sortKeys);
-          if (state.caseSensitive !== undefined)
-            setCaseSensitive(state.caseSensitive);
-        } catch (err) {
-          console.error("Failed to load persisted state:", err);
-        }
-      }
-    }, 0);
-  }, []);
-
-  // Persist state whenever inputs change
-  useEffect(() => {
-    if (!mounted) return;
-    const state = { input, viewMode, indentSize, sortKeys, caseSensitive };
-    sessionStorage.setItem("json-wizard-state", JSON.stringify(state));
-  }, [input, viewMode, indentSize, sortKeys, caseSensitive, mounted]);
+  const { state, updateState, mounted } = usePersistedState({
+    storageKey: "json-wizard-state",
+    initialState: {
+      input: "",
+      viewMode: "pretty" as ViewMode,
+      indentSize: 2,
+      sortKeys: false,
+    },
+    crossToolKey: "cross-tool-input-json-wizard",
+    crossToolField: "input",
+  });
 
   const validation: ValidationResult = useMemo(
-    () => validateJSON(input),
-    [input],
+    () => validateJSON(state.input),
+    [state.input],
   );
-  const stats: JSONStats = useMemo(() => getJSONStats(input), [input]);
+  const stats: JSONStats = useMemo(
+    () => getJSONStats(state.input),
+    [state.input],
+  );
 
   const isEscapedString = useMemo(
-    () => checkIsEscapedString(input, validation.isValid),
-    [input, validation.isValid],
+    () => checkIsEscapedString(state.input, validation.isValid),
+    [state.input, validation.isValid],
   );
 
   const inputMatchPaths = useMemo(
-    () => findJSONMatchPaths(input, searchTerm, caseSensitive),
-    [searchTerm, caseSensitive, input],
+    () => findJSONMatchPaths(state.input, searchTerm, caseSensitive),
+    [searchTerm, caseSensitive, state.input],
   );
 
   const searchMatches: SearchMatch[] = useMemo(
-    () => findSearchMatches(input, searchTerm, caseSensitive, inputMatchPaths),
-    [searchTerm, caseSensitive, input, inputMatchPaths],
+    () =>
+      findSearchMatches(
+        state.input,
+        searchTerm,
+        caseSensitive,
+        inputMatchPaths,
+      ),
+    [searchTerm, caseSensitive, state.input, inputMatchPaths],
   );
 
   const matchPositions = useMemo(
@@ -97,18 +76,18 @@ export function useJsonWizard() {
   const processedJSON = useMemo(
     () =>
       processJSON(
-        input,
-        viewMode,
-        indentSize,
-        sortKeys,
+        state.input,
+        state.viewMode,
+        state.indentSize,
+        state.sortKeys,
         validation.isValid,
         isEscapedString,
       ),
     [
-      input,
-      viewMode,
-      indentSize,
-      sortKeys,
+      state.input,
+      state.viewMode,
+      state.indentSize,
+      state.sortKeys,
       validation.isValid,
       isEscapedString,
     ],
@@ -155,18 +134,18 @@ export function useJsonWizard() {
   };
 
   return {
-    input,
-    setInput,
-    viewMode,
-    setViewMode,
-    indentSize,
-    setIndentSize,
+    input: state.input,
+    setInput: (newInput: string) => updateState({ input: newInput }),
+    viewMode: state.viewMode,
+    setViewMode: (mode: ViewMode) => updateState({ viewMode: mode }),
+    indentSize: state.indentSize,
+    setIndentSize: (size: number) => updateState({ indentSize: size }),
     searchTerm,
     setSearchTerm,
     caseSensitive,
     setCaseSensitive,
-    sortKeys,
-    setSortKeys,
+    sortKeys: state.sortKeys,
+    setSortKeys: (sort: boolean) => updateState({ sortKeys: sort }),
     currentMatchIndex,
     setCurrentMatchIndex,
     mounted,
