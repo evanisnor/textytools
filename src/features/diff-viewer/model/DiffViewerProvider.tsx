@@ -30,6 +30,8 @@ interface DiffViewerContextValue {
   totalMatches: number;
   inputMatchMap: Map<number, Set<number>>;
   outputMatchMap: Map<number, Set<number>>;
+  currentInputMatchMap: Map<number, Set<number>>;
+  currentOutputMatchMap: Map<number, Set<number>>;
   goToNextMatch: () => void;
   goToPreviousMatch: () => void;
   stats: DiffStats;

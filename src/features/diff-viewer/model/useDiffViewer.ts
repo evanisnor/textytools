@@ -6,6 +6,8 @@ import {
   findSearchMatches,
   createInputMatchMap,
   createOutputMatchMap,
+  createCurrentInputMatchMap,
+  createCurrentOutputMatchMap,
 } from "../lib/search";
 
 import { useTextDiff } from "@/entities/compare";
@@ -65,25 +67,37 @@ export function useDiffViewer() {
   const totalMatches = searchMatches.length;
 
   const inputMatchMap = useMemo(
-    () => createInputMatchMap(searchMatches, currentMatchIndex),
-    [searchMatches, currentMatchIndex],
+    () => createInputMatchMap(searchMatches),
+    [searchMatches],
   );
 
   const outputMatchMap = useMemo(
-    () => createOutputMatchMap(searchMatches, currentMatchIndex),
+    () => createOutputMatchMap(searchMatches),
+    [searchMatches],
+  );
+
+  const currentInputMatchMap = useMemo(
+    () => createCurrentInputMatchMap(searchMatches, currentMatchIndex),
+    [searchMatches, currentMatchIndex],
+  );
+
+  const currentOutputMatchMap = useMemo(
+    () => createCurrentOutputMatchMap(searchMatches, currentMatchIndex),
     [searchMatches, currentMatchIndex],
   );
 
   const goToNextMatch = () => {
-    if (totalMatches > 0) {
-      setCurrentMatchIndex((prev) => (prev + 1) % totalMatches);
-    }
+    setCurrentMatchIndex((prev) => {
+      if (totalMatches === 0) return 0;
+      return (prev + 1) % totalMatches;
+    });
   };
 
   const goToPreviousMatch = () => {
-    if (totalMatches > 0) {
-      setCurrentMatchIndex((prev) => (prev - 1 + totalMatches) % totalMatches);
-    }
+    setCurrentMatchIndex((prev) => {
+      if (totalMatches === 0) return 0;
+      return (prev - 1 + totalMatches) % totalMatches;
+    });
   };
 
   return {
@@ -103,6 +117,8 @@ export function useDiffViewer() {
     totalMatches,
     inputMatchMap,
     outputMatchMap,
+    currentInputMatchMap,
+    currentOutputMatchMap,
     goToNextMatch,
     goToPreviousMatch,
     stats,

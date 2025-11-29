@@ -1,5 +1,7 @@
 import type { SearchMatch } from "../model/types";
 
+import { createSearchRegex } from "@/entities/search";
+
 export function findSearchMatches(
   searchTerm: string,
   caseSensitive: boolean,
@@ -8,10 +10,7 @@ export function findSearchMatches(
 ): SearchMatch[] {
   if (!searchTerm) return [];
 
-  const regex = new RegExp(
-    searchTerm.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
-    caseSensitive ? "g" : "gi",
-  );
+  const regex = createSearchRegex(searchTerm, caseSensitive);
 
   // Collect matches per line for both panes
   const inputLines = input.split("\n");
@@ -68,30 +67,56 @@ export function findSearchMatches(
   return sortedMatches;
 }
 
+/**
+ * Creates a map of all match positions (for highlighting all matches)
+ */
 export function createInputMatchMap(
   searchMatches: SearchMatch[],
-  currentMatchIndex: number,
 ): Map<number, Set<number>> {
   const map = new Map<number, Set<number>>();
   if (searchMatches.length === 0) return map;
 
-  const currentMatch = searchMatches[currentMatchIndex];
-  if (!currentMatch) return map;
-
   searchMatches.forEach((match) => {
     if (match.inputMatches.length > 0) {
-      const isCurrentMatch = match.matchIndex === currentMatch.matchIndex;
-      map.set(
-        match.lineIndex,
-        new Set(isCurrentMatch ? match.inputMatches : []),
-      );
+      if (!map.has(match.lineIndex)) {
+        map.set(match.lineIndex, new Set());
+      }
+      match.inputMatches.forEach((pos) => {
+        map.get(match.lineIndex)!.add(pos);
+      });
     }
   });
 
   return map;
 }
 
+/**
+ * Creates a map of all match positions (for highlighting all matches)
+ */
 export function createOutputMatchMap(
+  searchMatches: SearchMatch[],
+): Map<number, Set<number>> {
+  const map = new Map<number, Set<number>>();
+  if (searchMatches.length === 0) return map;
+
+  searchMatches.forEach((match) => {
+    if (match.outputMatches.length > 0) {
+      if (!map.has(match.lineIndex)) {
+        map.set(match.lineIndex, new Set());
+      }
+      match.outputMatches.forEach((pos) => {
+        map.get(match.lineIndex)!.add(pos);
+      });
+    }
+  });
+
+  return map;
+}
+
+/**
+ * Creates a map of current match positions only (for highlighting the active match)
+ */
+export function createCurrentInputMatchMap(
   searchMatches: SearchMatch[],
   currentMatchIndex: number,
 ): Map<number, Set<number>> {
@@ -99,17 +124,25 @@ export function createOutputMatchMap(
   if (searchMatches.length === 0) return map;
 
   const currentMatch = searchMatches[currentMatchIndex];
-  if (!currentMatch) return map;
+  if (!currentMatch || currentMatch.inputMatches.length === 0) return map;
 
-  searchMatches.forEach((match) => {
-    if (match.outputMatches.length > 0) {
-      const isCurrentMatch = match.matchIndex === currentMatch.matchIndex;
-      map.set(
-        match.lineIndex,
-        new Set(isCurrentMatch ? match.outputMatches : []),
-      );
-    }
-  });
+  map.set(currentMatch.lineIndex, new Set(currentMatch.inputMatches));
+  return map;
+}
 
+/**
+ * Creates a map of current match positions only (for highlighting the active match)
+ */
+export function createCurrentOutputMatchMap(
+  searchMatches: SearchMatch[],
+  currentMatchIndex: number,
+): Map<number, Set<number>> {
+  const map = new Map<number, Set<number>>();
+  if (searchMatches.length === 0) return map;
+
+  const currentMatch = searchMatches[currentMatchIndex];
+  if (!currentMatch || currentMatch.outputMatches.length === 0) return map;
+
+  map.set(currentMatch.lineIndex, new Set(currentMatch.outputMatches));
   return map;
 }

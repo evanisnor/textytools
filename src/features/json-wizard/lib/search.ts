@@ -1,5 +1,7 @@
 import type { SearchMatch } from "../model/types";
 
+import { createSearchRegex } from "@/entities/search";
+
 export function findJSONMatchPaths(
   json: string,
   searchTerm: string,
@@ -10,10 +12,7 @@ export function findJSONMatchPaths(
   try {
     const parsed = JSON.parse(json);
     const paths: string[] = [];
-    const regex = new RegExp(
-      searchTerm.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
-      caseSensitive ? "g" : "gi",
-    );
+    const regex = createSearchRegex(searchTerm, caseSensitive);
 
     const traverse = (obj: unknown, path: string[] = []): void => {
       if (typeof obj === "object" && obj !== null) {
@@ -56,13 +55,12 @@ export function findSearchMatches(
 
   const matches: SearchMatch[] = [];
   const lines = text.split("\n");
+  const regex = createSearchRegex(searchTerm, caseSensitive);
 
   lines.forEach((line, lineIndex) => {
+    const lineRegex = new RegExp(regex.source, regex.flags);
     let match;
-    const lineRegex = new RegExp(
-      searchTerm.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
-      caseSensitive ? "g" : "gi",
-    );
+
     while ((match = lineRegex.exec(line)) !== null) {
       const jsonPath = jsonPaths[matches.length];
       matches.push({

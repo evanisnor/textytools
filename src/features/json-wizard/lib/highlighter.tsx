@@ -3,6 +3,7 @@ import { Fragment, type ReactNode } from "react";
 import type { ValidationResult } from "../model/types";
 
 import { tokenizeJson, type JsonSyntaxTheme } from "@/entities/json";
+import { HIGHLIGHT_COLORS } from "@/entities/search";
 
 interface RenderHighlightedTextParams {
   text: string;
@@ -195,8 +196,8 @@ export function renderHighlightedText({
           }
           className={
             isCurrentMatch
-              ? "bg-green-300 dark:bg-green-600 text-black"
-              : "bg-yellow-300 dark:bg-yellow-600 text-black"
+              ? HIGHLIGHT_COLORS.currentMatch
+              : HIGHLIGHT_COLORS.otherMatch
           }
         >
           {renderPartContent(part.text, part.start)}

@@ -5,6 +5,7 @@ import { Fragment, useRef, useEffect, useMemo } from "react";
 import { useDiffViewerContext } from "../model/DiffViewerProvider";
 
 import type { DiffType } from "@/entities/compare";
+import { HIGHLIGHT_COLORS } from "@/entities/search";
 
 import { trackClearEvent } from "@/shared/lib/analytics";
 import { TOOL_NAMES } from "@/shared/lib/constants";
@@ -32,6 +33,8 @@ export function DiffViewerShell() {
     totalMatches,
     inputMatchMap,
     outputMatchMap,
+    currentInputMatchMap,
+    currentOutputMatchMap,
     goToNextMatch,
     goToPreviousMatch,
   } = useDiffViewerContext();
@@ -87,8 +90,11 @@ export function DiffViewerShell() {
   ) => {
     if (!searchTerm) return text;
 
-    const positions = pane === "input" ? inputMatchMap : outputMatchMap;
-    const lineMatches = positions.get(lineIndex);
+    const allPositions = pane === "input" ? inputMatchMap : outputMatchMap;
+    const currentPositions =
+      pane === "input" ? currentInputMatchMap : currentOutputMatchMap;
+
+    const lineMatches = allPositions.get(lineIndex);
     if (!lineMatches || lineMatches.size === 0) return text;
 
     const regex = new RegExp(
@@ -96,9 +102,7 @@ export function DiffViewerShell() {
       caseSensitive ? "g" : "gi",
     );
 
-    const currentMatch = searchMatches[currentMatchIndex];
-    const isCurrentMatchLine =
-      currentMatch && currentMatch.lineIndex === lineIndex;
+    const currentLineMatches = currentPositions.get(lineIndex);
 
     const parts: Array<{ text: string; isMatch: boolean; isCurrent: boolean }> =
       [];
@@ -114,7 +118,8 @@ export function DiffViewerShell() {
         });
       }
 
-      const isCurrent = isCurrentMatchLine && lineMatches.has(match.index);
+      const isCurrent =
+        currentLineMatches !== undefined && currentLineMatches.has(match.index);
 
       parts.push({
         text: match[0],
@@ -139,8 +144,8 @@ export function DiffViewerShell() {
             key={index}
             className={
               part.isCurrent
-                ? "bg-green-300 dark:bg-green-600 text-black font-bold"
-                : "bg-yellow-300 dark:bg-yellow-600 text-black"
+                ? `${HIGHLIGHT_COLORS.currentMatch} font-bold`
+                : HIGHLIGHT_COLORS.otherMatch
             }
           >
             {part.text}
