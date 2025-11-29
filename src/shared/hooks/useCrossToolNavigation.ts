@@ -2,18 +2,6 @@
 
 import { useCallback } from "react";
 
-interface CrossToolNavigationOptions {
-  /**
-   * The current feature's storage key for saving state before navigation
-   */
-  currentFeatureKey: string;
-
-  /**
-   * The current feature's state to save
-   */
-  currentState: Record<string, unknown>;
-}
-
 /**
  * Hook for navigating between tools with data transfer via sessionStorage
  *
@@ -24,27 +12,21 @@ interface CrossToolNavigationOptions {
  *
  * @example
  * ```tsx
- * const { navigateToTool } = useCrossToolNavigation({
- *   currentFeatureKey: "jwt-decoder-state",
- *   currentState: { input }
- * });
+ * const { navigateToTool } = useCrossToolNavigation();
  *
  * navigateToTool({
  *   destination: "/json-wizard",
- *   data: formattedOutput,
- *   crossToolKey: "cross-tool-input-json-wizard"
+ *   saveState: { key: "jwt-decoder-state", value: { input } },
+ *   transferData: { key: "cross-tool-input-json-wizard", value: formattedOutput }
  * });
  * ```
  */
-export function useCrossToolNavigation({
-  currentFeatureKey,
-  currentState,
-}: CrossToolNavigationOptions) {
+export function useCrossToolNavigation() {
   const navigateToTool = useCallback(
     ({
       destination,
-      data,
-      crossToolKey,
+      saveState,
+      transferData,
     }: {
       /**
        * The destination path (e.g., "/json-wizard")
@@ -52,26 +34,40 @@ export function useCrossToolNavigation({
       destination: string;
 
       /**
-       * The data to transfer to the destination tool
+       * Optional: Current feature state to save for restoration on back navigation
        */
-      data: string;
+      saveState?: {
+        key: string;
+        value: Record<string, unknown>;
+      };
 
       /**
-       * The cross-tool key for the destination feature
-       * Convention: "cross-tool-input-{destination-feature-name}"
+       * The data to transfer to the destination tool
        */
-      crossToolKey: string;
+      transferData: {
+        /**
+         * The cross-tool key for the destination feature
+         * Convention: "cross-tool-input-{destination-feature-name}"
+         */
+        key: string;
+        /**
+         * The data to transfer
+         */
+        value: string;
+      };
     }) => {
       // Save current state for restoration on back navigation
-      sessionStorage.setItem(currentFeatureKey, JSON.stringify(currentState));
+      if (saveState) {
+        sessionStorage.setItem(saveState.key, JSON.stringify(saveState.value));
+      }
 
       // Save data for destination tool
-      sessionStorage.setItem(crossToolKey, data);
+      sessionStorage.setItem(transferData.key, transferData.value);
 
       // Navigate to destination
       window.location.href = destination;
     },
-    [currentFeatureKey, currentState],
+    [],
   );
 
   return {

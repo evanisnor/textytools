@@ -7,6 +7,7 @@ import { useJwtDecoderContext } from "../model/JwtDecoderProvider";
 import { useJsonSyntaxHighlighter } from "@/entities/json";
 import { useJwtSyntaxHighlighter } from "@/entities/jwt";
 
+import { useCrossToolNavigation } from "@/shared/hooks";
 import {
   trackCopyEvent,
   trackToolConversion,
@@ -19,6 +20,7 @@ import { useToast } from "@/shared/ui/toast/Toast";
 export function JwtDecoderShell() {
   const { input, setInput, result, formattedOutput } = useJwtDecoderContext();
   const { showToast, ToastComponent } = useToast();
+  const { navigateToTool } = useCrossToolNavigation();
 
   const jwtSyntax = useJwtSyntaxHighlighter({
     enabled: Boolean(input.trim()) && !result.error,
@@ -93,22 +95,21 @@ export function JwtDecoderShell() {
                   href="/json-wizard"
                   onClick={(e) => {
                     e.preventDefault();
-                    // Track cross-tool conversion
                     trackToolConversion({
                       sourceTool: "jwt-decoder",
                       destinationTool: "json-wizard",
                     });
-                    // Save current JWT input for restoration on back navigation
-                    sessionStorage.setItem(
-                      "jwt-decoder-state",
-                      JSON.stringify({ input }),
-                    );
-                    // Save formatted output for JSON Wizard
-                    sessionStorage.setItem(
-                      "cross-tool-input-json-wizard",
-                      formattedOutput,
-                    );
-                    window.location.href = "/json-wizard";
+                    navigateToTool({
+                      destination: "/json-wizard",
+                      saveState: {
+                        key: "jwt-decoder-state",
+                        value: { input },
+                      },
+                      transferData: {
+                        key: "cross-tool-input-json-wizard",
+                        value: formattedOutput,
+                      },
+                    });
                   }}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-900 dark:text-blue-100 rounded hover:bg-blue-200 dark:hover:bg-blue-900/50 active:bg-blue-300 dark:active:bg-blue-900/70 transition-colors cursor-pointer"
                 >

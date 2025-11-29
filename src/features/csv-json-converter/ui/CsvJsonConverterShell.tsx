@@ -7,6 +7,7 @@ import { useCsvJsonConverter } from "../model/useCsvJsonConverter";
 import { useCsvSyntaxHighlighter } from "@/entities/csv";
 import { useJsonSyntaxHighlighter } from "@/entities/json";
 
+import { useCrossToolNavigation } from "@/shared/hooks";
 import {
   trackCopyEvent,
   trackToolConversion,
@@ -27,6 +28,7 @@ export function CsvJsonConverterShell() {
     result,
   } = useCsvJsonConverter();
   const { showToast, ToastComponent } = useToast();
+  const { navigateToTool } = useCrossToolNavigation();
 
   const inputJsonSyntax = useJsonSyntaxHighlighter({
     enabled: result.detectedFormat === "json" && Boolean(input.trim()),
@@ -148,7 +150,6 @@ export function CsvJsonConverterShell() {
                       href="/json-wizard"
                       onClick={(e) => {
                         e.preventDefault();
-                        // Track cross-tool conversion
                         trackToolConversion({
                           sourceTool: "csv-json-converter",
                           destinationTool: "json-wizard",
@@ -159,17 +160,17 @@ export function CsvJsonConverterShell() {
                           delimiter,
                           includeHeaders,
                         });
-                        // Save current CSV input for restoration on back navigation
-                        sessionStorage.setItem(
-                          "csv-json-converter-input",
-                          input,
-                        );
-                        // Save converted JSON for JSON Wizard
-                        sessionStorage.setItem(
-                          "cross-tool-input-json-wizard",
-                          result.output,
-                        );
-                        window.location.href = "/json-wizard";
+                        navigateToTool({
+                          destination: "/json-wizard",
+                          saveState: {
+                            key: "csv-json-converter-input",
+                            value: { input },
+                          },
+                          transferData: {
+                            key: "cross-tool-input-json-wizard",
+                            value: result.output,
+                          },
+                        });
                       }}
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-900 dark:text-blue-100 rounded hover:bg-blue-200 dark:hover:bg-blue-900/50 active:bg-blue-300 dark:active:bg-blue-900/70 transition-colors cursor-pointer"
                     >

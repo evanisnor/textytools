@@ -16,6 +16,7 @@ import {
   type JsonSyntaxTheme,
 } from "@/entities/json";
 
+import { useCrossToolNavigation } from "@/shared/hooks";
 import {
   trackCopyEvent,
   trackToolConversion,
@@ -56,6 +57,7 @@ export function JsonWizardShell() {
   const inputEditorRef = useRef<TextEditorContainerRef>(null);
   const outputEditorRef = useRef<TextEditorContainerRef>(null);
   const { showToast, ToastComponent } = useToast();
+  const { navigateToTool } = useCrossToolNavigation();
 
   const inputJsonSyntax = useJsonSyntaxHighlighter({
     enabled: Boolean(input.trim()),
@@ -204,21 +206,23 @@ export function JsonWizardShell() {
                         viewMode,
                         sortKeys,
                       });
-                      sessionStorage.setItem(
-                        "json-wizard-state",
-                        JSON.stringify({
-                          input,
-                          viewMode,
-                          indentSize,
-                          sortKeys,
-                          caseSensitive,
-                        }),
-                      );
-                      sessionStorage.setItem(
-                        "cross-tool-input-text-encoder",
-                        processedJSON,
-                      );
-                      window.location.href = "/text-encoder";
+                      navigateToTool({
+                        destination: "/text-encoder",
+                        saveState: {
+                          key: "json-wizard-state",
+                          value: {
+                            input,
+                            viewMode,
+                            indentSize,
+                            sortKeys,
+                            caseSensitive,
+                          },
+                        },
+                        transferData: {
+                          key: "cross-tool-input-text-encoder",
+                          value: processedJSON,
+                        },
+                      });
                     }}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-900 dark:text-purple-100 rounded hover:bg-purple-200 dark:hover:bg-purple-900/50 active:bg-purple-300 dark:active:bg-purple-900/70 transition-colors cursor-pointer whitespace-nowrap"
                   >
@@ -251,21 +255,23 @@ export function JsonWizardShell() {
                         viewMode,
                         sortKeys,
                       });
-                      sessionStorage.setItem(
-                        "json-wizard-state",
-                        JSON.stringify({
-                          input,
-                          viewMode,
-                          indentSize,
-                          sortKeys,
-                          caseSensitive,
-                        }),
-                      );
-                      sessionStorage.setItem(
-                        "cross-tool-input-csv-json-converter",
-                        processedJSON,
-                      );
-                      window.location.href = "/csv-json-converter";
+                      navigateToTool({
+                        destination: "/csv-json-converter",
+                        saveState: {
+                          key: "json-wizard-state",
+                          value: {
+                            input,
+                            viewMode,
+                            indentSize,
+                            sortKeys,
+                            caseSensitive,
+                          },
+                        },
+                        transferData: {
+                          key: "cross-tool-input-csv-json-converter",
+                          value: processedJSON,
+                        },
+                      });
                     }}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-900 dark:text-blue-100 rounded hover:bg-blue-200 dark:hover:bg-blue-900/50 active:bg-blue-300 dark:active:bg-blue-900/70 transition-colors cursor-pointer whitespace-nowrap"
                   >

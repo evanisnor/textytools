@@ -9,6 +9,7 @@ import {
   convertMatchesToJson,
 } from "@/entities/transform";
 
+import { useCrossToolNavigation } from "@/shared/hooks";
 import { trackCopyEvent, trackClearEvent } from "@/shared/lib/analytics";
 import { TOOL_NAMES } from "@/shared/lib/constants";
 import { TextEditorContainer } from "@/shared/ui/text-editor/TextEditorContainer";
@@ -34,6 +35,7 @@ export function RegexTesterShell() {
   } = useRegexTesterContext();
 
   const { showToast, ToastComponent } = useToast();
+  const { navigateToTool } = useCrossToolNavigation();
 
   const copyMatches = async () => {
     const matchText = matches.map((m) => m.fullMatch).join("\n");
@@ -52,14 +54,14 @@ export function RegexTesterShell() {
   const convertToJson = () => {
     const jsonOutput = convertMatchesToJson(matches);
     if (jsonOutput) {
-      navigateToJsonWizard(matches, jsonOutput);
+      navigateToJsonWizard(matches, jsonOutput, navigateToTool);
     }
   };
 
   const convertToCsv = () => {
     const csvOutput = convertMatchesToCsv(matches);
     if (csvOutput) {
-      navigateToCsvConverter(matches, csvOutput);
+      navigateToCsvConverter(matches, csvOutput, navigateToTool);
     }
   };
 

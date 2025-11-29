@@ -5,13 +5,13 @@ import { trackToolConversion } from "@/shared/lib/analytics";
 export function navigateToJsonWizard(
   matches: RegexMatch[],
   jsonOutput: string,
+  navigateToTool: (params: {
+    destination: string;
+    transferData: { key: string; value: string };
+  }) => void,
 ) {
   const hasNamedGroups = matches[0]?.groupNames.some((name) => name !== null);
 
-  // Save JSON for json-wizard
-  sessionStorage.setItem("cross-tool-input-json-wizard", jsonOutput);
-
-  // Track the conversion
   trackToolConversion({
     sourceTool: "regex-tester",
     destinationTool: "json-wizard",
@@ -19,20 +19,25 @@ export function navigateToJsonWizard(
     hasNamedGroups,
   });
 
-  // Navigate to json-wizard
-  window.location.href = "/json-wizard";
+  navigateToTool({
+    destination: "/json-wizard",
+    transferData: {
+      key: "cross-tool-input-json-wizard",
+      value: jsonOutput,
+    },
+  });
 }
 
 export function navigateToCsvConverter(
   matches: RegexMatch[],
   csvOutput: string,
+  navigateToTool: (params: {
+    destination: string;
+    transferData: { key: string; value: string };
+  }) => void,
 ) {
   const hasNamedGroups = matches[0]?.groupNames.some((name) => name !== null);
 
-  // Save CSV for csv-json-converter
-  sessionStorage.setItem("cross-tool-input-csv-json-converter", csvOutput);
-
-  // Track the conversion
   trackToolConversion({
     sourceTool: "regex-tester",
     destinationTool: "csv-json-converter",
@@ -40,6 +45,11 @@ export function navigateToCsvConverter(
     hasNamedGroups,
   });
 
-  // Navigate to csv-json-converter
-  window.location.href = "/csv-json-converter";
+  navigateToTool({
+    destination: "/csv-json-converter",
+    transferData: {
+      key: "cross-tool-input-csv-json-converter",
+      value: csvOutput,
+    },
+  });
 }
