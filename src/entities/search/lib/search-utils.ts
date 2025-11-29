@@ -1,4 +1,4 @@
-import type { BaseSearchMatch } from "../model/types";
+import type { SearchMatch, DualPaneSearchResult } from "../model/types";
 
 /**
  * Escapes special regex characters in a search term for literal matching
@@ -18,16 +18,16 @@ export function createSearchRegex(
 }
 
 /**
- * Finds all text matches in a single text string, line by line
+ * Finds all matches in a single text string
  */
 export function findTextMatches(
   text: string,
   searchTerm: string,
   caseSensitive: boolean,
-): BaseSearchMatch[] {
+): SearchMatch[] {
   if (!searchTerm || !text) return [];
 
-  const matches: BaseSearchMatch[] = [];
+  const matches: SearchMatch[] = [];
   const lines = text.split("\n");
   const regex = createSearchRegex(searchTerm, caseSensitive);
 
@@ -48,10 +48,58 @@ export function findTextMatches(
 }
 
 /**
- * Creates a map of line index to column positions for quick lookup
+ * Finds matches in two panes simultaneously
+ * Returns separate match arrays for left and right panes
+ */
+export function findDualPaneMatches(
+  leftText: string,
+  rightText: string,
+  searchTerm: string,
+  caseSensitive: boolean,
+): DualPaneSearchResult {
+  const leftMatches = findTextMatches(leftText, searchTerm, caseSensitive);
+  const rightMatches = findTextMatches(rightText, searchTerm, caseSensitive);
+
+  // Re-index right matches to continue from left matches
+  const totalLeftMatches = leftMatches.length;
+  rightMatches.forEach((match, index) => {
+    match.matchIndex = totalLeftMatches + index;
+  });
+
+  return {
+    leftMatches,
+    rightMatches,
+    totalMatches: leftMatches.length + rightMatches.length,
+  };
+}
+
+/**
+ * Creates a map for efficient match lookup by line
+ * Returns: Map<lineIndex, Set<columnStart>>
+ * Use this for simple highlighting where match index is not needed
+ */
+export function createMatchMap(
+  matches: SearchMatch[],
+): Map<number, Set<number>> {
+  const map = new Map<number, Set<number>>();
+
+  matches.forEach((match) => {
+    if (!map.has(match.lineIndex)) {
+      map.set(match.lineIndex, new Set());
+    }
+    map.get(match.lineIndex)!.add(match.columnStart);
+  });
+
+  return map;
+}
+
+/**
+ * Creates a map that preserves match indices for complex highlighting
+ * Returns: Map<lineIndex, Map<columnStart, matchIndex>>
+ * Use this when you need to identify which specific match is being highlighted
  */
 export function createMatchPositionMap(
-  matches: BaseSearchMatch[],
+  matches: SearchMatch[],
 ): Map<number, Map<number, number>> {
   const map = new Map<number, Map<number, number>>();
 
@@ -66,7 +114,27 @@ export function createMatchPositionMap(
 }
 
 /**
- * Navigation helpers
+ * Creates a map containing only the current match for highlighting
+ * Returns: Map<lineIndex, Set<columnStart>>
+ */
+export function createCurrentMatchMap(
+  matches: SearchMatch[],
+  currentIndex: number,
+): Map<number, Set<number>> {
+  const map = new Map<number, Set<number>>();
+  if (matches.length === 0 || currentIndex >= matches.length) return map;
+
+  const current = matches[currentIndex];
+  if (!map.has(current.lineIndex)) {
+    map.set(current.lineIndex, new Set());
+  }
+  map.get(current.lineIndex)!.add(current.columnStart);
+
+  return map;
+}
+
+/**
+ * Gets the index of the next match (wraps around)
  */
 export function getNextMatchIndex(
   currentIndex: number,
@@ -76,6 +144,9 @@ export function getNextMatchIndex(
   return (currentIndex + 1) % totalMatches;
 }
 
+/**
+ * Gets the index of the previous match (wraps around)
+ */
 export function getPreviousMatchIndex(
   currentIndex: number,
   totalMatches: number,

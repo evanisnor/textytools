@@ -1,7 +1,12 @@
-import type { SearchMatch } from "../model/types";
+import {
+  findTextMatches,
+  createSearchRegex,
+  type SearchMatch,
+} from "@/entities/search";
 
-import { createSearchRegex } from "@/entities/search";
-
+/**
+ * Finds JSON paths for matches by traversing the JSON structure
+ */
 export function findJSONMatchPaths(
   json: string,
   searchTerm: string,
@@ -45,49 +50,27 @@ export function findJSONMatchPaths(
   }
 }
 
-export function findSearchMatches(
+/**
+ * Finds matches with JSON path metadata attached
+ */
+export function findJSONMatches(
   text: string,
   searchTerm: string,
   caseSensitive: boolean,
   jsonPaths: string[],
 ): SearchMatch[] {
-  if (!searchTerm || !text) return [];
+  const matches = findTextMatches(text, searchTerm, caseSensitive);
 
-  const matches: SearchMatch[] = [];
-  const lines = text.split("\n");
-  const regex = createSearchRegex(searchTerm, caseSensitive);
-
-  lines.forEach((line, lineIndex) => {
-    const lineRegex = new RegExp(regex.source, regex.flags);
-    let match;
-
-    while ((match = lineRegex.exec(line)) !== null) {
-      const jsonPath = jsonPaths[matches.length];
-      matches.push({
-        lineIndex,
-        matchIndex: matches.length,
-        columnStart: match.index,
-        jsonPath,
-      });
-    }
-  });
-
-  return matches;
+  // Attach JSON path metadata to each match
+  return matches.map((match, index) => ({
+    ...match,
+    metadata: jsonPaths[index],
+  }));
 }
 
-export function createMatchPositionMap(
-  matches: SearchMatch[],
-): Map<number, Map<number, number>> {
-  const map = new Map<number, Map<number, number>>();
-  matches.forEach((match) => {
-    if (!map.has(match.lineIndex)) {
-      map.set(match.lineIndex, new Map());
-    }
-    map.get(match.lineIndex)!.set(match.columnStart, match.matchIndex);
-  });
-  return map;
-}
-
+/**
+ * Maps input matches to output matches using JSON paths
+ */
 export function mapInputToOutputMatches(
   inputMatches: SearchMatch[],
   outputMatches: SearchMatch[],
@@ -97,13 +80,12 @@ export function mapInputToOutputMatches(
   // Build a queue of output match indices for each path
   const pathToOutputIndices = new Map<string, number[]>();
   outputMatches.forEach((outputMatch) => {
-    if (outputMatch.jsonPath !== undefined) {
-      if (!pathToOutputIndices.has(outputMatch.jsonPath)) {
-        pathToOutputIndices.set(outputMatch.jsonPath, []);
+    const jsonPath = outputMatch.metadata as string | undefined;
+    if (jsonPath !== undefined) {
+      if (!pathToOutputIndices.has(jsonPath)) {
+        pathToOutputIndices.set(jsonPath, []);
       }
-      pathToOutputIndices
-        .get(outputMatch.jsonPath)!
-        .push(outputMatch.matchIndex);
+      pathToOutputIndices.get(jsonPath)!.push(outputMatch.matchIndex);
     }
   });
 
@@ -112,14 +94,15 @@ export function mapInputToOutputMatches(
 
   // Map each input match to the corresponding output match via structural path
   inputMatches.forEach((inputMatch) => {
-    if (inputMatch.jsonPath !== undefined) {
-      const outputIndices = pathToOutputIndices.get(inputMatch.jsonPath);
+    const jsonPath = inputMatch.metadata as string | undefined;
+    if (jsonPath !== undefined) {
+      const outputIndices = pathToOutputIndices.get(jsonPath);
       if (outputIndices && outputIndices.length > 0) {
-        const usageCount = pathUsageCount.get(inputMatch.jsonPath) || 0;
+        const usageCount = pathUsageCount.get(jsonPath) || 0;
         const outputIndex =
           outputIndices[Math.min(usageCount, outputIndices.length - 1)];
         map.set(inputMatch.matchIndex, outputIndex);
-        pathUsageCount.set(inputMatch.jsonPath, usageCount + 1);
+        pathUsageCount.set(jsonPath, usageCount + 1);
       }
     } else {
       // Fallback to sequential for invalid JSON

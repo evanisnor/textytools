@@ -1,29 +1,22 @@
-// Domain types
+// Types
 export type {
-  BaseSearchMatch,
+  SearchMatch,
+  DualPaneSearchResult,
   SearchConfig,
-  SearchResult,
 } from "./model/types";
 
-// Search utilities
+// Core search utilities
 export {
   escapeRegex,
   createSearchRegex,
   findTextMatches,
+  findDualPaneMatches,
+  createMatchMap,
   createMatchPositionMap,
+  createCurrentMatchMap,
   getNextMatchIndex,
   getPreviousMatchIndex,
 } from "./lib/search-utils";
 
 // Highlighting utilities
-export {
-  segmentText,
-  renderHighlightedSegments,
-  highlightText,
-  HIGHLIGHT_COLORS,
-  type TextSegment,
-  type HighlightOptions,
-} from "./ui/highlight-utils";
-
-// Hooks
-export { useSearch } from "./model/useSearch";
+export { HIGHLIGHT_COLORS } from "./ui/highlight-utils";

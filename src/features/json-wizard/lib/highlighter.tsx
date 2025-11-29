@@ -71,8 +71,8 @@ export function renderHighlightedText({
   // Apply matches
   if (lineMatches && searchTerm) {
     const len = searchTerm.length;
-    for (const [start, matchIndex] of lineMatches.entries()) {
-      for (let i = start; i < start + len && i < text.length; i++) {
+    for (const [columnStart, matchIndex] of lineMatches.entries()) {
+      for (let i = columnStart; i < columnStart + len && i < text.length; i++) {
         mask[i] = { type: "match", matchIndex };
       }
     }

@@ -1,10 +1,20 @@
 /**
- * Basic search match information
+ * Single search match in text
  */
-export interface BaseSearchMatch {
-  lineIndex: number; // The line number where this match occurs
-  matchIndex: number; // Global index of this match
-  columnStart: number; // Column position where the match starts
+export interface SearchMatch {
+  lineIndex: number;
+  matchIndex: number;
+  columnStart: number;
+  metadata?: unknown; // For feature-specific extensions (e.g., jsonPath)
+}
+
+/**
+ * Result of searching in dual panes (left/right or input/output)
+ */
+export interface DualPaneSearchResult {
+  leftMatches: SearchMatch[];
+  rightMatches: SearchMatch[];
+  totalMatches: number; // Total across both panes
 }
 
 /**
@@ -13,12 +23,4 @@ export interface BaseSearchMatch {
 export interface SearchConfig {
   searchTerm: string;
   caseSensitive: boolean;
-}
-
-/**
- * Result of a search operation
- */
-export interface SearchResult<T extends BaseSearchMatch = BaseSearchMatch> {
-  matches: T[];
-  totalMatches: number;
 }

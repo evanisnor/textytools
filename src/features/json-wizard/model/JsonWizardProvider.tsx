@@ -2,13 +2,10 @@
 
 import { createContext, useContext, ReactNode } from "react";
 
-import type {
-  ViewMode,
-  ValidationResult,
-  JSONStats,
-  SearchMatch,
-} from "./types";
+import type { ViewMode, ValidationResult, JSONStats } from "./types";
 import { useJsonWizard } from "./useJsonWizard";
+
+import type { SearchMatch } from "@/entities/search";
 
 interface JsonWizardContextValue {
   input: string;

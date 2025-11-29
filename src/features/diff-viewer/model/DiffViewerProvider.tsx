@@ -2,10 +2,10 @@
 
 import { createContext, useContext, ReactNode } from "react";
 
-import type { SearchMatch } from "./types";
 import { useDiffViewer } from "./useDiffViewer";
 
 import type { DiffLine } from "@/entities/compare";
+import type { SearchMatch } from "@/entities/search";
 
 interface DiffStats {
   added: number;
@@ -26,7 +26,8 @@ interface DiffViewerContextValue {
   setCurrentMatchIndex: (value: number) => void;
   mounted: boolean;
   diffLines: DiffLine[];
-  searchMatches: SearchMatch[];
+  leftMatches: SearchMatch[];
+  rightMatches: SearchMatch[];
   totalMatches: number;
   inputMatchMap: Map<number, Set<number>>;
   outputMatchMap: Map<number, Set<number>>;

@@ -29,7 +29,8 @@ export function DiffViewerShell() {
     currentMatchIndex,
     setCurrentMatchIndex,
     diffLines,
-    searchMatches,
+    leftMatches,
+    rightMatches,
     totalMatches,
     inputMatchMap,
     outputMatchMap,
@@ -44,9 +45,10 @@ export function DiffViewerShell() {
 
   // Scroll to current match in both panes
   useEffect(() => {
-    if (!searchTerm || searchMatches.length === 0) return;
+    const allMatches = [...leftMatches, ...rightMatches];
+    if (!searchTerm || allMatches.length === 0) return;
 
-    const currentMatch = searchMatches[currentMatchIndex];
+    const currentMatch = allMatches[currentMatchIndex];
     if (!currentMatch) return;
 
     setTimeout(() => {
@@ -81,7 +83,7 @@ export function DiffViewerShell() {
       scrollToLine(inputEditorRef);
       scrollToLine(outputEditorRef);
     }, 0);
-  }, [currentMatchIndex, searchMatches, searchTerm]);
+  }, [currentMatchIndex, leftMatches, rightMatches, searchTerm]);
 
   const renderHighlightedText = (
     text: string,

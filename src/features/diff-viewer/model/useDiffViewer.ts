@@ -2,15 +2,14 @@
 
 import { useState, useMemo, useEffect } from "react";
 
-import {
-  findSearchMatches,
-  createInputMatchMap,
-  createOutputMatchMap,
-  createCurrentInputMatchMap,
-  createCurrentOutputMatchMap,
-} from "../lib/search";
-
 import { useTextDiff } from "@/entities/compare";
+import {
+  findDualPaneMatches,
+  createMatchMap,
+  createCurrentMatchMap,
+  getNextMatchIndex,
+  getPreviousMatchIndex,
+} from "@/entities/search";
 
 export function useDiffViewer() {
   const [input, setInput] = useState("");
@@ -59,45 +58,59 @@ export function useDiffViewer() {
 
   const { diffLines, stats } = useTextDiff(input, output);
 
-  const searchMatches = useMemo(
-    () => findSearchMatches(searchTerm, caseSensitive, input, output),
+  const searchResult = useMemo(
+    () => findDualPaneMatches(input, output, searchTerm, caseSensitive),
     [searchTerm, caseSensitive, input, output],
   );
 
-  const totalMatches = searchMatches.length;
+  const { leftMatches, rightMatches, totalMatches } = searchResult;
 
   const inputMatchMap = useMemo(
-    () => createInputMatchMap(searchMatches),
-    [searchMatches],
+    () => createMatchMap(leftMatches),
+    [leftMatches],
   );
 
   const outputMatchMap = useMemo(
-    () => createOutputMatchMap(searchMatches),
-    [searchMatches],
+    () => createMatchMap(rightMatches),
+    [rightMatches],
   );
 
-  const currentInputMatchMap = useMemo(
-    () => createCurrentInputMatchMap(searchMatches, currentMatchIndex),
-    [searchMatches, currentMatchIndex],
-  );
+  const currentInputMatchMap = useMemo(() => {
+    // Find which match is current and if it's in the left pane
+    const allMatches = [...leftMatches, ...rightMatches];
+    const currentMatch = allMatches[currentMatchIndex];
+    if (!currentMatch) return new Map();
 
-  const currentOutputMatchMap = useMemo(
-    () => createCurrentOutputMatchMap(searchMatches, currentMatchIndex),
-    [searchMatches, currentMatchIndex],
-  );
+    // Check if current match is in left pane
+    const isInLeftPane = leftMatches.some(
+      (m) => m.matchIndex === currentMatch.matchIndex,
+    );
+    return isInLeftPane
+      ? createCurrentMatchMap(leftMatches, leftMatches.indexOf(currentMatch))
+      : new Map();
+  }, [leftMatches, rightMatches, currentMatchIndex]);
+
+  const currentOutputMatchMap = useMemo(() => {
+    // Find which match is current and if it's in the right pane
+    const allMatches = [...leftMatches, ...rightMatches];
+    const currentMatch = allMatches[currentMatchIndex];
+    if (!currentMatch) return new Map();
+
+    // Check if current match is in right pane
+    const isInRightPane = rightMatches.some(
+      (m) => m.matchIndex === currentMatch.matchIndex,
+    );
+    return isInRightPane
+      ? createCurrentMatchMap(rightMatches, rightMatches.indexOf(currentMatch))
+      : new Map();
+  }, [leftMatches, rightMatches, currentMatchIndex]);
 
   const goToNextMatch = () => {
-    setCurrentMatchIndex((prev) => {
-      if (totalMatches === 0) return 0;
-      return (prev + 1) % totalMatches;
-    });
+    setCurrentMatchIndex((prev) => getNextMatchIndex(prev, totalMatches));
   };
 
   const goToPreviousMatch = () => {
-    setCurrentMatchIndex((prev) => {
-      if (totalMatches === 0) return 0;
-      return (prev - 1 + totalMatches) % totalMatches;
-    });
+    setCurrentMatchIndex((prev) => getPreviousMatchIndex(prev, totalMatches));
   };
 
   return {
@@ -113,7 +126,8 @@ export function useDiffViewer() {
     setCurrentMatchIndex,
     mounted,
     diffLines,
-    searchMatches,
+    leftMatches,
+    rightMatches,
     totalMatches,
     inputMatchMap,
     outputMatchMap,

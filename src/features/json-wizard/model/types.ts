@@ -12,10 +12,3 @@ export interface JSONStats {
   depth: number;
   size: number;
 }
-
-export interface SearchMatch {
-  lineIndex: number;
-  matchIndex: number;
-  columnStart: number;
-  jsonPath?: string;
-}

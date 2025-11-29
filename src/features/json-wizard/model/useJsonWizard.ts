@@ -5,19 +5,20 @@ import { useState, useMemo } from "react";
 import { processJSON, checkIsEscapedString } from "../lib/formatter";
 import {
   findJSONMatchPaths,
-  findSearchMatches,
-  createMatchPositionMap,
+  findJSONMatches,
   mapInputToOutputMatches,
 } from "../lib/search";
 import { getJSONStats } from "../lib/stats";
 import { validateJSON } from "../lib/validators";
 
-import type {
-  ViewMode,
-  ValidationResult,
-  JSONStats,
-  SearchMatch,
-} from "./types";
+import type { ViewMode, ValidationResult, JSONStats } from "./types";
+
+import {
+  createMatchPositionMap,
+  type SearchMatch,
+  getNextMatchIndex,
+  getPreviousMatchIndex,
+} from "@/entities/search";
 
 import { usePersistedState } from "@/shared/hooks";
 
@@ -59,12 +60,7 @@ export function useJsonWizard() {
 
   const searchMatches: SearchMatch[] = useMemo(
     () =>
-      findSearchMatches(
-        state.input,
-        searchTerm,
-        caseSensitive,
-        inputMatchPaths,
-      ),
+      findJSONMatches(state.input, searchTerm, caseSensitive, inputMatchPaths),
     [searchTerm, caseSensitive, state.input, inputMatchPaths],
   );
 
@@ -100,7 +96,7 @@ export function useJsonWizard() {
 
   const outputSearchMatches: SearchMatch[] = useMemo(
     () =>
-      findSearchMatches(
+      findJSONMatches(
         processedJSON,
         searchTerm,
         caseSensitive,
@@ -122,15 +118,11 @@ export function useJsonWizard() {
   const totalMatches = searchMatches.length;
 
   const goToNextMatch = () => {
-    if (totalMatches > 0) {
-      setCurrentMatchIndex((prev) => (prev + 1) % totalMatches);
-    }
+    setCurrentMatchIndex((prev) => getNextMatchIndex(prev, totalMatches));
   };
 
   const goToPreviousMatch = () => {
-    if (totalMatches > 0) {
-      setCurrentMatchIndex((prev) => (prev - 1 + totalMatches) % totalMatches);
-    }
+    setCurrentMatchIndex((prev) => getPreviousMatchIndex(prev, totalMatches));
   };
 
   return {
