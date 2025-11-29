@@ -2,15 +2,23 @@ import { useState, useEffect, useMemo } from "react";
 
 import { useRegexMatchHighlighter } from "@/entities/regex";
 
-const STORAGE_KEY = "regex-tester-state";
-const CROSS_TOOL_KEY = "cross-tool-input-regex-tester";
+import { usePersistedState } from "@/shared/hooks";
 
 export function useRegexTester() {
-  const [pattern, setPattern] = useState("");
-  const [flags, setFlags] = useState("g");
-  const [testString, setTestString] = useState("");
   const [currentMatchIndex, setCurrentMatchIndex] = useState(0);
-  const [mounted, setMounted] = useState(false);
+
+  const { state, updateState, mounted } = usePersistedState({
+    storageKey: "regex-tester-state",
+    initialState: {
+      pattern: "",
+      flags: "g",
+      testString: "",
+    },
+    crossToolKey: "cross-tool-input-regex-tester",
+    crossToolField: "testString",
+  });
+
+  const { pattern, flags, testString } = state;
 
   const { matches, error, isHighlighted, getMatchIndex } =
     useRegexMatchHighlighter(pattern, flags, testString);
@@ -21,46 +29,6 @@ export function useRegexTester() {
     return pattern.match(capturingGroupPattern)?.length ?? 0;
   }, [pattern]);
 
-  // Load persisted state on mount
-  useEffect(() => {
-    setTimeout(() => {
-      setMounted(true);
-
-      // Check for cross-tool data first (takes precedence)
-      const crossToolInput = sessionStorage.getItem(CROSS_TOOL_KEY);
-      if (crossToolInput) {
-        sessionStorage.removeItem(CROSS_TOOL_KEY);
-        setTestString(crossToolInput);
-        return;
-      }
-
-      // Load persisted state from sessionStorage
-      const persistedState = sessionStorage.getItem(STORAGE_KEY);
-      if (persistedState) {
-        try {
-          const state = JSON.parse(persistedState);
-          if (state.pattern !== undefined) setPattern(state.pattern);
-          if (state.flags !== undefined) setFlags(state.flags);
-          if (state.testString !== undefined) setTestString(state.testString);
-        } catch (err) {
-          console.error("Failed to load persisted state:", err);
-        }
-      }
-    }, 0);
-  }, []);
-
-  // Persist state whenever inputs change
-  useEffect(() => {
-    if (!mounted) return;
-
-    const state = {
-      pattern,
-      flags,
-      testString,
-    };
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  }, [pattern, flags, testString, mounted]);
-
   // Reset current match index when pattern or text changes
   useEffect(() => {
     if (currentMatchIndex !== 0) {
@@ -70,11 +38,10 @@ export function useRegexTester() {
   }, [pattern, flags, testString]);
 
   const toggleFlag = (flag: string) => {
-    if (flags.includes(flag)) {
-      setFlags(flags.replace(flag, ""));
-    } else {
-      setFlags(flags + flag);
-    }
+    const newFlags = flags.includes(flag)
+      ? flags.replace(flag, "")
+      : flags + flag;
+    updateState({ flags: newFlags });
   };
 
   const goToNextMatch = () => {
@@ -92,7 +59,7 @@ export function useRegexTester() {
   };
 
   const clearTestString = () => {
-    setTestString("");
+    updateState({ testString: "" });
     setCurrentMatchIndex(0);
   };
 
@@ -108,9 +75,10 @@ export function useRegexTester() {
     captureGroupCount,
 
     // Actions
-    setPattern,
-    setFlags,
-    setTestString,
+    setPattern: (newPattern: string) => updateState({ pattern: newPattern }),
+    setFlags: (newFlags: string) => updateState({ flags: newFlags }),
+    setTestString: (newTestString: string) =>
+      updateState({ testString: newTestString }),
     toggleFlag,
     goToNextMatch,
     goToPreviousMatch,
