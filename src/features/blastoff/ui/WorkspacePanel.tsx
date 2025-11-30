@@ -19,7 +19,12 @@ export function WorkspacePanel() {
     return (
       <div className="space-y-6">
         {/* Initial Input Block */}
-        <DataBlock title="Input" value={inputText} onChange={setInputText} />
+        <DataBlock
+          title="Input"
+          value={inputText}
+          onChange={setInputText}
+          onClear={() => setInputText("")}
+        />
 
         {/* Transform Palette */}
         <TransformPalette />

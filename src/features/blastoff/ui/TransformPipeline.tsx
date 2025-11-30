@@ -28,6 +28,7 @@ export function TransformPipeline() {
         title="Input"
         value={currentDocument.inputData}
         onChange={handleUpdateInput}
+        onClear={() => handleUpdateInput("")}
       />
 
       {/* Transform Steps */}

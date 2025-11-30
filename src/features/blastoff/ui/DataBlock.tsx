@@ -18,6 +18,7 @@ interface DataBlockProps {
   readOnly?: boolean;
   onChange?: (value: string) => void;
   onRemove?: () => void;
+  onClear?: () => void;
   children?: React.ReactNode; // For subheader content (e.g., transform options)
   stats?: React.ReactNode; // For read-only stats/validation info
   defaultSyntax?: "none" | "csv" | "json" | "jwt"; // Default syntax highlighting
@@ -31,6 +32,7 @@ export function DataBlock({
   readOnly = false,
   onChange,
   onRemove,
+  onClear,
   children,
   stats,
   defaultSyntax = "none",
@@ -45,13 +47,15 @@ export function DataBlock({
   const [localValue, setLocalValue] = useState(value);
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
 
-  // Update local value when external value changes (but not during typing)
+  // Update local value when external value changes
   useEffect(() => {
-    // Only update if not currently typing (no pending debounce)
-    if (!debounceTimer.current) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setLocalValue(value);
+    // Clear any pending debounce timer when value changes externally
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+      debounceTimer.current = null;
     }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setLocalValue(value);
   }, [value]);
 
   const handleChange = (newValue: string) => {
@@ -86,40 +90,69 @@ export function DataBlock({
             )}
           </div>
           <div className="flex items-center gap-4">
-            {/* Word Wrap Toggle */}
-            <label className="flex items-center gap-2 text-xs">
-              <input
-                type="checkbox"
-                checked={wordWrap}
-                onChange={(e) => setWordWrap(e.target.checked)}
-                className="w-3 h-3"
-              />
-              <span className="text-zinc-600 dark:text-zinc-400">Wrap</span>
-            </label>
-
             {/* Syntax Highlighting */}
-            <select
-              value={syntaxHighlight}
-              onChange={(e) =>
-                setSyntaxHighlight(e.target.value as "none" | "csv" | "json")
-              }
-              disabled={lockSyntax}
-              className="text-xs px-2 py-1 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded focus:outline-none focus:ring-1 focus:ring-zinc-400 disabled:opacity-50 disabled:cursor-not-allowed"
+            {!lockSyntax && (
+              <select
+                value={syntaxHighlight}
+                onChange={(e) =>
+                  setSyntaxHighlight(e.target.value as "none" | "csv" | "json")
+                }
+                className="text-xs px-2 py-1 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded focus:outline-none focus:ring-1 focus:ring-zinc-400"
+              >
+                <option value="none">Plain Text</option>
+                <option value="csv">CSV</option>
+                <option value="json">JSON</option>
+                <option value="jwt">JWT</option>
+              </select>
+            )}
+
+            {/* Word Wrap Toggle */}
+            <button
+              type="button"
+              onClick={() => setWordWrap(!wordWrap)}
+              aria-pressed={wordWrap}
+              className={`inline-flex items-center justify-center rounded border px-2 py-0.5 text-xs font-medium transition-colors ${
+                wordWrap
+                  ? "bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900 border-zinc-900 dark:border-zinc-50"
+                  : "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 border-transparent hover:bg-zinc-200 dark:hover:bg-zinc-700"
+              } cursor-pointer`}
             >
-              <option value="none">Plain Text</option>
-              <option value="csv">CSV</option>
-              <option value="json">JSON</option>
-              <option value="jwt">JWT</option>
-            </select>
+              <span className="font-semibold tracking-wide">Wrap</span>
+            </button>
+
+            {/* Clear Button */}
+            {onClear && (
+              <button
+                type="button"
+                onClick={onClear}
+                className="inline-flex items-center justify-center rounded border px-2 py-0.5 text-xs font-medium transition-colors bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 border-transparent hover:bg-zinc-200 dark:hover:bg-zinc-700 cursor-pointer"
+              >
+                <span className="font-semibold tracking-wide">Clear</span>
+              </button>
+            )}
 
             {/* Remove Button */}
             {onRemove && (
               <button
                 onClick={onRemove}
-                className="text-zinc-400 hover:text-red-500 dark:hover:text-red-400 transition-colors text-lg"
+                className="text-zinc-400 hover:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer"
                 title="Remove"
               >
-                ×
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M3 6h18" />
+                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                </svg>
               </button>
             )}
           </div>
