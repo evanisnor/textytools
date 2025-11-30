@@ -190,6 +190,7 @@ export const TRANSFORM_REGISTRY: Record<TransformType, TransformDefinition> = {
       return convertCase(
         input,
         format as "camel" | "pascal" | "snake" | "kebab" | "constant" | "title",
+        true, // preserveLines = true for blastoff
       );
     },
   },

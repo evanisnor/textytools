@@ -63,8 +63,20 @@ export function toPathCase(str: string): string {
     .join("/");
 }
 
-export function convertCase(text: string, caseType: CaseType): string {
+export function convertCase(
+  text: string,
+  caseType: CaseType,
+  preserveLines = false,
+): string {
   if (!text) return "";
+
+  // If preserveLines is true, apply conversion to each line separately
+  if (preserveLines) {
+    return text
+      .split("\n")
+      .map((line) => convertCase(line, caseType, false))
+      .join("\n");
+  }
 
   switch (caseType) {
     case "upper":
