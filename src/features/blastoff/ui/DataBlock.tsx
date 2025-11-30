@@ -158,17 +158,17 @@ export function DataBlock({
           </div>
         </div>
 
-        {/* Subheader for transform options */}
-        {children && (
-          <div className="px-4 py-2 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950">
-            {children}
-          </div>
-        )}
-
         {/* Stats/Validation row */}
         {stats && (
           <div className="px-4 py-2 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950">
             {stats}
+          </div>
+        )}
+
+        {/* Subheader for transform options */}
+        {children && (
+          <div className="px-4 py-2 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950">
+            {children}
           </div>
         )}
       </div>

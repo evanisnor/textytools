@@ -345,23 +345,12 @@ Tokens (GPT-4): ${tokens}`;
         return "Error: Invalid JSON";
       }
     },
-  },
-
-  "json-validate": {
-    type: "json-validate",
-    name: "Validate JSON",
-    description: "Check JSON syntax and display errors",
-    category: "data",
-    acceptsInput: ["text", "json"],
-    producesOutput: "text",
-    defaultProperties: {},
-    propertySchema: [],
-    execute: (input) => {
+    getStats: (_output, input) => {
       try {
         JSON.parse(input);
-        return "✓ Valid JSON";
-      } catch (error) {
-        return `✗ Invalid JSON:\n${error instanceof Error ? error.message : String(error)}`;
+        return { Status: "✓ Valid" };
+      } catch {
+        return { Status: "✗ Invalid" };
       }
     },
   },

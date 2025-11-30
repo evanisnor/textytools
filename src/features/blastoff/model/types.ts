@@ -13,7 +13,6 @@ export type TransformType =
   | "csv-to-json"
   | "json-to-csv"
   | "json-format"
-  | "json-validate"
   // Analysis
   | "regex-extract"
   | "jwt-decode"
