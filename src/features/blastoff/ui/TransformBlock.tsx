@@ -81,7 +81,28 @@ export function TransformBlock({
       }, 500);
     } else {
       // Update immediately for non-text inputs
-      const newProperties = { ...step.properties, [key]: value };
+      let newProperties = { ...step.properties, [key]: value };
+
+      // For text-sanitize transform, track operation order
+      if (step.transformType === "text-sanitize" && key !== "operationOrder") {
+        const operationOrder =
+          (step.properties.operationOrder as string[]) || [];
+
+        if (value === true && !operationOrder.includes(key)) {
+          // Add to end of order when enabled
+          newProperties = {
+            ...newProperties,
+            operationOrder: [...operationOrder, key],
+          };
+        } else if (value === false && operationOrder.includes(key)) {
+          // Remove from order when disabled
+          newProperties = {
+            ...newProperties,
+            operationOrder: operationOrder.filter((op) => op !== key),
+          };
+        }
+      }
+
       updateTransformStep?.(step.id, newProperties);
     }
   };

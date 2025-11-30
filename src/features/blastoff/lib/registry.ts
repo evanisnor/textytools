@@ -40,6 +40,10 @@ export const TRANSFORM_REGISTRY: Record<TransformType, TransformDefinition> = {
       normalizeWhitespace: false,
       sortLines: false,
       reverseLines: false,
+      operationOrder: [
+        "trimLines",
+        "removeEmptyLines",
+      ] as SanitizationOptionId[],
     },
     propertySchema: [
       {
@@ -104,21 +108,11 @@ export const TRANSFORM_REGISTRY: Record<TransformType, TransformDefinition> = {
       },
     ],
     execute: (input, props) => {
-      const enabledFilters: SanitizationOptionId[] = [];
+      const operationOrder =
+        (props.operationOrder as SanitizationOptionId[]) || [];
 
-      if (props.trimLines) enabledFilters.push("trimLines");
-      if (props.removeEmptyLines) enabledFilters.push("removeEmptyLines");
-      if (props.removeDuplicateLines)
-        enabledFilters.push("removeDuplicateLines");
-      if (props.removeExtraSpaces) enabledFilters.push("removeExtraSpaces");
-      if (props.removeNonAscii) enabledFilters.push("removeNonAscii");
-      if (props.removeEmoji) enabledFilters.push("removeEmoji");
-      if (props.removeNumbers) enabledFilters.push("removeNumbers");
-      if (props.removePunctuation) enabledFilters.push("removePunctuation");
-      if (props.removeSpecialChars) enabledFilters.push("removeSpecialChars");
-      if (props.normalizeWhitespace) enabledFilters.push("normalizeWhitespace");
-      if (props.sortLines) enabledFilters.push("sortLines");
-      if (props.reverseLines) enabledFilters.push("reverseLines");
+      // Filter to only enabled operations, preserving order
+      const enabledFilters = operationOrder.filter((id) => props[id] === true);
 
       const options = enabledFilters.map((id) => ({
         id,
@@ -127,6 +121,40 @@ export const TRANSFORM_REGISTRY: Record<TransformType, TransformDefinition> = {
         enabled: true,
       }));
       return sanitizeText(input, options);
+    },
+    getStats: (_output, _input, props) => {
+      const labelMap: Record<SanitizationOptionId, string> = {
+        trimLines: "Trim Lines",
+        removeEmptyLines: "Remove Empty Lines",
+        removeDuplicateLines: "Remove Duplicates",
+        removeExtraSpaces: "Remove Extra Spaces",
+        removeNonAscii: "Remove Non-ASCII",
+        removeEmoji: "Remove Emoji",
+        removeNumbers: "Remove Numbers",
+        removePunctuation: "Remove Punctuation",
+        removeSpecialChars: "Remove Special Chars",
+        normalizeWhitespace: "Normalize Whitespace",
+        sortLines: "Sort Lines",
+        reverseLines: "Reverse Lines",
+      };
+
+      const operationOrder =
+        (props.operationOrder as SanitizationOptionId[]) || [];
+
+      // Filter to only enabled operations, preserving order
+      const enabledOperations = operationOrder.filter(
+        (id) => props[id] === true,
+      );
+
+      if (enabledOperations.length === 0) {
+        return { Operations: "(none selected)" };
+      }
+
+      const breadcrumb = enabledOperations
+        .map((id) => labelMap[id])
+        .join(" → ");
+
+      return { Operations: breadcrumb };
     },
   },
 
