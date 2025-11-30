@@ -27,6 +27,7 @@ export const TRANSFORM_REGISTRY: Record<TransformType, TransformDefinition> = {
     category: "text",
     acceptsInput: ["text"],
     producesOutput: "text",
+    hideSyntaxSelector: true,
     defaultProperties: {
       trimLines: true,
       removeEmptyLines: true,
@@ -165,6 +166,7 @@ export const TRANSFORM_REGISTRY: Record<TransformType, TransformDefinition> = {
     category: "text",
     acceptsInput: ["text"],
     producesOutput: "text",
+    hideSyntaxSelector: true,
     defaultProperties: {
       format: "kebab",
     },

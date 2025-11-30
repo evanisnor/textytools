@@ -226,42 +226,40 @@ export function TransformPalette() {
   const buttonClasses =
     "px-4 py-2 text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 active:bg-zinc-300 dark:active:bg-zinc-600 transition-colors cursor-pointer";
 
-  // Compact collection of center-aligned buttons in a flex row
   return (
-    <div className="flex flex-row flex-wrap justify-center gap-2 py-4">
-      {Object.entries(categories).map(([, items]) => {
-        if (items.length === 0) return null;
+    <>
+      {/* Transform Palette */}
+      <div className="flex flex-row flex-wrap justify-center gap-2 py-4">
+        {Object.entries(categories).map(([, items]) => {
+          if (items.length === 0) return null;
 
-        return items.map((transform) => (
-          <button
-            key={transform.type}
-            onClick={() => handleQuickApply(transform.type)}
-            className={buttonClasses}
-            title={transform.description}
-          >
-            {transform.name}
-          </button>
-        ));
-      })}
+          return items.map((transform) => (
+            <button
+              key={transform.type}
+              onClick={() => handleQuickApply(transform.type)}
+              className={buttonClasses}
+              title={transform.description}
+            >
+              {transform.name}
+            </button>
+          ));
+        })}
+      </div>
 
+      {/* Exports Section */}
       {hasTransforms && (
-        <>
-          <button
-            onClick={() => handleExport("smart-download")}
-            className={buttonClasses}
-            title="Download as .txt, .json, or .csv based on content"
-          >
-            Download
-          </button>
-          <button
-            onClick={() => handleExport("copy-clipboard")}
-            className={buttonClasses}
-            title="Copy final output to clipboard"
-          >
-            Copy
-          </button>
-        </>
+        <div className="pt-4 mt-2">
+          <div className="flex flex-row flex-wrap justify-center gap-2">
+            <button
+              onClick={() => handleExport("smart-download")}
+              className={buttonClasses}
+              title="Download as .txt, .json, or .csv based on content"
+            >
+              Download
+            </button>
+          </div>
+        </div>
       )}
-    </div>
+    </>
   );
 }

@@ -73,6 +73,7 @@ export interface TransformDefinition {
     input: string,
     properties: Record<string, unknown>,
   ) => Record<string, string | number | boolean> | null;
+  hideSyntaxSelector?: boolean; // If true, hide syntax highlighting selector
 }
 
 export interface ExportDefinition {

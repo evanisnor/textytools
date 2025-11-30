@@ -288,12 +288,12 @@ export function TransformBlock({
 
       <DataBlock
         title={`Step ${stepNumber}: ${transform.name}`}
-        subtitle={transform.category}
         value={step.output}
         readOnly
         onRemove={() => handleRemoveTransform(step.id)}
         defaultSyntax={defaultSyntax}
         lockSyntax={lockSyntax}
+        hideSyntaxSelector={transform.hideSyntaxSelector}
         stats={renderStats()}
       >
         {renderOptions()}

@@ -11,6 +11,8 @@ import { getSyntaxHighlighter } from "../lib/syntax-highlight";
 
 import { TextEditor } from "@/entities/editor";
 
+import { useToast } from "@/shared/ui/toast/Toast";
+
 interface DataBlockProps {
   title: string;
   subtitle?: string;
@@ -23,6 +25,7 @@ interface DataBlockProps {
   stats?: React.ReactNode; // For read-only stats/validation info
   defaultSyntax?: "none" | "csv" | "json" | "jwt"; // Default syntax highlighting
   lockSyntax?: boolean; // If true, disable syntax selector
+  hideSyntaxSelector?: boolean; // If true, hide syntax selector completely
 }
 
 export function DataBlock({
@@ -37,6 +40,7 @@ export function DataBlock({
   stats,
   defaultSyntax = "none",
   lockSyntax = false,
+  hideSyntaxSelector = false,
 }: DataBlockProps) {
   const [wordWrap, setWordWrap] = useState(true);
   const [syntaxHighlight, setSyntaxHighlight] = useState<
@@ -46,6 +50,9 @@ export function DataBlock({
   // Local state for text input to prevent cursor jumping
   const [localValue, setLocalValue] = useState(value);
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+
+  // Toast for copy feedback
+  const { showToast, ToastComponent } = useToast();
 
   // Update local value when external value changes
   useEffect(() => {
@@ -76,8 +83,19 @@ export function DataBlock({
     }, 500);
   };
 
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(value);
+      showToast("Copied to clipboard");
+    } catch (error) {
+      console.error("Failed to copy:", error);
+      showToast("Failed to copy");
+    }
+  };
+
   return (
     <div className="relative">
+      {ToastComponent}
       {/* Header Card */}
       <div className="bg-white dark:bg-zinc-900 rounded-t-lg border border-zinc-200 dark:border-zinc-800 border-b-0">
         <div className="flex items-center justify-between px-4 py-3">
@@ -91,7 +109,7 @@ export function DataBlock({
           </div>
           <div className="flex items-center gap-4">
             {/* Syntax Highlighting */}
-            {!lockSyntax && (
+            {!hideSyntaxSelector && !lockSyntax && (
               <select
                 value={syntaxHighlight}
                 onChange={(e) =>
@@ -118,6 +136,15 @@ export function DataBlock({
               } cursor-pointer`}
             >
               <span className="font-semibold tracking-wide">Wrap</span>
+            </button>
+
+            {/* Copy Button */}
+            <button
+              type="button"
+              onClick={handleCopy}
+              className="inline-flex items-center justify-center rounded border px-2 py-0.5 text-xs font-medium transition-colors bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 border-transparent hover:bg-zinc-200 dark:hover:bg-zinc-700 cursor-pointer"
+            >
+              <span className="font-semibold tracking-wide">Copy</span>
             </button>
 
             {/* Clear Button */}
