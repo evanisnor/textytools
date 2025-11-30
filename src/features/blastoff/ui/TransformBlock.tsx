@@ -86,12 +86,14 @@ export function TransformBlock({ step, stepNumber }: TransformBlockProps) {
     if (transform.propertySchema.length === 0) return null;
 
     return (
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         {transform.propertySchema.map((schema) => (
           <div key={schema.key} className="flex items-center gap-1.5">
-            <label className="text-xs text-zinc-600 dark:text-zinc-400">
-              {schema.label}:
-            </label>
+            {schema.type !== "toggle" && schema.type !== "toggle-group" && (
+              <label className="text-xs text-zinc-600 dark:text-zinc-400">
+                {schema.label}:
+              </label>
+            )}
 
             {schema.type === "text" && (
               <input
@@ -144,6 +146,56 @@ export function TransformBlock({ step, stepNumber }: TransformBlockProps) {
                   Enable
                 </span>
               </label>
+            )}
+
+            {schema.type === "toggle" && (
+              <button
+                type="button"
+                onClick={() =>
+                  handlePropertyChange(
+                    schema.key,
+                    !(localProperties[schema.key] as boolean),
+                  )
+                }
+                aria-pressed={(localProperties[schema.key] as boolean) || false}
+                className={`inline-flex items-center justify-center rounded border px-2 py-0.5 text-xs font-medium transition-colors ${
+                  (localProperties[schema.key] as boolean)
+                    ? "bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900 border-zinc-900 dark:border-zinc-50"
+                    : "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 border-transparent hover:bg-zinc-200 dark:hover:bg-zinc-700"
+                } cursor-pointer`}
+              >
+                <span className="font-semibold tracking-wide">
+                  {schema.label}
+                </span>
+              </button>
+            )}
+
+            {schema.type === "toggle-group" && (
+              <div className="flex items-center gap-0 rounded border border-zinc-200 dark:border-zinc-700 overflow-hidden">
+                {(schema.options as { value: string; label: string }[])?.map(
+                  (opt, index) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() =>
+                        handlePropertyChange(schema.key, opt.value)
+                      }
+                      aria-pressed={
+                        (localProperties[schema.key] as string) === opt.value
+                      }
+                      className={`inline-flex items-center justify-center px-2 py-0.5 text-xs font-medium transition-colors ${
+                        (localProperties[schema.key] as string) === opt.value
+                          ? "bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900"
+                          : "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                      } ${index > 0 ? "border-l border-zinc-200 dark:border-zinc-700" : ""} cursor-pointer`}
+                    >
+                      <span className="font-semibold tracking-wide">
+                        {opt.label}
+                      </span>
+                    </button>
+                  ),
+                )}
+              </div>
             )}
 
             {schema.type === "multi-select" && (

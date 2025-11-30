@@ -15,6 +15,7 @@ import {
   encodeText,
   decodeText,
   type SanitizationOptionId,
+  type EncodingType,
 } from "@/entities/transform";
 
 export const TRANSFORM_REGISTRY: Record<TransformType, TransformDefinition> = {
@@ -26,26 +27,99 @@ export const TRANSFORM_REGISTRY: Record<TransformType, TransformDefinition> = {
     acceptsInput: ["text"],
     producesOutput: "text",
     defaultProperties: {
-      filters: ["trimLines", "removeEmpty"],
+      trimLines: true,
+      removeEmptyLines: true,
+      removeDuplicateLines: false,
+      removeExtraSpaces: false,
+      removeNonAscii: false,
+      removeEmoji: false,
+      removeNumbers: false,
+      removePunctuation: false,
+      removeSpecialChars: false,
+      normalizeWhitespace: false,
+      sortLines: false,
+      reverseLines: false,
     },
     propertySchema: [
       {
-        key: "filters",
-        type: "multi-select",
-        label: "Filters",
-        options: [
-          "trimLines",
-          "removeEmpty",
-          "removeDuplicates",
-          "normalizeWhitespace",
-          "lowercase",
-          "uppercase",
-        ],
+        key: "trimLines",
+        type: "toggle",
+        label: "Trim Lines",
+      },
+      {
+        key: "removeEmptyLines",
+        type: "toggle",
+        label: "Remove Empty Lines",
+      },
+      {
+        key: "removeDuplicateLines",
+        type: "toggle",
+        label: "Remove Duplicates",
+      },
+      {
+        key: "removeExtraSpaces",
+        type: "toggle",
+        label: "Remove Extra Spaces",
+      },
+      {
+        key: "removeNonAscii",
+        type: "toggle",
+        label: "Remove Non-ASCII",
+      },
+      {
+        key: "removeEmoji",
+        type: "toggle",
+        label: "Remove Emoji",
+      },
+      {
+        key: "removeNumbers",
+        type: "toggle",
+        label: "Remove Numbers",
+      },
+      {
+        key: "removePunctuation",
+        type: "toggle",
+        label: "Remove Punctuation",
+      },
+      {
+        key: "removeSpecialChars",
+        type: "toggle",
+        label: "Remove Special Chars",
+      },
+      {
+        key: "normalizeWhitespace",
+        type: "toggle",
+        label: "Normalize Whitespace",
+      },
+      {
+        key: "sortLines",
+        type: "toggle",
+        label: "Sort Lines",
+      },
+      {
+        key: "reverseLines",
+        type: "toggle",
+        label: "Reverse Lines",
       },
     ],
     execute: (input, props) => {
-      const filters = props.filters as SanitizationOptionId[];
-      const options = filters.map((id) => ({
+      const enabledFilters: SanitizationOptionId[] = [];
+
+      if (props.trimLines) enabledFilters.push("trimLines");
+      if (props.removeEmptyLines) enabledFilters.push("removeEmptyLines");
+      if (props.removeDuplicateLines)
+        enabledFilters.push("removeDuplicateLines");
+      if (props.removeExtraSpaces) enabledFilters.push("removeExtraSpaces");
+      if (props.removeNonAscii) enabledFilters.push("removeNonAscii");
+      if (props.removeEmoji) enabledFilters.push("removeEmoji");
+      if (props.removeNumbers) enabledFilters.push("removeNumbers");
+      if (props.removePunctuation) enabledFilters.push("removePunctuation");
+      if (props.removeSpecialChars) enabledFilters.push("removeSpecialChars");
+      if (props.normalizeWhitespace) enabledFilters.push("normalizeWhitespace");
+      if (props.sortLines) enabledFilters.push("sortLines");
+      if (props.reverseLines) enabledFilters.push("reverseLines");
+
+      const options = enabledFilters.map((id) => ({
         id,
         label: id,
         description: "",
@@ -130,6 +204,11 @@ Tokens (GPT-4): ${tokens}`;
     },
     propertySchema: [
       {
+        key: "hasHeader",
+        type: "toggle",
+        label: "With Header Row",
+      },
+      {
         key: "delimiter",
         type: "select",
         label: "Delimiter",
@@ -139,11 +218,6 @@ Tokens (GPT-4): ${tokens}`;
           { value: "\t", label: "Tab" },
           { value: "|", label: "Pipe" },
         ],
-      },
-      {
-        key: "hasHeader",
-        type: "boolean",
-        label: "Has header row",
       },
     ],
     execute: (input, props) => {
@@ -204,27 +278,41 @@ Tokens (GPT-4): ${tokens}`;
     acceptsInput: ["json", "text"],
     producesOutput: "json",
     defaultProperties: {
+      mode: "pretty",
       indent: 2,
       sortKeys: false,
     },
     propertySchema: [
       {
-        key: "indent",
-        type: "select",
-        label: "Indentation",
-        options: ["2", "4", "0"],
+        key: "mode",
+        type: "toggle-group",
+        label: "Format",
+        options: [
+          { value: "pretty", label: "Pretty" },
+          { value: "minify", label: "Minify" },
+        ],
       },
       {
         key: "sortKeys",
-        type: "boolean",
-        label: "Sort keys alphabetically",
+        type: "toggle",
+        label: "Sort Keys",
+      },
+      {
+        key: "indent",
+        type: "select",
+        label: "Indentation",
+        options: ["2", "4", "8"],
       },
     ],
     execute: (input, props) => {
       try {
         const data = JSON.parse(input);
+        const mode = props.mode as string;
         const indent = Number(props.indent);
         const sortKeys = props.sortKeys as boolean;
+
+        // Determine actual indent based on mode
+        const actualIndent = mode === "minify" ? 0 : indent;
 
         if (sortKeys) {
           const sortObject = (obj: unknown): unknown => {
@@ -244,10 +332,14 @@ Tokens (GPT-4): ${tokens}`;
             }
             return obj;
           };
-          return JSON.stringify(sortObject(data), null, indent || undefined);
+          return JSON.stringify(
+            sortObject(data),
+            null,
+            actualIndent || undefined,
+          );
         }
 
-        return JSON.stringify(data, null, indent || undefined);
+        return JSON.stringify(data, null, actualIndent || undefined);
       } catch {
         return "Error: Invalid JSON";
       }
@@ -421,70 +513,86 @@ Tokens (GPT-4): ${tokens}`;
     },
   },
 
-  "base64-encode": {
-    type: "base64-encode",
-    name: "Base64 Encode",
-    description: "Encode text to Base64",
+  "text-encode": {
+    type: "text-encode",
+    name: "Encode",
+    description: "Encode text using various formats",
     category: "encoding",
     acceptsInput: ["text"],
     producesOutput: "text",
-    defaultProperties: {},
-    propertySchema: [],
-    execute: (input) => {
+    defaultProperties: {
+      encoding: "base64",
+    },
+    propertySchema: [
+      {
+        key: "encoding",
+        type: "select",
+        label: "Encoding",
+        options: [
+          { value: "base64", label: "Base64" },
+          { value: "base58", label: "Base58 (Bitcoin)" },
+          { value: "base91", label: "Base91" },
+          { value: "ascii85", label: "ASCII85 (Adobe)" },
+          { value: "z85", label: "Z85 (ZeroMQ)" },
+          { value: "url", label: "URL Encoding" },
+          { value: "html", label: "HTML Entities" },
+          { value: "hex", label: "Hexadecimal" },
+          { value: "binary", label: "Binary" },
+          { value: "unicode", label: "Unicode Escape" },
+          { value: "rot13", label: "ROT13" },
+          { value: "morse", label: "Morse Code" },
+          { value: "quotedPrintable", label: "Quoted-Printable (MIME)" },
+        ],
+      },
+    ],
+    execute: (input, props) => {
       try {
-        return encodeText(input, "base64");
+        const encoding = props.encoding as EncodingType;
+        return encodeText(input, encoding);
       } catch (error) {
         return `Error: ${error instanceof Error ? error.message : "Cannot encode text"}`;
       }
     },
   },
 
-  "base64-decode": {
-    type: "base64-decode",
-    name: "Base64 Decode",
-    description: "Decode Base64 to text",
+  "text-decode": {
+    type: "text-decode",
+    name: "Decode",
+    description: "Decode text from various formats",
     category: "encoding",
     acceptsInput: ["text"],
     producesOutput: "text",
-    defaultProperties: {},
-    propertySchema: [],
-    execute: (input) => {
-      try {
-        return decodeText(input.trim(), "base64");
-      } catch (error) {
-        return `Error: ${error instanceof Error ? error.message : "Invalid Base64 string"}`;
-      }
+    defaultProperties: {
+      encoding: "base64",
     },
-  },
-
-  "url-encode": {
-    type: "url-encode",
-    name: "URL Encode",
-    description: "Encode text for URL usage",
-    category: "encoding",
-    acceptsInput: ["text"],
-    producesOutput: "text",
-    defaultProperties: {},
-    propertySchema: [],
-    execute: (input) => {
-      return encodeText(input, "url");
-    },
-  },
-
-  "url-decode": {
-    type: "url-decode",
-    name: "URL Decode",
-    description: "Decode URL-encoded text",
-    category: "encoding",
-    acceptsInput: ["text"],
-    producesOutput: "text",
-    defaultProperties: {},
-    propertySchema: [],
-    execute: (input) => {
+    propertySchema: [
+      {
+        key: "encoding",
+        type: "select",
+        label: "Encoding",
+        options: [
+          { value: "base64", label: "Base64" },
+          { value: "base58", label: "Base58 (Bitcoin)" },
+          { value: "base91", label: "Base91" },
+          { value: "ascii85", label: "ASCII85 (Adobe)" },
+          { value: "z85", label: "Z85 (ZeroMQ)" },
+          { value: "url", label: "URL Encoding" },
+          { value: "html", label: "HTML Entities" },
+          { value: "hex", label: "Hexadecimal" },
+          { value: "binary", label: "Binary" },
+          { value: "unicode", label: "Unicode Escape" },
+          { value: "rot13", label: "ROT13" },
+          { value: "morse", label: "Morse Code" },
+          { value: "quotedPrintable", label: "Quoted-Printable (MIME)" },
+        ],
+      },
+    ],
+    execute: (input, props) => {
       try {
-        return decodeText(input, "url");
+        const encoding = props.encoding as EncodingType;
+        return decodeText(input.trim(), encoding);
       } catch (error) {
-        return `Error: ${error instanceof Error ? error.message : "Invalid URL-encoded string"}`;
+        return `Error: ${error instanceof Error ? error.message : "Cannot decode text"}`;
       }
     },
   },

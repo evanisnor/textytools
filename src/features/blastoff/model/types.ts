@@ -18,10 +18,8 @@ export type TransformType =
   | "regex-extract"
   | "jwt-decode"
   // Encoding
-  | "base64-encode"
-  | "base64-decode"
-  | "url-encode"
-  | "url-decode";
+  | "text-encode"
+  | "text-decode";
 
 export interface TransformStep {
   id: string;
@@ -45,7 +43,13 @@ export interface Document {
 
 export type ExportType = "smart-download" | "copy-clipboard";
 
-export type PropertyType = "text" | "select" | "boolean" | "multi-select";
+export type PropertyType =
+  | "text"
+  | "select"
+  | "boolean"
+  | "toggle"
+  | "toggle-group"
+  | "multi-select";
 
 export interface PropertySchema {
   key: string;
