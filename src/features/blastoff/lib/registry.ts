@@ -6,6 +6,7 @@
 import { TransformDefinition, TransformType } from "../model/types";
 
 import { countTokens } from "@/entities/counter";
+import { isExpired, isNotYetValid, formatDate } from "@/entities/jwt";
 import {
   sanitizeText,
   convertCase,
@@ -492,8 +493,8 @@ Tokens (GPT-4): ${tokens}`;
 
   "jwt-decode": {
     type: "jwt-decode",
-    name: "JWT Decode",
-    description: "Decode JSON Web Token",
+    name: "JWT Verify",
+    description: "Decode and verify JSON Web Token",
     category: "analysis",
     acceptsInput: ["text"],
     producesOutput: "json",
@@ -509,6 +510,48 @@ Tokens (GPT-4): ${tokens}`;
         );
       } catch (error) {
         return `Error: ${error instanceof Error ? error.message : "Invalid JWT token"}`;
+      }
+    },
+    getStats: (_output, input) => {
+      try {
+        const decoded = decodeJWT(input);
+        const stats: Record<string, string | number | boolean> = {};
+
+        if (decoded.algorithm) {
+          stats.Algorithm = decoded.algorithm;
+        }
+
+        if (decoded.issuedAt) {
+          stats["Issued At"] = formatDate(decoded.issuedAt);
+        }
+
+        if (decoded.expiresAt) {
+          stats["Expires At"] = formatDate(decoded.expiresAt);
+          const expired = isExpired(decoded.expiresAt);
+          if (expired) {
+            stats.Status = "⚠️ Expired";
+          }
+        }
+
+        if (decoded.notBefore) {
+          stats["Not Before"] = formatDate(decoded.notBefore);
+          const notYetValid = isNotYetValid(decoded.notBefore);
+          if (notYetValid) {
+            stats.Status = "⚠️ Not Yet Valid";
+          }
+        }
+
+        if (
+          !stats.Status &&
+          decoded.expiresAt &&
+          !isExpired(decoded.expiresAt)
+        ) {
+          stats.Status = "✓ Valid";
+        }
+
+        return Object.keys(stats).length > 0 ? stats : null;
+      } catch {
+        return null;
       }
     },
   },

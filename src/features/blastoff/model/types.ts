@@ -69,6 +69,11 @@ export interface TransformDefinition {
   defaultProperties: Record<string, unknown>;
   propertySchema: PropertySchema[];
   execute: (input: string, properties: Record<string, unknown>) => string;
+  getStats?: (
+    output: string,
+    input: string,
+    properties: Record<string, unknown>,
+  ) => Record<string, string | number | boolean> | null;
 }
 
 export interface ExportDefinition {

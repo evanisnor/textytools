@@ -16,9 +16,14 @@ import { DataBlock } from "./DataBlock";
 interface TransformBlockProps {
   step: TransformStep;
   stepNumber: number;
+  stepInput: string;
 }
 
-export function TransformBlock({ step, stepNumber }: TransformBlockProps) {
+export function TransformBlock({
+  step,
+  stepNumber,
+  stepInput,
+}: TransformBlockProps) {
   const { handleRemoveTransform, updateTransformStep } = useBlastoffContext();
 
   const transform = TRANSFORM_REGISTRY[step.transformType];
@@ -79,6 +84,29 @@ export function TransformBlock({ step, stepNumber }: TransformBlockProps) {
       const newProperties = { ...step.properties, [key]: value };
       updateTransformStep?.(step.id, newProperties);
     }
+  };
+
+  // Render transform stats/validation info
+  const renderStats = () => {
+    if (!transform.getStats) return null;
+
+    const stats = transform.getStats(step.output, stepInput, step.properties);
+    if (!stats) return null;
+
+    return (
+      <div className="flex flex-wrap items-center gap-3">
+        {Object.entries(stats).map(([key, value]) => (
+          <div key={key} className="flex items-center gap-1.5">
+            <span className="text-xs text-zinc-600 dark:text-zinc-400">
+              {key}:
+            </span>
+            <span className="text-xs font-medium text-zinc-900 dark:text-zinc-100">
+              {String(value)}
+            </span>
+          </div>
+        ))}
+      </div>
+    );
   };
 
   // Render transform-specific options
@@ -245,6 +273,7 @@ export function TransformBlock({ step, stepNumber }: TransformBlockProps) {
         onRemove={() => handleRemoveTransform(step.id)}
         defaultSyntax={defaultSyntax}
         lockSyntax={lockSyntax}
+        stats={renderStats()}
       >
         {renderOptions()}
       </DataBlock>

@@ -19,6 +19,7 @@ interface DataBlockProps {
   onChange?: (value: string) => void;
   onRemove?: () => void;
   children?: React.ReactNode; // For subheader content (e.g., transform options)
+  stats?: React.ReactNode; // For read-only stats/validation info
   defaultSyntax?: "none" | "csv" | "json" | "jwt"; // Default syntax highlighting
   lockSyntax?: boolean; // If true, disable syntax selector
 }
@@ -31,6 +32,7 @@ export function DataBlock({
   onChange,
   onRemove,
   children,
+  stats,
   defaultSyntax = "none",
   lockSyntax = false,
 }: DataBlockProps) {
@@ -127,6 +129,13 @@ export function DataBlock({
         {children && (
           <div className="px-4 py-2 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950">
             {children}
+          </div>
+        )}
+
+        {/* Stats/Validation row */}
+        {stats && (
+          <div className="px-4 py-2 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950">
+            {stats}
           </div>
         )}
       </div>

@@ -31,9 +31,22 @@ export function TransformPipeline() {
       />
 
       {/* Transform Steps */}
-      {currentDocument.transforms.map((step, index) => (
-        <TransformBlock key={step.id} step={step} stepNumber={index + 1} />
-      ))}
+      {currentDocument.transforms.map((step, index) => {
+        // Get input for this step (either document input or previous step's output)
+        const stepInput =
+          index === 0
+            ? currentDocument.inputData
+            : currentDocument.transforms[index - 1].output;
+
+        return (
+          <TransformBlock
+            key={step.id}
+            step={step}
+            stepNumber={index + 1}
+            stepInput={stepInput}
+          />
+        );
+      })}
 
       {/* Transform Palette at Bottom */}
       <TransformPalette />
