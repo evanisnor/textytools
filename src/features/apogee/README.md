@@ -127,7 +127,7 @@ Apogee strictly separates **what**, **how**, and **where**:
 
 Traditional transformation tools force each transform to handle parsing internally. If you want to hash a JSON field from a log file, you'd need a "Extract JSON from Logs" transform, then a "Get Field" transform, then a "Hash" transform.
 
-Apogee inverts this: **every step includes a lens** that defines how to parse input before transforming it. The lens is not optional—it's always there, defaulting to "all" (pass-through).
+Apogee inverts this: **every step includes a lens** that defines how to parse input before transforming it. The lens functionality is always available in the data model, defaulting to "all" (pass-through). The UI panel for configuring the lens appears only when users need to extract or parse structured data—primarily for Convert transforms.
 
 **User workflow:**
 1. Paste log file into input
@@ -140,6 +140,8 @@ Apogee inverts this: **every step includes a lens** that defines how to parse in
 - **Composability**: Transforms become pure converters. They don't need custom extraction logic for every input format.
 - **Reusability**: The same "JSON Convert" transform works on raw JSON, CSV-containing-JSON, logs-containing-JSON, or XML-containing-JSON. The lens handles extraction.
 - **Discoverability**: Users see all transforms as available options. No more "I need to convert CSV to JSON" → search → "Wait, there's no CSV-to-JSON transform?" → give up. Just add "JSON Convert" and configure the lens to parse CSV.
+
+**Lens Visibility**: The lens is primarily useful for Convert transforms where users need to extract structured data from unstructured input. For other transform categories (Encode, Hash, Manipulate), the lens defaults to "all" mode and the UI panel remains collapsed or hidden.
 
 ### 1.5 Unified Metadata: Stats as First-Class Citizens
 
@@ -1102,76 +1104,7 @@ execute: (input: string, properties: Record<string, unknown>) => TransformResult
 }
 ```
 
-### 4.4 Line-by-Line Processing Mode
-
-Encode, Decode, Hash, and Manipulate transforms support **line-by-line processing** mode, which applies the transform to each line independently and joins the results.
-
-**When enabled** (`supportsLineByLine: true`), the transform automatically adds a `lineByLine` toggle to its property schema:
-
-```typescript
-{
-  type: "base64-encode",
-  supportsLineByLine: true,
-  propertySchema: [
-    // ... other properties
-  ],
-
-  execute: (input: string, properties: Record<string, unknown>) => {
-    const { lineByLine = false } = properties;
-
-    if (lineByLine) {
-      const lines = input.split('\n');
-      const processed = lines.map(line => {
-        // Apply transform to each line
-        return btoa(line); // Example: Base64 encode
-      });
-
-      return {
-        success: true,
-        data: processed.join('\n'),
-        mimeType: "text/plain",
-        stats: [
-          { label: "Lines Processed", value: lines.length },
-          { label: "Mode", value: "Line-by-Line" }
-        ]
-      };
-    }
-
-    // Default: process entire input as one block
-    return {
-      success: true,
-      data: btoa(input),
-      mimeType: "text/plain",
-      stats: [{ label: "Mode", value: "Entire Input" }]
-    };
-  }
-}
-```
-
-**Use Cases:**
-- **Hash each password in a list**: Input list of passwords → SHA-256 (line-by-line) → list of hashes
-- **Encode CSV column values**: Use lens to extract column → Base64 (line-by-line) → encoded values
-- **Case conversion on list items**: Input list → Change Case (line-by-line) → transformed list
-- **URL encode query parameters**: Input list of params → URL Encode (line-by-line) → encoded params
-
-**Behavior:**
-- Empty lines are preserved as empty lines in output
-- The toggle appears in the transform's inline options panel
-- Stats show "Lines Processed" count when enabled
-- Default is `false` (process entire input)
-
-**Supported Categories:**
-- **Encode**: All encoding transforms (Base64, Hex, URL, etc.)
-- **Decode**: All decoding transforms
-- **Hash**: All hash algorithms (MD5, SHA-256, etc.)
-- **Manipulate**: Text transforms (Sanitize, Change Case, Regex Replace)
-
-**Not Supported:**
-- **Convert**: Requires structured parsing of entire input
-- **Compress/Decompress**: Compression algorithms need full context
-- **Analyze**: Visualization needs complete dataset
-
-### 4.5 Output Type Tracking and Transform Filtering
+### 4.4 Output Type Tracking and Transform Filtering
 
 The engine tracks output types to filter compatible transforms.
 
@@ -1216,7 +1149,7 @@ static getAvailableExports(currentOutputType: string): ExportDefinition[] {
 }
 ```
 
-### 4.6 Error Handling and Graceful Degradation
+### 4.5 Error Handling and Graceful Degradation
 
 The engine implements resilient error handling:
 
@@ -1246,7 +1179,7 @@ step.output = "[Transform \"custom-parser\" no longer available]";
 // Pipeline continues, preserves document integrity
 ```
 
-### 4.7 Execution Flow Diagram
+### 4.6 Execution Flow Diagram
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -1304,7 +1237,7 @@ Document Input: "Log: {\"user\":\"alice\"}\nMore logs..."
 Final Output: "ewogICJ1c2VyIjogImFsaWNlIgp9"
 ```
 
-### 4.8 Performance Optimizations
+### 4.7 Performance Optimizations
 
 **Incremental Execution:**
 - User changes Step 3 options
@@ -1346,7 +1279,9 @@ The Apogee registry organizes transforms by purpose, with each transform exposin
 **Entity Locations:** `entities/json/`, `entities/csv/`, `entities/xml/`, `entities/yaml/`, `entities/toml/` (format entities)
 **Transform Locations:** `entities/transform/json-convert/`, `entities/transform/csv-convert/`, etc.
 
-#### JSON
+**Lens Support:** Convert transforms are the primary use case for the Input Lens. Users can extract structured data from unstructured input (e.g., regex to extract JSON from logs) before conversion.
+
+#### JSON **[Exists - Requires Augmentation]**
 **Entity:** `entities/json/` | **Transform:** `entities/transform/json-convert/`
 - **Options:**
   - Indentation: `2 | 4 | Tab`
@@ -1358,7 +1293,7 @@ The Apogee registry organizes transforms by purpose, with each transform exposin
   - Depth: `Number`
 - **MIME Type:** `application/json`
 
-#### CSV
+#### CSV **[Exists - Requires Augmentation]**
 **Entity:** `entities/csv/` | **Transform:** `entities/transform/csv-convert/`
 - **Options:**
   - Delimiter: `Comma | Tab | Semicolon | Pipe`
@@ -1369,7 +1304,7 @@ The Apogee registry organizes transforms by purpose, with each transform exposin
   - Column Count: `Number`
 - **MIME Type:** `text/csv`
 
-#### YAML
+#### YAML **[Planned]**
 **Entity:** `entities/yaml/` | **Transform:** `entities/transform/yaml-convert/`
 - **Options:**
   - Indentation: `2 | 4`
@@ -1379,7 +1314,7 @@ The Apogee registry organizes transforms by purpose, with each transform exposin
   - Valid YAML: `Boolean`
 - **MIME Type:** `application/x-yaml`
 
-#### TOML
+#### TOML **[Planned]**
 **Entity:** `entities/toml/` | **Transform:** `entities/transform/toml-convert/`
 - **Options:**
   - Formatting: `Compact | Expanded`
@@ -1388,7 +1323,7 @@ The Apogee registry organizes transforms by purpose, with each transform exposin
   - Table Count: `Number`
 - **MIME Type:** `application/toml`
 
-#### XML
+#### XML **[Planned]**
 **Entity:** `entities/xml/` | **Transform:** `entities/transform/xml-convert/`
 - **Options:**
   - Indentation: `2 | 4 | Tab`
@@ -1400,7 +1335,7 @@ The Apogee registry organizes transforms by purpose, with each transform exposin
   - Namespace Count: `Number`
 - **MIME Type:** `application/xml`
 
-#### Protobuf (Future)
+#### Protobuf **[Future]**
 - **Options:**
   - Schema Definition: `File Upload | Paste`
   - Output Format: `JSON Representation | Hex`
@@ -1411,106 +1346,127 @@ The Apogee registry organizes transforms by purpose, with each transform exposin
 
 ### 5.2 Encode
 **Focus:** Representing binary or text data in safe transport formats.
-**Entity Location:** `entities/transform/text-encoding/` (single entity for all encodings)
+**Entity Location:** `entities/transform/text-encoding/` **[Exists - Requires Augmentation]** (single entity for all encodings)
 
-**All encode transforms support line-by-line mode** (`supportsLineByLine: true`).
+**Line-by-Line Support:** All encode transforms support line-by-line mode (`supportsLineByLine: true`). When enabled, each line of input is encoded independently and joined with newlines. Useful for encoding lists of values (e.g., encode each password in a list separately).
 
-#### Base64 / Base64URL
+#### Base64 / Base64URL **[Exists - Requires Augmentation]**
 - **Options:**
   - URL Safe: `Toggle`
   - Padding: `Toggle`
   - Line Width: `None | 64 | 76` (split lines)
-  - **Line-by-Line Mode**: `Toggle` (process each line independently)
+  - Line-by-Line Mode: `Toggle`
 - **Stats:**
   - Output Size: `Number (bytes)`
   - Expansion Ratio: `Number (%)` (vs original)
   - Lines Processed: `Number` (when line-by-line enabled)
 - **MIME Type:** `text/plain`
 
-#### Base58
+#### Base58 **[Exists - Requires Augmentation]**
 - **Options:**
   - Alphabet: `Bitcoin | Ripple | Flickr`
+  - Line-by-Line Mode: `Toggle`
 - **Stats:**
   - Output Size: `Number (bytes)`
+  - Lines Processed: `Number` (when line-by-line enabled)
 - **MIME Type:** `text/plain`
 
-#### Base91
-- **Options:** None (standardized alphabet)
+#### Base91 **[Planned]**
+- **Options:**
+  - Line-by-Line Mode: `Toggle`
 - **Stats:**
   - Output Size: `Number (bytes)`
   - Compression Ratio: `Number (%)` (vs Base64)
+  - Lines Processed: `Number` (when line-by-line enabled)
 - **MIME Type:** `text/plain`
 
-#### ASCII85
+#### ASCII85 **[Planned]**
 - **Options:**
   - Format: `Adobe | btoa | RFC 1924`
   - Line Width: `None | 80`
+  - Line-by-Line Mode: `Toggle`
 - **Stats:**
   - Output Size: `Number (bytes)`
+  - Lines Processed: `Number` (when line-by-line enabled)
 - **MIME Type:** `text/plain`
 
-#### Z85 (ZeroMQ)
-- **Options:** None (standardized alphabet)
+#### Z85 (ZeroMQ) **[Planned]**
+- **Options:**
+  - Line-by-Line Mode: `Toggle`
 - **Stats:**
   - Output Size: `Number (bytes)`
+  - Lines Processed: `Number` (when line-by-line enabled)
 - **MIME Type:** `text/plain`
 
-#### URL Encode
+#### URL Encode **[Exists - Requires Augmentation]**
 - **Options:**
   - Mode: `Encode All | Special Only | RFC 3986`
+  - Line-by-Line Mode: `Toggle`
 - **Stats:**
   - Characters Encoded: `Number`
+  - Lines Processed: `Number` (when line-by-line enabled)
 - **MIME Type:** `text/plain`
 
-#### HTML Entity
+#### HTML Entity **[Exists - Requires Augmentation]**
 - **Options:**
   - Format: `Decimal | Hex | Named`
   - Encode: `All | Non-ASCII Only`
+  - Line-by-Line Mode: `Toggle`
 - **Stats:**
   - Entities Created: `Number`
+  - Lines Processed: `Number` (when line-by-line enabled)
 - **MIME Type:** `text/html`
 
-#### Hex (Base16)
+#### Hex (Base16) **[Exists - Requires Augmentation]**
 - **Options:**
   - Delimiter: `None | Space | Colon | 0x Prefix`
   - Case: `Upper | Lower`
+  - Line-by-Line Mode: `Toggle`
 - **Stats:**
   - Output Size: `Number (bytes)`
+  - Lines Processed: `Number` (when line-by-line enabled)
 - **MIME Type:** `text/plain`
 
-#### Quoted-Printable
+#### Quoted-Printable **[Planned]**
 - **Options:**
   - Binary Mode: `Toggle`
   - Line Width: `76 | Custom`
+  - Line-by-Line Mode: `Toggle`
 - **Stats:**
   - Encoded Characters: `Number`
+  - Lines Processed: `Number` (when line-by-line enabled)
 - **MIME Type:** `text/plain`
 
-#### ROT13
-- **Options:** None (fixed algorithm)
+#### ROT13 **[Planned]**
+- **Options:**
+  - Line-by-Line Mode: `Toggle`
 - **Stats:**
   - Characters Rotated: `Number`
+  - Lines Processed: `Number` (when line-by-line enabled)
 - **MIME Type:** `text/plain`
 
-#### Morse Code
+#### Morse Code **[Planned]**
 - **Options:**
   - Dot Character: `String` (default: `.`)
   - Dash Character: `String` (default: `-`)
   - Separator: `Space | / | Custom`
+  - Line-by-Line Mode: `Toggle`
 - **Stats:**
   - Character Count: `Number`
+  - Lines Processed: `Number` (when line-by-line enabled)
 - **MIME Type:** `text/plain`
 
 ### 5.3 Decode
 **Focus:** Reverting encodings and inspecting payloads.
-**Entity Location:** `entities/transform/text-encoding/` (single entity for all decodings, reusing encoding entity)
+**Entity Location:** `entities/transform/text-encoding/` **[Exists - Requires Augmentation]** (single entity for all decodings, reusing encoding entity)
 
-**All decode transforms support line-by-line mode** (`supportsLineByLine: true`).
+**Line-by-Line Support:** All decode transforms support line-by-line mode (`supportsLineByLine: true`). When enabled, each line of input is decoded independently and joined with newlines.
 
-#### JWT (JSON Web Token)
+#### JWT (JSON Web Token) **[Exists - Requires Augmentation]**
 - **Options:**
   - Secret/Public Key: `String` (optional, for signature verification)
   - Algorithm Override: `Auto | HS256 | RS256 | ES256`
+  - Line-by-Line Mode: `Toggle`
 - **Stats:**
   - Algorithm: `String` (from header)
   - Type: `String` (from header)
@@ -1520,104 +1476,119 @@ The Apogee registry organizes transforms by purpose, with each transform exposin
   - Expiration: `Date`
   - Not Before: `Date`
   - Status: `Valid | Expired | Not Yet Valid | Invalid Signature` (alert level)
+  - Lines Processed: `Number` (when line-by-line enabled)
 - **MIME Type:** `application/json`
 
-#### Base64 / Base58 / Hex / etc. Decoders
+#### Base64 / Base58 / Hex Decoders **[Exists - Requires Augmentation]**
 - **Options:**
   - Ignore Non-Alphabet Chars: `Strict | Lenient`
   - Detect Encoding: `Auto | Force [Type]`
+  - Line-by-Line Mode: `Toggle`
 - **Stats:**
   - Decoded Size: `Number (bytes)`
   - Detected Encoding: `String` (with confidence %)
   - Invalid Characters Skipped: `Number`
+  - Lines Processed: `Number` (when line-by-line enabled)
 - **MIME Type:** `text/plain` (or detected)
 
-#### Unicode
+#### Unicode **[Planned]**
 - **Options:**
   - Output Format: `Code Point (U+XXXX) | CSS (\XXXX) | HTML (&#x) | JavaScript (\u)`
   - Encode: `All | Non-ASCII Only`
+  - Line-by-Line Mode: `Toggle`
 - **Stats:**
   - Code Points: `Number`
+  - Lines Processed: `Number` (when line-by-line enabled)
 - **MIME Type:** `text/plain`
 
 ### 5.4 Hash
 **Focus:** Generating cryptographic signatures and checksums.
-**Entity Location:** `entities/transform/text-hash/` (single entity for all hash algorithms)
+**Entity Location:** `entities/transform/text-hash/` **[Exists - Requires Augmentation]** (single entity for all hash algorithms)
 
-**All hash transforms support line-by-line mode** (`supportsLineByLine: true`).
+**Line-by-Line Support:** All hash transforms support line-by-line mode (`supportsLineByLine: true`). When enabled, each line of input is hashed independently and output as separate hashes joined with newlines. Useful for hashing lists of passwords or values individually.
 
-#### MD5
+#### MD5 **[Exists - Requires Augmentation]**
 - **Options:**
   - Output Encoding: `Hex | Base64`
   - HMAC Key: `String` (optional, enables HMAC-MD5)
-  - **Line-by-Line Mode**: `Toggle` (hash each line separately)
+  - Line-by-Line Mode: `Toggle`
 - **Stats:**
   - Output Bit Length: `128`
   - Collision Resistance: `⚠️ Weak (deprecated for security)` (alert: warning)
   - Lines Processed: `Number` (when line-by-line enabled)
 - **MIME Type:** `text/plain`
-- **Example Use Case:** Hash each password in a list → `password1\npassword2` → `5f4dcc3b...\n6cb75f...'`
+- **Example:** Hash each password in a list → `password1\npassword2` → `5f4dcc3b...\n6cb75f...`
 
-#### SHA-1
+#### SHA-1 **[Exists - Requires Augmentation]**
 - **Options:**
   - Output Encoding: `Hex | Base64`
   - HMAC Key: `String` (optional)
+  - Line-by-Line Mode: `Toggle`
 - **Stats:**
   - Output Bit Length: `160`
   - Collision Resistance: `⚠️ Weak (use SHA-256+)` (alert: warning)
+  - Lines Processed: `Number` (when line-by-line enabled)
 - **MIME Type:** `text/plain`
 
-#### SHA-256 / SHA-384 / SHA-512
+#### SHA-256 / SHA-384 / SHA-512 **[Exists - Requires Augmentation]**
 - **Options:**
   - Output Encoding: `Hex | Base64`
   - HMAC Key: `String` (optional)
+  - Line-by-Line Mode: `Toggle`
 - **Stats:**
   - Output Bit Length: `256 | 384 | 512`
   - Collision Resistance: `✓ Strong` (alert: info)
+  - Lines Processed: `Number` (when line-by-line enabled)
 - **MIME Type:** `text/plain`
 
-#### SHA-3 (256/384/512)
+#### SHA-3 (256/384/512) **[Planned]**
 - **Options:**
   - Variant: `SHA3-256 | SHA3-384 | SHA3-512`
   - Output Encoding: `Hex | Base64`
+  - Line-by-Line Mode: `Toggle`
 - **Stats:**
   - Output Bit Length: `256 | 384 | 512`
   - Algorithm: `Keccak (SHA-3)`
+  - Lines Processed: `Number` (when line-by-line enabled)
 - **MIME Type:** `text/plain`
 
-#### BLAKE3
+#### BLAKE3 **[Planned]**
 - **Options:**
   - Output Encoding: `Hex | Base64`
   - Output Length: `Custom (bytes)` (default: 32)
+  - Line-by-Line Mode: `Toggle`
 - **Stats:**
   - Output Bit Length: `Configurable`
   - Performance: `✓ Fast & Secure`
+  - Lines Processed: `Number` (when line-by-line enabled)
 - **MIME Type:** `text/plain`
 
-#### Murmur3 (Non-Cryptographic)
+#### Murmur3 (Non-Cryptographic) **[Planned]**
 - **Options:**
   - Variant: `32-bit | 128-bit`
   - Seed: `Number` (default: 0)
   - Output Encoding: `Hex | Decimal`
+  - Line-by-Line Mode: `Toggle`
 - **Stats:**
   - Output Bit Length: `32 | 128`
   - Use Case: `Checksums, Hash Tables (not security)`
+  - Lines Processed: `Number` (when line-by-line enabled)
 - **MIME Type:** `text/plain`
 
 ### 5.5 Manipulate
 **Focus:** String-level text operations and cleanup.
-**Entity Locations:** `entities/transform/text-sanitize/`, `entities/transform/text-case/`, `entities/regex/`
+**Entity Locations:** `entities/transform/text-sanitize/` **[Exists]**, `entities/transform/text-case/` **[Exists]**, `entities/regex/` **[Planned]**
 
-**All manipulate transforms support line-by-line mode** (`supportsLineByLine: true`).
+**Line-by-Line Support:** All manipulate transforms support line-by-line mode (`supportsLineByLine: true`). When enabled, the transformation is applied to each line independently.
 
-#### Sanitize
+#### Sanitize **[Exists - Requires Augmentation]**
 - **Options:**
   - Trim Whitespace: `None | Start | End | Both`
   - Remove Empty Lines: `Toggle`
   - Remove Duplicate Lines: `Toggle`
   - Normalize Line Endings: `LF (\n) | CRLF (\r\n) | CR (\r)`
   - Remove Non-Printable: `Toggle`
-  - **Line-by-Line Mode**: `Toggle` (sanitize each line independently)
+  - Line-by-Line Mode: `Toggle`
 - **Stats:**
   - Lines Removed: `Number`
   - Characters Removed: `Number`
@@ -1625,27 +1596,29 @@ The Apogee registry organizes transforms by purpose, with each transform exposin
   - Lines Processed: `Number` (when line-by-line enabled)
 - **MIME Type:** `text/plain`
 
-#### Change Case
+#### Change Case **[Exists - Requires Augmentation]**
 - **Options:**
   - Target Case: `camelCase | PascalCase | snake_case | kebab-case | CONSTANT_CASE | Train-Case | Title Case | lower | UPPER`
-  - **Line-by-Line Mode**: `Toggle` (convert case for each line separately)
+  - Line-by-Line Mode: `Toggle`
 - **Stats:**
   - Transformations Applied: `Number`
   - Lines Processed: `Number` (when line-by-line enabled)
 - **MIME Type:** `text/plain`
-- **Example Use Case:** Convert list of variable names → `user_name\norder_id` → `userName\norderId`
+- **Example:** Convert list of variable names → `user_name\norder_id` → `userName\norderId`
 
-#### Regex Replace
+#### Regex Replace **[Planned]**
 - **Options:**
   - Pattern: `String (Regex)`
   - Replacement: `String` (supports capture groups: `$1`, `$2`)
   - Flags: `Global | Case Insensitive | Multiline | Dotall`
+  - Line-by-Line Mode: `Toggle`
 - **Stats:**
   - Match Count: `Number`
   - Replacement Count: `Number`
+  - Lines Processed: `Number` (when line-by-line enabled)
 - **MIME Type:** `text/plain`
 
-#### Sort Lines
+#### Sort Lines **[Planned]**
 - **Options:**
   - Order: `Ascending | Descending`
   - Type: `Alphabetical | Numerical | Length`
@@ -1654,7 +1627,7 @@ The Apogee registry organizes transforms by purpose, with each transform exposin
   - Lines Sorted: `Number`
 - **MIME Type:** `text/plain`
 
-#### Extract Lines
+#### Extract Lines **[Planned]**
 - **Options:**
   - Mode: `Contains | Starts With | Ends With | Regex Match`
   - Pattern: `String`
@@ -1666,10 +1639,11 @@ The Apogee registry organizes transforms by purpose, with each transform exposin
 
 ### 5.6 Compress
 **Focus:** Size reduction via compression algorithms.
-**Entity Location:** `entities/transform/compression/` (single entity for compress/decompress algorithms)
-**Note:** Output rendered as Base64/Hex for text display, or binary download.
+**Entity Location:** `entities/transform/compression/` **[Planned]** (single entity for compress/decompress algorithms)
 
-#### Gzip
+**Note:** Output rendered as Base64/Hex for text display, or binary download. Line-by-line mode not supported as compression requires full context.
+
+#### Gzip **[Planned]**
 - **Options:**
   - Compression Level: `1 (Fast) | 5 (Default) | 9 (Best)`
   - Output Encoding: `Base64 | Hex | Binary Download`
@@ -1679,7 +1653,7 @@ The Apogee registry organizes transforms by purpose, with each transform exposin
   - Savings: `Number (%)` (alert: info if > 50%)
 - **MIME Type:** `application/gzip`
 
-#### Bzip2
+#### Bzip2 **[Planned]**
 - **Options:**
   - Compression Level: `1-9`
   - Output Encoding: `Base64 | Hex | Binary Download`
@@ -1689,7 +1663,7 @@ The Apogee registry organizes transforms by purpose, with each transform exposin
   - Savings: `Number (%)`
 - **MIME Type:** `application/x-bzip2`
 
-#### Brotli
+#### Brotli **[Planned]**
 - **Options:**
   - Quality Level: `0-11` (default: 11)
   - Mode: `Generic | Text | Font`
@@ -1700,7 +1674,7 @@ The Apogee registry organizes transforms by purpose, with each transform exposin
   - Savings: `Number (%)`
 - **MIME Type:** `application/brotli`
 
-#### Zstd
+#### Zstd **[Planned]**
 - **Options:**
   - Compression Level: `1-22` (default: 3)
   - Output Encoding: `Base64 | Hex | Binary Download`
@@ -1711,7 +1685,7 @@ The Apogee registry organizes transforms by purpose, with each transform exposin
   - Compression Ratio: `Number:1`
 - **MIME Type:** `application/zstd`
 
-#### LZMA2 / 7zip
+#### LZMA2 / 7zip **[Future]**
 - **Options:**
   - Compression Level: `0-9`
   - Dictionary Size: `Auto | 16MB | 32MB | 64MB`
@@ -1722,7 +1696,7 @@ The Apogee registry organizes transforms by purpose, with each transform exposin
   - Savings: `Number (%)`
 - **MIME Type:** `application/x-7z-compressed`
 
-#### XZ
+#### XZ **[Future]**
 - **Options:**
   - Compression Level: `0-9`
   - Check Type: `CRC64 | SHA-256 | None`
@@ -1735,9 +1709,11 @@ The Apogee registry organizes transforms by purpose, with each transform exposin
 
 ### 5.7 Decompress
 **Focus:** Restoring compressed data to original form.
-**Entity Location:** `entities/transform/compression/` (same entity as Compress)
+**Entity Location:** `entities/transform/compression/` **[Planned]** (same entity as Compress)
 
-#### Gzip / Bzip2 / Brotli / Zstd / LZMA2 / XZ (Decompress)
+**Note:** Line-by-line mode not supported as decompression requires full context.
+
+#### Gzip / Bzip2 / Brotli / Zstd **[Planned]**
 - **Options:**
   - Input Encoding: `Auto-Detect | Base64 | Hex | Binary`
 - **Stats:**
@@ -1746,15 +1722,24 @@ The Apogee registry organizes transforms by purpose, with each transform exposin
   - Compression Ratio: `Number:1` (original compression)
 - **MIME Type:** `text/plain` (or detected from content)
 
+#### LZMA2 / XZ **[Future]**
+- **Options:**
+  - Input Encoding: `Auto-Detect | Base64 | Hex | Binary`
+- **Stats:**
+  - Decompressed Size: `Number (bytes)`
+  - Detected Format: `String`
+  - Compression Ratio: `Number:1`
+- **MIME Type:** `text/plain` (or detected from content)
+
 ### 5.8 Analyze
 **Focus:** Visualizing data and generating insights through charts, graphs, and validation reports.
-**Entity Locations:** `entities/transform/chart-generator/`, `entities/transform/data-validator/`, `entities/transform/pattern-analyzer/`
+**Entity Locations:** `entities/transform/chart-generator/` **[Future]**, `entities/transform/data-validator/` **[Future]**, `entities/transform/pattern-analyzer/` **[Future]**
 
 **Design Philosophy:** Analyze transforms convert raw data into visual representations. They accept structured data (CSV, JSON) or text, and produce either SVG/Canvas visualizations or formatted reports.
 
-**Note:** Extraction and querying operations (regex, JSONPath, CSV columns) are handled by the **Input Lens** feature, not transforms.
+**Note:** Extraction and querying operations (regex, JSONPath, CSV columns) are handled by the **Input Lens** feature, not transforms. Line-by-line mode not supported as analysis requires full dataset context.
 
-#### Chart Generator
+#### Chart Generator **[Future]**
 - **Accepts Input:** `csv`, `json`
 - **Options:**
   - Chart Type: `Bar | Line | Pie | Scatter | Area`
@@ -1772,7 +1757,7 @@ The Apogee registry organizes transforms by purpose, with each transform exposin
 - **Output:** SVG chart embedded in DataBlock
 - **MIME Type:** `image/svg+xml`
 
-#### Frequency Distribution
+#### Frequency Distribution **[Future]**
 - **Accepts Input:** `text`, `csv`, `json`
 - **Options:**
   - Unit: `Words | Characters | Lines | Values (for CSV/JSON)`
@@ -1787,7 +1772,7 @@ The Apogee registry organizes transforms by purpose, with each transform exposin
 - **Output:** SVG histogram/bar chart + data table
 - **MIME Type:** `image/svg+xml` or `text/html` (for table)
 
-#### Time Series Plot
+#### Time Series Plot **[Future]**
 - **Accepts Input:** `csv`, `json`, `text` (log lines)
 - **Options:**
   - Timestamp Column: `String (column name or extraction pattern)`
@@ -1804,7 +1789,7 @@ The Apogee registry organizes transforms by purpose, with each transform exposin
 - **Output:** Interactive SVG line chart
 - **MIME Type:** `image/svg+xml`
 
-#### Data Validator
+#### Data Validator **[Future]**
 - **Accepts Input:** `json`, `csv`, `yaml`
 - **Options:**
   - Schema: `JSON Schema | CSV Column Types | Custom Rules`
@@ -1819,7 +1804,7 @@ The Apogee registry organizes transforms by purpose, with each transform exposin
 - **Output:** Color-coded validation report with highlighted errors
 - **MIME Type:** `text/html` (formatted report) or `application/json` (error list)
 
-#### Pattern Heatmap
+#### Pattern Heatmap **[Future]**
 - **Accepts Input:** `text`, `csv`, `json`
 - **Options:**
   - Pattern Type: `Character Distribution | Word Positions | Numeric Ranges | Timestamp Density`
@@ -1837,7 +1822,9 @@ The Apogee registry organizes transforms by purpose, with each transform exposin
 **Focus:** Delivering pipeline output to the user. Exports are **not transforms**—they're actions shown in the ExportRow component below the pipeline.
 **Location:** `features/apogee/lib/exports.ts` (registry), `features/apogee/ui/ExportRow.tsx` (UI component)
 
-#### Text File
+**Note:** Export actions are separate from transforms and appear in a dedicated UI component below the transform pipeline.
+
+#### Text File **[Planned]**
 - **Options:**
   - Filename: `String` (default: `output.txt`)
   - Extension: `Auto | .txt | .log | .md | .json | .csv | .xml`
@@ -1847,7 +1834,7 @@ The Apogee registry organizes transforms by purpose, with each transform exposin
   - Line Count: `Number`
 - **Action:** Triggers browser download
 
-#### PDF
+#### PDF **[Future]**
 - **Options:**
   - Page Size: `A4 | Letter | Legal | Custom`
   - Font Size: `8 | 10 | 12 | 14 | 16`
@@ -1860,7 +1847,7 @@ The Apogee registry organizes transforms by purpose, with each transform exposin
   - File Size: `Number (KB)`
 - **Action:** Generates PDF using jsPDF or similar, triggers download
 
-#### Clipboard
+#### Clipboard **[Planned]**
 - **Options:**
   - Format: `Plain Text | HTML | Rich Text (if applicable)`
 - **Stats:**
@@ -2113,46 +2100,3 @@ Use `react-window` for outputs > 10,000 lines:
 - Render only visible rows + buffer
 - Maintain syntax highlighting performance
 - Smooth scrolling experience
-
-## 10. Implementation Phases
-
-### Phase 1: Core Engine
-1. Update `TransformStep` model with `inputSelection`
-2. Update `TransformDefinition` to return `TransformResult`
-3. Implement lens pass logic in `ApogeeEngine`
-4. Add MIME type detection
-
-### Phase 2: Transform Library
-1. Implement core transforms with new schema
-2. Add transforms by category:
-   - Convert: YAML, TOML, XML
-   - Hash: SHA-3, BLAKE3
-3. Implement stats for all transforms
-
-### Phase 3: UI Components
-1. Build `StatsBar` component
-2. Build `LensPanel` component (support "all" and "regex" modes initially)
-3. Update `TransformPalette` with verb grouping
-4. Update `DataBlock` with MIME-based highlighting
-
-### Phase 4: Advanced Features
-1. Minimizable transform blocks
-2. Keyboard shortcuts
-3. Incremental execution optimization
-4. Web worker integration for heavy transforms
-
-### Phase 5: Compression & Analysis
-1. Implement compression transforms:
-   - Gzip, Brotli, Zstd (priority)
-   - Bzip2, LZMA2, XZ (secondary)
-2. Implement analysis transforms (visualization):
-   - Chart Generator (SVG rendering for bar/line/pie charts)
-   - Frequency Distribution (histogram generation)
-   - Data Validator (schema validation with visual reports)
-3. Integrate charting library (e.g., D3.js, Chart.js, or custom SVG generation)
-
-### Phase 6: Extended Lens Modes
-1. Add JSONPath lens mode
-2. Add CSV column lens mode
-3. Add XPath lens mode
-4. Update LensPanel UI to support all modes
