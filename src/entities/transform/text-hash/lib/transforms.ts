@@ -3,6 +3,8 @@
  * Wraps existing hashing functions with TransformDefinition interface
  */
 
+import { sha3_224, sha3_256, sha3_384, sha3_512 } from "js-sha3";
+
 import type { TransformDefinition, TransformResult } from "../../shared/types";
 
 import { hashText } from "./codec";
@@ -233,6 +235,202 @@ export const sha512HashDefinition: TransformDefinition = {
         mimeType: "text/plain",
         stats: [
           { label: "Algorithm", value: "SHA-512" },
+          { label: "Output Length", value: "512 bits (128 hex chars)" },
+          {
+            label: "Security",
+            value: "Maximum cryptographic security",
+            alert: "info",
+          },
+        ],
+      };
+    } catch (err) {
+      return {
+        success: false,
+        data: "",
+        error: `Hashing failed: ${err instanceof Error ? err.message : "Unknown error"}`,
+        mimeType: "text/plain",
+      };
+    }
+  },
+};
+
+/**
+ * SHA3-224 Hash Transform
+ */
+export const sha3_224HashDefinition: TransformDefinition = {
+  type: "sha3-224-hash",
+  name: "SHA3-224 Hash",
+  description: "Generate SHA3-224 hash (224-bit)",
+  category: "hash",
+  acceptsInput: ["*"],
+  producesOutput: "text/plain",
+  propertySchema: [],
+  defaultProperties: {},
+  execute: async (input: string): Promise<TransformResult> => {
+    if (!input) {
+      return {
+        success: false,
+        data: "",
+        error: "Input is empty",
+        mimeType: "text/plain",
+      };
+    }
+
+    try {
+      const output = sha3_224(input);
+      return {
+        success: true,
+        data: output,
+        mimeType: "text/plain",
+        stats: [
+          { label: "Algorithm", value: "SHA3-224" },
+          { label: "Output Length", value: "224 bits (56 hex chars)" },
+          {
+            label: "Security",
+            value: "Modern cryptographic standard",
+            alert: "info",
+          },
+        ],
+      };
+    } catch (err) {
+      return {
+        success: false,
+        data: "",
+        error: `Hashing failed: ${err instanceof Error ? err.message : "Unknown error"}`,
+        mimeType: "text/plain",
+      };
+    }
+  },
+};
+
+/**
+ * SHA3-256 Hash Transform
+ */
+export const sha3_256HashDefinition: TransformDefinition = {
+  type: "sha3-256-hash",
+  name: "SHA3-256 Hash",
+  description: "Generate SHA3-256 hash (256-bit)",
+  category: "hash",
+  acceptsInput: ["*"],
+  producesOutput: "text/plain",
+  propertySchema: [],
+  defaultProperties: {},
+  execute: async (input: string): Promise<TransformResult> => {
+    if (!input) {
+      return {
+        success: false,
+        data: "",
+        error: "Input is empty",
+        mimeType: "text/plain",
+      };
+    }
+
+    try {
+      const output = sha3_256(input);
+      return {
+        success: true,
+        data: output,
+        mimeType: "text/plain",
+        stats: [
+          { label: "Algorithm", value: "SHA3-256" },
+          { label: "Output Length", value: "256 bits (64 hex chars)" },
+          {
+            label: "Security",
+            value: "Modern cryptographic standard",
+            alert: "info",
+          },
+        ],
+      };
+    } catch (err) {
+      return {
+        success: false,
+        data: "",
+        error: `Hashing failed: ${err instanceof Error ? err.message : "Unknown error"}`,
+        mimeType: "text/plain",
+      };
+    }
+  },
+};
+
+/**
+ * SHA3-384 Hash Transform
+ */
+export const sha3_384HashDefinition: TransformDefinition = {
+  type: "sha3-384-hash",
+  name: "SHA3-384 Hash",
+  description: "Generate SHA3-384 hash (384-bit)",
+  category: "hash",
+  acceptsInput: ["*"],
+  producesOutput: "text/plain",
+  propertySchema: [],
+  defaultProperties: {},
+  execute: async (input: string): Promise<TransformResult> => {
+    if (!input) {
+      return {
+        success: false,
+        data: "",
+        error: "Input is empty",
+        mimeType: "text/plain",
+      };
+    }
+
+    try {
+      const output = sha3_384(input);
+      return {
+        success: true,
+        data: output,
+        mimeType: "text/plain",
+        stats: [
+          { label: "Algorithm", value: "SHA3-384" },
+          { label: "Output Length", value: "384 bits (96 hex chars)" },
+          {
+            label: "Security",
+            value: "High cryptographic security",
+            alert: "info",
+          },
+        ],
+      };
+    } catch (err) {
+      return {
+        success: false,
+        data: "",
+        error: `Hashing failed: ${err instanceof Error ? err.message : "Unknown error"}`,
+        mimeType: "text/plain",
+      };
+    }
+  },
+};
+
+/**
+ * SHA3-512 Hash Transform
+ */
+export const sha3_512HashDefinition: TransformDefinition = {
+  type: "sha3-512-hash",
+  name: "SHA3-512 Hash",
+  description: "Generate SHA3-512 hash (512-bit)",
+  category: "hash",
+  acceptsInput: ["*"],
+  producesOutput: "text/plain",
+  propertySchema: [],
+  defaultProperties: {},
+  execute: async (input: string): Promise<TransformResult> => {
+    if (!input) {
+      return {
+        success: false,
+        data: "",
+        error: "Input is empty",
+        mimeType: "text/plain",
+      };
+    }
+
+    try {
+      const output = sha3_512(input);
+      return {
+        success: true,
+        data: output,
+        mimeType: "text/plain",
+        stats: [
+          { label: "Algorithm", value: "SHA3-512" },
           { label: "Output Length", value: "512 bits (128 hex chars)" },
           {
             label: "Security",

@@ -18,4 +18,8 @@ export {
   sha256HashDefinition,
   sha384HashDefinition,
   sha512HashDefinition,
+  sha3_224HashDefinition,
+  sha3_256HashDefinition,
+  sha3_384HashDefinition,
+  sha3_512HashDefinition,
 } from "./lib/transforms";

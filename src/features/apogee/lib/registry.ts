@@ -11,6 +11,10 @@ import type {
   TransformCategory,
 } from "../model/types";
 
+import {
+  brotliCompressDefinition,
+  brotliDecompressDefinition,
+} from "@/entities/transform/brotli-compress";
 import { csvConvertDefinition } from "@/entities/transform/csv-convert";
 import { extractLinesDefinition } from "@/entities/transform/extract-lines";
 import {
@@ -51,11 +55,19 @@ import {
   sha256HashDefinition,
   sha384HashDefinition,
   sha512HashDefinition,
+  sha3_224HashDefinition,
+  sha3_256HashDefinition,
+  sha3_384HashDefinition,
+  sha3_512HashDefinition,
 } from "@/entities/transform/text-hash";
 import { textSanitizeTransform } from "@/entities/transform/text-sanitize";
 import { tomlConvertDefinition } from "@/entities/transform/toml-convert";
 import { xmlConvertDefinition } from "@/entities/transform/xml-convert";
 import { yamlConvertDefinition } from "@/entities/transform/yaml-convert";
+import {
+  zstdCompressDefinition,
+  zstdDecompressDefinition,
+} from "@/entities/transform/zstd-compress";
 
 /**
  * Global transform registry
@@ -103,6 +115,10 @@ export const TRANSFORM_REGISTRY: Record<string, TransformDefinition> = {
   "sha256-hash": sha256HashDefinition as TransformDefinition,
   "sha384-hash": sha384HashDefinition as TransformDefinition,
   "sha512-hash": sha512HashDefinition as TransformDefinition,
+  "sha3-224-hash": sha3_224HashDefinition as TransformDefinition,
+  "sha3-256-hash": sha3_256HashDefinition as TransformDefinition,
+  "sha3-384-hash": sha3_384HashDefinition as TransformDefinition,
+  "sha3-512-hash": sha3_512HashDefinition as TransformDefinition,
 
   // Manipulate transforms
   "text-sanitize": textSanitizeTransform as TransformDefinition,
@@ -113,9 +129,13 @@ export const TRANSFORM_REGISTRY: Record<string, TransformDefinition> = {
 
   // Compress transforms
   "gzip-compress": gzipCompressDefinition as TransformDefinition,
+  "brotli-compress": brotliCompressDefinition as TransformDefinition,
+  "zstd-compress": zstdCompressDefinition as TransformDefinition,
 
   // Decompress transforms
   "gzip-decompress": gzipDecompressDefinition as TransformDefinition,
+  "brotli-decompress": brotliDecompressDefinition as TransformDefinition,
+  "zstd-decompress": zstdDecompressDefinition as TransformDefinition,
 };
 
 /**

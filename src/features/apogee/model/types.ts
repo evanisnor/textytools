@@ -58,6 +58,10 @@ export type HashTransform =
   | "sha256-hash"
   | "sha384-hash"
   | "sha512-hash"
+  | "sha3-224-hash"
+  | "sha3-256-hash"
+  | "sha3-384-hash"
+  | "sha3-512-hash"
   | "sha3-hash"
   | "blake3-hash"
   | "murmur3-hash";

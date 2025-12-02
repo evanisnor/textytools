@@ -77,25 +77,30 @@ Phase 5 focuses on expanding the transform catalog with additional transforms ac
 
 ### Category 3: Additional Hash Transforms
 
-**Status:** ✅ Partial (1/4 complete)
+**Status:** ✅ Complete (5 transforms)
 
 #### Completed Transforms:
 - [x] SHA-384 - 384-bit secure hash using Web Crypto API
+- [x] SHA3-224 - 224-bit SHA-3 hash (modern cryptographic standard)
+- [x] SHA3-256 - 256-bit SHA-3 hash (modern cryptographic standard)
+- [x] SHA3-384 - 384-bit SHA-3 hash (high cryptographic security)
+- [x] SHA3-512 - 512-bit SHA-3 hash (maximum cryptographic security)
 
-#### Remaining Transforms:
-- [ ] SHA-3-256 - Requires external library (sha3)
-- [ ] SHA-3-512 - Requires external library (sha3)
-- [ ] BLAKE3 - Requires external library (blake3-wasm)
-- [ ] Murmur3 - Requires external library (murmurhash)
+#### Deferred Transforms:
+- [ ] BLAKE3 - Cannot find a reliable pure JavaScript library
+- [ ] Murmur3 - Deferred for future phase
 
 **Files Modified:**
+- `src/entities/transform/text-hash/lib/transforms.ts` - Added SHA-384 and SHA3-224/256/384/512 transform definitions
 - `src/entities/transform/text-hash/lib/sha.ts` - Added SHA-384 implementation
 - `src/entities/transform/text-hash/lib/codec.ts` - Added SHA-384 to codec switch
-- `src/entities/transform/text-hash/lib/transforms.ts` - Added SHA-384 transform definition
 - `src/entities/transform/text-hash/model/types.ts` - Updated HashType union
-- `src/entities/transform/text-hash/index.ts` - Exported SHA-384 definition
-- `src/features/apogee/lib/registry.ts` - Registered SHA-384
-- `src/features/apogee/model/types.ts` - HashTransform type already included sha384-hash
+- `src/entities/transform/text-hash/index.ts` - Exported new definitions
+- `src/features/apogee/lib/registry.ts` - Registered all new hash transforms
+- `src/features/apogee/model/types.ts` - Updated HashTransform type union
+
+**Dependencies Added:**
+- `js-sha3` - Pure JavaScript SHA-3 implementation (Next.js compatible)
 
 **Implementation Notes:**
 - SHA-384 uses native Web Crypto API (no external dependencies needed)
@@ -135,33 +140,41 @@ Phase 5 focuses on expanding the transform catalog with additional transforms ac
 
 ### Category 5: Compress/Decompress Transforms
 
-**Status:** ✅ Complete (2 transforms)
+**Status:** ✅ Complete (6 transforms)
 
 #### Completed Transforms:
 - [x] Gzip Compress - Compress text using Gzip with configurable level
 - [x] Gzip Decompress - Decompress Gzip data from Base64 or Hex
+- [x] Brotli Compress - Compress text using Brotli with configurable quality
+- [x] Brotli Decompress - Decompress Brotli data from Base64 or Hex
+- [x] Zstd Compress - Compress text using Zstandard with configurable level
+- [x] Zstd Decompress - Decompress Zstandard data from Base64 or Hex
 
 **Files Created:**
 - `src/entities/transform/gzip-compress/lib/gzipCompress.ts` - Gzip compress/decompress implementations
 - `src/entities/transform/gzip-compress/index.ts` - Export definitions
+- `src/entities/transform/brotli-compress/lib/brotliCompress.ts` - Brotli compress/decompress implementations
+- `src/entities/transform/brotli-compress/index.ts` - Export definitions
+- `src/entities/transform/zstd-compress/lib/zstdCompress.ts` - Zstd compress/decompress implementations
+- `src/entities/transform/zstd-compress/index.ts` - Export definitions
 
 **Files Modified:**
-- `src/features/apogee/lib/registry.ts` - Registered gzip transforms
+- `src/features/apogee/lib/registry.ts` - Registered all compress/decompress transforms
 
 **Dependencies Added:**
 - `pako` - Pure JavaScript gzip implementation (Next.js compatible, no WASM)
 - `@types/pako` - TypeScript types for pako
+- `brotli` - Pure JavaScript Brotli implementation (Next.js compatible, no WASM)
+- `simple-zstd` - Pure JavaScript Zstandard implementation (Next.js compatible)
 
 **Implementation Notes:**
-- Uses `pako` library (pure JavaScript, works with Next.js)
-- Compress: Configurable compression level (1-9), output as Base64 or Hex
-- Decompress: Accepts Base64 or Hex input
+- All libraries are pure JavaScript (no WASM required!)
+- Gzip: Configurable compression level (1-9), output as Base64 or Hex
+- Brotli: Configurable quality (1-11), output as Base64 or Hex
+- Zstd: Configurable compression level (1-19), output as Base64 or Hex
+- Decompress: Each accepts Base64 or Hex input
 - Stats show original size, compressed size, and savings percentage
-- **No WASM** - fully client-side compatible
-
-#### Deferred Transforms:
-- [ ] Brotli Compress/Decompress - Would require WASM or server-side
-- [ ] Zstd Compress/Decompress - Would require WASM or server-side
+- All implementations are **client-side compatible** with Next.js
 
 ---
 
@@ -189,29 +202,51 @@ Phase 5 focuses on expanding the transform catalog with additional transforms ac
 
 ### Decode Category (6 new transforms)
 1. **Morse Code Decode** - `morse-decode` - Decode Morse Code to text
-### Dependencies Added:
-- **pako** - Pure JavaScript gzip implementation (Next.js compatible, no WASM)
-- **@types/pako** - TypeScript types for pako
+2. **Quoted-Printable Decode** - `quoted-printable-decode` - Decode MIME Quoted-Printable
+3. **Base91 Decode** - `base91-decode` - Decode Base91 text
 4. **ASCII85 Decode** - `ascii85-decode` - Decode ASCII85 text
 5. **Z85 Decode** - `z85-decode` - Decode ZeroMQ Z85
 6. **JWT Decode** - `jwt-decode` - Decode and validate JSON Web Tokens
+7. **Unicode Decode** - `unicode-decode` - Decode Unicode escape sequences
 
-### Hash Category (1 new transform)
+### Hash Category (5 new transforms)
 1. **SHA-384 Hash** - `sha384-hash` - 384-bit secure hash algorithm
+2. **SHA3-224 Hash** - `sha3-224-hash` - 224-bit SHA-3 hash
+3. **SHA3-256 Hash** - `sha3-256-hash` - 256-bit SHA-3 hash
+4. **SHA3-384 Hash** - `sha3-384-hash` - 384-bit SHA-3 hash
+5. **SHA3-512 Hash** - `sha3-512-hash` - 512-bit SHA-3 hash
 
 ### Manipulate Category (3 new transforms)
 1. **Regex Replace** - `regex-replace` - Find and replace using regular expressions
 2. **Sort Lines** - `sort-lines` - Sort text lines by various criteria
 3. **Extract Lines** - `extract-lines` - Filter lines by pattern matching
-**Total New Transforms Added:** 16
-**Total New Transforms Added:** 15
+
+### Compress Category (3 new transforms)
+1. **Gzip Compress** - `gzip-compress` - Compress text using Gzip
+2. **Brotli Compress** - `brotli-compress` - Compress text using Brotli
+3. **Zstd Compress** - `zstd-compress` - Compress text using Zstandard
+
+### Decompress Category (3 new transforms)
+1. **Gzip Decompress** - `gzip-decompress` - Decompress Gzip data
+2. **Brotli Decompress** - `brotli-decompress` - Decompress Brotli data
+3. **Zstd Decompress** - `zstd-decompress` - Decompress Zstandard data
+
+**Total New Transforms Added:** 28
 
 ---
 
 ## Implementation Notes
 
 ### Dependencies Added:
-- None (all encoding/decoding functions already existed in text-encoding entity)
+- **pako** - Pure JavaScript gzip implementation (Next.js compatible, no WASM)
+- **@types/pako** - TypeScript types for pako
+- **js-sha3** - Pure JavaScript SHA-3 implementation (Next.js compatible)
+- **brotli** - Pure JavaScript Brotli implementation (Next.js compatible, no WASM)
+- **simple-zstd** - Pure JavaScript Zstandard implementation (Next.js compatible)
+
+### Deferred for Future Phase:
+- **BLAKE3** - Cannot find a reliable pure JavaScript library (all implementations require WASM)
+- **Murmur3** - Deferred for future phase (requires external library)
 
 ### Architecture Decisions:
 - Following the same pattern as Phase 3 transforms
@@ -238,12 +273,11 @@ Phase 5 focuses on expanding the transform catalog with additional transforms ac
 ---
 ## Summary Statistics
 
-**Total Transforms Planned:** ~25+  
-**Total Transforms Completed:** 20  
-**Completion Percentage:** ~80%
+**Total Transforms Planned:** ~30+  
+**Total Transforms Completed:** 28  
+**Completion Percentage:** ~93%
 
 **Phase 3 Baseline:** 22 transforms  
-**Phase 5 Current Total:** 42 transforms (22 + 20)  
-**Phase 5 Target:** 45+ transforms total (22 + 16)  
-**Phase 5 Target:** 45+ transforms total
+**Phase 5 New Additions:** 28 transforms  
+**Phase 5 Current Total:** 50 transforms (22 + 28)
 
