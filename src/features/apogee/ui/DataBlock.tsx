@@ -139,7 +139,7 @@ export function DataBlock({
           onChange={onChange}
           readOnly={readOnly}
           wrap={wrap}
-          showLineNumbers={!wrap}
+          showLineNumbers={true}
           height="h-64"
           placeholder={readOnly ? "No output" : "Enter data..."}
         />

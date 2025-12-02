@@ -3,18 +3,14 @@
  * Converts various formats (JSON, CSV, YAML, XML, TOML) to JSON with formatting options
  */
 
+import { detectFormat, parseToIntermediate } from "../../shared";
 import type { TransformResult, PropertySchema } from "../../shared/types";
 
-import { parseCSV } from "@/entities/csv";
 import {
-  parseJSON,
   formatJSON,
   getJSONStats,
   type JsonFormatOptions,
 } from "@/entities/json";
-import { parseTOML } from "@/entities/toml";
-import { parseXML, xmlToJSON } from "@/entities/xml";
-import { parseYAML } from "@/entities/yaml";
 
 /**
  * Property schema for JSON conversion options
@@ -55,54 +51,24 @@ export const jsonConvertDefaultProperties: Record<string, unknown> = {
 };
 
 /**
- * Detect input format and parse accordingly
+ * Detect input format and parse to intermediate representation
  */
 function parseInput(input: string): {
   success: boolean;
   data?: unknown;
   error?: string;
 } {
-  // Try JSON first (most common)
-  const jsonResult = parseJSON(input);
-  if (jsonResult.success) {
-    return { success: true, data: jsonResult.data };
+  const format = detectFormat(input);
+
+  if (format === "unknown") {
+    return {
+      success: false,
+      error:
+        "Unable to detect input format. Supported: JSON, CSV, YAML, XML, TOML",
+    };
   }
 
-  // Try YAML
-  const yamlResult = parseYAML(input);
-  if (yamlResult.success) {
-    return { success: true, data: yamlResult.data };
-  }
-
-  // Try XML
-  const xmlResult = parseXML(input);
-  if (xmlResult.success && xmlResult.data) {
-    const jsonData = xmlToJSON(xmlResult.data);
-    return { success: true, data: jsonData };
-  }
-
-  // Try TOML
-  const tomlResult = parseTOML(input);
-  if (tomlResult.success) {
-    return { success: true, data: tomlResult.data };
-  }
-
-  // Try CSV (last resort, as it's very forgiving)
-  try {
-    const csvData = parseCSV(input);
-    if (csvData.length > 0) {
-      return { success: true, data: csvData };
-    }
-  } catch {
-    // CSV parsing failed
-  }
-
-  // All parsers failed
-  return {
-    success: false,
-    error:
-      "Unable to parse input. Supported formats: JSON, CSV, YAML, XML, TOML",
-  };
+  return parseToIntermediate(input, format);
 }
 
 /**

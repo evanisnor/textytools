@@ -50,3 +50,33 @@ export function validateTOML(input: string): {
     error: result.error,
   };
 }
+
+/**
+ * Detect if input is likely TOML
+ * Checks for TOML-specific syntax patterns
+ */
+export function isTOML(input: string): boolean {
+  if (!input || input.trim() === "") {
+    return false;
+  }
+
+  const trimmed = input.trim();
+
+  // Common TOML indicators
+  const tomlPatterns = [
+    /^\[[\w.-]+\]/, // Section headers [section.name]
+    /^[\w-]+\s*=\s*/, // Key-value pairs
+    /^\[\[[\w.-]+\]\]/, // Array of tables
+  ];
+
+  // Check if any TOML pattern matches
+  const hasTomlSyntax = tomlPatterns.some((pattern) => pattern.test(trimmed));
+
+  if (!hasTomlSyntax) {
+    return false;
+  }
+
+  // Try to parse
+  const result = parseTOML(trimmed);
+  return result.success;
+}

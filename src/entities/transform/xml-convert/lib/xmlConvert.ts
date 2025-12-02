@@ -3,10 +3,9 @@
  * Converts various formats to XML with formatting options
  */
 
+import { detectFormat, parseToIntermediate } from "../../shared";
 import type { TransformResult, PropertySchema } from "../../shared/types";
 
-import { parseJSON } from "@/entities/json";
-import { parseTOML } from "@/entities/toml";
 import {
   parseXML,
   formatXML,
@@ -14,7 +13,6 @@ import {
   getXMLStats,
   type XmlFormatOptions,
 } from "@/entities/xml";
-import { parseYAML } from "@/entities/yaml";
 
 /**
  * Property schema for XML conversion options
@@ -56,7 +54,9 @@ export const xmlConvertDefaultProperties: Record<string, unknown> = {
 };
 
 /**
- * Parse input data
+ * Detect input format and parse
+ * XML is special - if input is XML, we keep the Document object for reformatting
+ * Otherwise, parse to intermediate representation
  */
 function parseInput(input: string): {
   success: boolean;
@@ -65,33 +65,35 @@ function parseInput(input: string): {
   xmlDoc?: Document;
   error?: string;
 } {
-  // Try XML first - if it's XML, keep the Document object
-  const xmlResult = parseXML(input);
-  if (xmlResult.success && xmlResult.data) {
-    return { success: true, isXml: true, xmlDoc: xmlResult.data };
+  const format = detectFormat(input);
+
+  if (format === "unknown") {
+    return {
+      success: false,
+      error:
+        "Unable to detect input format. Supported: XML, JSON, YAML, TOML, CSV",
+    };
   }
 
-  // Try JSON
-  const jsonResult = parseJSON(input);
-  if (jsonResult.success) {
-    return { success: true, data: jsonResult.data };
+  // Special case: If input is XML, keep the Document object for reformatting
+  if (format === "xml") {
+    const xmlResult = parseXML(input);
+    if (xmlResult.success && xmlResult.data) {
+      return { success: true, isXml: true, xmlDoc: xmlResult.data };
+    }
+    return {
+      success: false,
+      error: xmlResult.error || "Failed to parse XML",
+    };
   }
 
-  // Try YAML
-  const yamlResult = parseYAML(input);
-  if (yamlResult.success) {
-    return { success: true, data: yamlResult.data };
-  }
-
-  // Try TOML
-  const tomlResult = parseTOML(input);
-  if (tomlResult.success) {
-    return { success: true, data: tomlResult.data };
-  }
-
+  // For other formats, convert to intermediate representation
+  const parsed = parseToIntermediate(input, format);
   return {
-    success: false,
-    error: "Unable to parse input. Supported formats: XML, JSON, YAML, TOML",
+    success: parsed.success,
+    data: parsed.data,
+    isXml: false,
+    error: parsed.error,
   };
 }
 

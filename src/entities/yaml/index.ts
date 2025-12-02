@@ -3,7 +3,7 @@
  */
 
 // Parsing and validation
-export { parseYAML, validateYAML } from "./lib/parse";
+export { parseYAML, validateYAML, isYAML } from "./lib/parse";
 export type { YamlParseResult } from "./lib/parse";
 
 // Formatting

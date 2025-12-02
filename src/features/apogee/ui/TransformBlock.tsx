@@ -200,7 +200,7 @@ export function TransformBlock({
               value={step.output || ""}
               readOnly
               wrap={wrap}
-              showLineNumbers={!wrap}
+              showLineNumbers={true}
               height="h-64"
               placeholder="No output"
             />

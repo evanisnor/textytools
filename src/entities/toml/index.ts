@@ -3,7 +3,7 @@
  */
 
 // Parsing and validation
-export { parseTOML, validateTOML } from "./lib/parse";
+export { parseTOML, validateTOML, isTOML } from "./lib/parse";
 export type { TomlParseResult } from "./lib/parse";
 
 // Formatting

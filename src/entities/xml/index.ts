@@ -3,7 +3,7 @@
  */
 
 // Parsing and validation
-export { parseXML, validateXML } from "./lib/parse";
+export { parseXML, validateXML, isXML } from "./lib/parse";
 export type { XmlParseResult } from "./lib/parse";
 
 // Formatting

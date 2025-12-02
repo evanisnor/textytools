@@ -2,7 +2,7 @@
 export { parseCsvLine, escapeCsvValue } from "./lib/parser";
 
 // CSV parsing (full document - Apogee support)
-export { parseCSV, detectDelimiter } from "./lib/parse";
+export { parseCSV, detectDelimiter, isCSV } from "./lib/parse";
 export type { CsvParseOptions } from "./lib/parse";
 
 // CSV formatting (Apogee support)

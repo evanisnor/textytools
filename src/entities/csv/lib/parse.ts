@@ -63,3 +63,36 @@ export function detectDelimiter(input: string): string {
 
   return detectedDelimiter;
 }
+
+/**
+ * Detect if input is likely CSV
+ * Checks for consistent column structure across multiple lines
+ */
+export function isCSV(input: string): boolean {
+  if (!input || input.trim() === "") {
+    return false;
+  }
+
+  const lines = input.split(/\r?\n/).filter((line) => line.trim() !== "");
+
+  // Need at least 2 lines (header + data)
+  if (lines.length < 2) {
+    return false;
+  }
+
+  const delimiters = [",", "\t", ";", "|"];
+
+  for (const delimiter of delimiters) {
+    const columnCounts = lines
+      .slice(0, Math.min(10, lines.length)) // Check first 10 lines
+      .map((line) => parseCsvLine(line, delimiter).length);
+
+    // Check if all lines have the same number of columns and > 1 column
+    const uniqueCounts = new Set(columnCounts);
+    if (uniqueCounts.size === 1 && columnCounts[0] > 1) {
+      return true;
+    }
+  }
+
+  return false;
+}

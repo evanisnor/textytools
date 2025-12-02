@@ -57,3 +57,28 @@ export function validateJSON(input: string): {
     error: result.error,
   };
 }
+
+/**
+ * Detect if input is likely JSON (object or array)
+ * More strict than parseJSON - only returns true for structured JSON
+ */
+export function isJSON(input: string): boolean {
+  if (!input || input.trim() === "") {
+    return false;
+  }
+
+  const trimmed = input.trim();
+
+  // Must start with { or [ to be structured JSON
+  if (!trimmed.startsWith("{") && !trimmed.startsWith("[")) {
+    return false;
+  }
+
+  try {
+    const parsed = JSON.parse(trimmed);
+    // Only accept objects or arrays, not primitives
+    return typeof parsed === "object" && parsed !== null;
+  } catch {
+    return false;
+  }
+}

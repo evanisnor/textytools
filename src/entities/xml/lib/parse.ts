@@ -57,3 +57,36 @@ export function validateXML(input: string): {
     error: result.error,
   };
 }
+
+/**
+ * Detect if input is likely XML
+ * Checks for XML syntax patterns
+ */
+export function isXML(input: string): boolean {
+  if (!input || input.trim() === "") {
+    return false;
+  }
+
+  const trimmed = input.trim();
+
+  // Must start with < for XML
+  if (!trimmed.startsWith("<")) {
+    return false;
+  }
+
+  // Check for XML declaration or root element
+  const xmlPatterns = [
+    /^<\?xml/i, // XML declaration
+    /^<[\w-]+/, // Opening tag
+  ];
+
+  const hasXmlSyntax = xmlPatterns.some((pattern) => pattern.test(trimmed));
+
+  if (!hasXmlSyntax) {
+    return false;
+  }
+
+  // Try to parse
+  const result = parseXML(trimmed);
+  return result.success;
+}

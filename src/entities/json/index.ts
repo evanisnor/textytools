@@ -9,7 +9,7 @@ export { setNestedValue } from "./lib/unflatten";
 export { parseValue } from "./lib/type-parser";
 
 // Parsing and validation (Apogee support)
-export { parseJSON, validateJSON } from "./lib/parse";
+export { parseJSON, validateJSON, isJSON } from "./lib/parse";
 export type { JsonParseResult } from "./lib/parse";
 
 // Formatting (Apogee support)
