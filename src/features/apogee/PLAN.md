@@ -2,15 +2,17 @@
 
 This document outlines the component build order for implementing the Apogee feature. The sequence prioritizes foundational infrastructure before higher-level features, ensuring each component can be tested in isolation before integration.
 
+**Note:** This plan aligns with the phase structure in README.md, which organizes by implementation order rather than by spec sections.
+
 ## Build Order Overview
 
 1. **Core Data Model & Types** - Foundation for all subsequent work
-2. **Format Entity Layer** - Reusable parsing/serialization utilities
-3. **Transform Registry & Engine** - Execution framework
-4. **Basic UI Components** - Presentational layer primitives
-5. **Simple Transform Implementations** - Initial working transforms
-6. **Advanced UI Features** - Lens panel, stats bar, palette
-7. **Transform Catalog Expansion** - Additional transform categories
+2. **Format Entity Layer** - Reusable parsing/serialization utilities  
+3. **Transform Implementations** - Build transforms from README.md Section 5 (Transform Catalog)
+4. **State Management** - Document lifecycle and pipeline execution
+5. **Transform Catalog Expansion** - Complete remaining transforms from Section 5
+6. **UI Components** - Presentational layer (README.md Section 6)
+7. **Advanced UI Features** - Lens panel, stats bar, palette enhancements
 8. **Export Actions & Polish** - Final user-facing features
 
 ---
@@ -319,9 +321,69 @@ Create React Context for document state:
 
 ---
 
-## Phase 5: Basic UI Components
+## Phase 5: Transform Catalog Expansion
 
-### 5.1 DataBlock Component
+**Goal:** Complete the remaining transforms from README.md Section 5 (Transform Catalog)
+
+### 5.1 Additional Convert Transforms
+Implement remaining format conversions (currently have JSON, CSV, YAML, XML, TOML):
+- Additional format converters as needed
+- Enhanced options for existing converters
+
+**Location:** `src/entities/transform/`
+
+---
+
+### 5.2 Additional Encode/Decode Transforms
+Expand encoding coverage (currently have Base64, Base58, Hex, URL, HTML Entity):
+- Base91, ASCII85, Z85, Quoted-Printable, ROT13, Morse
+- Corresponding decode transforms
+
+**Location:** `src/entities/transform/text-encoding/`
+
+---
+
+### 5.3 Additional Hash Transforms
+Add more hash algorithms (currently have MD5, SHA-1, SHA-256, SHA-512):
+- SHA-384, SHA-3, BLAKE3, Murmur3
+
+**Location:** `src/entities/transform/text-hash/`
+
+---
+
+### 5.4 Additional Manipulate Transforms
+Expand text manipulation (currently have text-sanitize, case-convert):
+- Regex Replace
+- Sort Lines
+- Extract Lines
+
+**Location:** `src/entities/transform/`
+
+---
+
+### 5.5 Compress/Decompress Transforms
+Implement compression algorithms:
+- Gzip, Bzip2, Brotli, Zstd, LZMA2, XZ
+
+**Location:** `src/entities/transform/`
+
+---
+
+### 5.6 Analyze Transforms
+Implement data analysis and visualization:
+- Chart Generator
+- Frequency Distribution
+- Time Series Plot
+- Data Validator
+- Pattern Heatmap
+
+**Location:** `src/entities/transform/`
+
+---
+
+## Phase 6: UI Components (README.md Section 6)
+
+### 6.1 DataBlock Component
 **File:** `src/features/apogee/ui/DataBlock.tsx`
 
 Create the core output display component:
@@ -334,30 +396,14 @@ Create the core output display component:
 
 **Testing:** Render with different values, test read-only mode, verify controls work.
 
-**Dependencies:** Existing `TextEditor` component from `src/shared/ui/`
+**Dependencies:** Existing `TextEditor` component from `src/entities/editor/`
 
 ---
 
-### 5.2 InputForm Component
-**File:** `src/features/apogee/ui/InputForm.tsx`
-
-Create the initial data entry form:
-
-- Text area for input data
-- Input type selector (text, CSV, JSON)
-- "Create Document" button
-- Calls `createDocument()` from context
-
-**Testing:** Enter data, select type, verify document creation.
-
-**Dependencies:** Apogee Context (4.2), DataBlock (5.1)
-
----
-
-### 5.3 TransformBlock Component (Minimal)
+### 6.3 TransformBlock Component
 **File:** `src/features/apogee/ui/TransformBlock.tsx`
 
-Create the transform step display (without lens panel initially):
+Create the transform step display:
 
 - Header with step number, transform name, minimize/remove buttons
 - Configuration panel (schema-driven form generation from `propertySchema`)
@@ -367,11 +413,11 @@ Create the transform step display (without lens panel initially):
 
 **Testing:** Render with different transforms, verify property updates trigger re-execution.
 
-**Dependencies:** DataBlock (5.1), Apogee Context (4.2)
+**Dependencies:** DataBlock (6.1), ConfigurationPanel (6.4), Apogee Context (4.2)
 
 ---
 
-### 5.4 Schema-Driven Form Generation
+### 6.4 Schema-Driven Form Generation (ConfigurationPanel)
 **File:** `src/features/apogee/ui/ConfigurationPanel.tsx`
 
 Create form controls based on property schemas:
@@ -392,7 +438,7 @@ Create form controls based on property schemas:
 
 ---
 
-### 5.5 TransformPipeline Component
+### 6.5 TransformPipeline Component
 **File:** `src/features/apogee/ui/TransformPipeline.tsx`
 
 Create the main pipeline display:
@@ -400,17 +446,18 @@ Create the main pipeline display:
 - Render InputForm (when no document)
 - Render DataBlock for input + TransformBlock list (when document loaded)
 - Step connectors (visual arrows between steps)
+- Transform palette for adding transforms
 - Call execution engine on mount and updates
 
 **Testing:** Create document, verify pipeline renders, add/remove transforms.
 
-**Dependencies:** InputForm (5.2), TransformBlock (5.3), DataBlock (5.1), Apogee Context (4.2)
+**Dependencies:** InputForm (6.2), TransformBlock (6.3), DataBlock (6.1), Apogee Context (4.2)
 
 ---
 
-## Phase 6: Advanced UI Features
+## Phase 7: Advanced UI Features
 
-### 6.1 StatsBar Component
+### 7.1 StatsBar Component
 **File:** `src/features/apogee/ui/StatsBar.tsx`
 
 Create the metadata display bar:
@@ -426,7 +473,7 @@ Create the metadata display bar:
 
 ---
 
-### 6.2 Enhance DataBlock with Stats
+### 7.2 Enhance DataBlock with Stats
 **File:** `src/features/apogee/ui/DataBlock.tsx`
 
 Integrate StatsBar into DataBlock:
@@ -437,21 +484,21 @@ Integrate StatsBar into DataBlock:
 
 **Testing:** Execute transforms, verify stats appear correctly.
 
-**Dependencies:** StatsBar (6.1)
+**Dependencies:** StatsBar (7.1)
 
 ---
 
-### 6.3 Lens Execution Logic
+### 7.3 Lens Execution Logic
 **File:** `src/features/apogee/lib/lens.ts`
 
 Implement the Input Lens Pass:
 
 - `executeLensPass(input: string, selection: TransformStep['inputSelection']): Promise<LensResult>`
-  - Mode: "all" (pass-through)
-  - Mode: "regex" (pattern extraction with flags)
-  - Mode: "jsonpath" (JSONPath query execution)
-  - Mode: "csv-column" (column extraction)
-  - Mode: "xml-xpath" (XPath query execution)
+  - Mode: "all" (pass-through) ✅ DONE
+  - Mode: "regex" (pattern extraction with flags) ✅ DONE
+  - Mode: "csv-column" (column extraction) ✅ DONE (basic)
+  - Mode: "jsonpath" (JSONPath query execution) - Placeholder for Phase 8
+  - Mode: "xml-xpath" (XPath query execution) - Placeholder for Phase 8
 - `parseData(data: string, format: string): string` (parse as JSON/CSV/YAML/XML/TOML)
 - Error handling for invalid patterns/queries
 
@@ -461,22 +508,7 @@ Implement the Input Lens Pass:
 
 ---
 
-### 6.4 Integrate Lens into Engine
-**File:** `src/features/apogee/lib/engine.ts`
-
-Update execution engine to use lens:
-
-- Call `executeLensPass()` before each transform execution
-- Handle lens errors (show in step output, continue pipeline)
-- Update execution flow diagram in code comments
-
-**Testing:** Create transforms with lens configurations, verify extraction works before transformation.
-
-**Dependencies:** Lens logic (6.3)
-
----
-
-### 6.5 LensPanel Component
+### 7.4 LensPanel Component
 **File:** `src/features/apogee/ui/LensConfig.tsx`
 
 Create the lens configuration UI:
@@ -497,7 +529,7 @@ Create the lens configuration UI:
 
 ---
 
-### 6.6 Integrate Lens into TransformBlock
+### 7.5 Integrate Lens into TransformBlock
 **File:** `src/features/apogee/ui/TransformBlock.tsx`
 
 Add LensPanel to TransformBlock:
@@ -509,63 +541,78 @@ Add LensPanel to TransformBlock:
 
 **Testing:** Add Convert transform, configure lens, verify extraction before conversion.
 
-**Dependencies:** LensPanel (6.5)
+**Dependencies:** LensPanel (7.4)
 
 ---
 
-### 6.7 TransformPalette Component
+### 7.6 Enhanced TransformPalette
 **File:** `src/features/apogee/ui/TransformPalette.tsx`
 
-Create the transform selection UI:
+Enhance the transform selection UI (currently basic in Phase 6):
 
-- Category buttons (Convert, Encode, Decode, Hash, Manipulate, Compress, Decompress, Analyze)
-- Collapsible category rows
-- Transform tiles with icon, name, tooltip (description, input/output types)
+- Search/filter functionality
+- Transform icons/visual indicators
+- Detailed tooltips (description, input/output types, examples)
 - Filter transforms by current output type (call `ApogeeEngine.getAvailableTransforms()`)
-- Add transform on tile click (call `addTransform()` from context)
+- Keyboard shortcuts for common transforms
 
-**Testing:** Click categories, verify transforms appear, add transforms to pipeline.
+**Testing:** Search transforms, verify compatibility filtering, test keyboard shortcuts.
 
 **Dependencies:** Apogee Context (4.2), Engine (1.3)
 
 ---
 
-### 6.8 Integrate Palette into Pipeline
-**File:** `src/features/apogee/ui/TransformPipeline.tsx`
+### 7.7 Syntax Highlighting Integration
+**File:** `src/features/apogee/ui/DataBlock.tsx`
 
-Add TransformPalette below the pipeline:
+Add syntax highlighting to DataBlock:
 
-- Render palette after last transform step
-- Show only compatible transforms based on current output type
+- Use `mimeType` prop to select highlighter
+- Integrate syntax highlighting library (e.g., Prism, Highlight.js, or Shiki)
+- Support JSON, CSV, YAML, XML, TOML highlighting
+- Manual override selector (dropdown in header)
 
-**Testing:** Add document, verify palette shows, add transforms.
+**Testing:** Display different data types, verify highlighting works, test manual override.
 
-**Dependencies:** TransformPalette (6.7)
-
----
-
-## Phase 7: Transform Catalog Expansion
-
-### 7.1 YAML/TOML/XML Convert Transforms
-**Locations:**
-- `src/entities/transform/yaml-convert/`
-- `src/entities/transform/toml-convert/`
-- `src/entities/transform/xml-convert/`
-
-Implement remaining Convert category transforms:
-
-- Follow same pattern as JSON Convert (3.1)
-- Use respective format entities (2.3, 2.4, 2.5)
-- Generate appropriate stats
-- Register in registry
-
-**Testing:** Test conversions between all formats (JSON↔YAML↔XML↔TOML).
-
-**Dependencies:** YAML entity (2.3), XML entity (2.4), TOML entity (2.5), JSON entity (2.1)
+**Dependencies:** Syntax highlighting library
 
 ---
 
-### 7.2 Additional Encode Transforms
+## Phase 8: Advanced Features & Polish
+
+### 8.1 JSONPath & XPath Support
+**File:** `src/features/apogee/lib/lens.ts`
+
+Implement advanced lens modes:
+
+- JSONPath support (integrate `jsonpath` library)
+- XPath support (use browser DOMParser)
+- Update lens.ts to remove placeholders
+- Add comprehensive error handling
+
+**Testing:** Test JSONPath queries on JSON data, XPath queries on XML data.
+
+**Dependencies:** jsonpath library
+
+---
+
+### 8.2 Export Actions
+**File:** `src/features/apogee/lib/export.ts`
+
+Implement export functionality:
+
+- Export document as JSON (with full pipeline state)
+- Download output as file (respecting mimeType)
+- Copy pipeline URL (for sharing)
+- Generate shareable template
+
+**Testing:** Export documents, verify download works, test URL sharing.
+
+**Dependencies:** Apogee Context (4.2)
+
+---
+
+### 8.3 Additional Encode Transforms (Future)
 **Locations:**
 - `src/entities/transform/text-encoding/lib/base91.ts`
 - `src/entities/transform/text-encoding/lib/ascii85.ts`
@@ -587,7 +634,7 @@ Implement remaining Encode transforms:
 
 ---
 
-### 7.3 Decode Transforms
+### 8.4 Decode Transforms (Future)
 **Locations:**
 - `src/entities/transform/text-encoding/lib/jwtDecode.ts`
 - `src/entities/transform/text-encoding/lib/base64Decode.ts`
@@ -607,7 +654,7 @@ Implement Decode transforms:
 
 ---
 
-### 7.4 Additional Hash Transforms
+### 8.5 Additional Hash Transforms (Future)
 **Locations:**
 - `src/entities/transform/text-hash/lib/sha1.ts`
 - `src/entities/transform/text-hash/lib/sha384.ts`
@@ -628,7 +675,7 @@ Implement remaining Hash transforms:
 
 ---
 
-### 7.5 Manipulate Transforms
+### 8.6 Manipulate Transforms (Future)
 **Locations:**
 - `src/entities/transform/text-sanitize/` (augment existing)
 - `src/entities/transform/text-case/` (augment existing)
@@ -652,7 +699,7 @@ Implement Manipulate category:
 
 ---
 
-### 7.6 Compress/Decompress Transforms (Future)
+### 8.7 Compress/Decompress Transforms (Future)
 **Location:** `src/entities/transform/compression/`
 
 Implement compression transforms:
@@ -668,7 +715,7 @@ Implement compression transforms:
 
 ---
 
-### 7.7 Analyze Transforms (Future)
+### 8.8 Analyze Transforms (Future)
 **Locations:**
 - `src/entities/transform/chart-generator/`
 - `src/entities/transform/frequency-distribution/`
@@ -688,26 +735,6 @@ Implement Analyze category:
 **Testing:** Test with various datasets, verify chart rendering, validate schemas.
 
 **Dependencies:** Chart libraries (d3.js, chart.js, or custom SVG generation), JSON Schema validator
-
----
-
-## Phase 8: Export Actions & Polish
-
-### 8.1 Export Registry
-**File:** `src/features/apogee/lib/exports.ts`
-
-Create export action registry:
-
-- `ExportDefinition` implementations:
-  - Text File (download with extension, line ending options)
-  - Clipboard (copy to clipboard with format options)
-  - PDF (future - generate PDF using jsPDF)
-- `EXPORT_REGISTRY` object
-- Registry access functions similar to transforms
-
-**Testing:** Export various outputs, verify downloads and clipboard copy.
-
-**Dependencies:** Types (1.1), browser APIs (Blob, URL.createObjectURL, navigator.clipboard)
 
 ---
 
@@ -804,9 +831,9 @@ Implement keyboard navigation:
 
 ---
 
-### 8.8 Performance Optimizations
+### 8.9 Performance Optimizations (Future)
 
-#### 8.8.1 Web Workers for Heavy Transforms
+#### 8.9.1 Web Workers for Heavy Transforms
 **File:** `src/features/apogee/lib/worker.ts`
 
 Offload expensive operations:
@@ -821,7 +848,7 @@ Offload expensive operations:
 
 ---
 
-#### 8.8.2 Virtual Scrolling for Large Outputs
+#### 8.9.2 Virtual Scrolling for Large Outputs
 **File:** `src/features/apogee/ui/DataBlock.tsx`
 
 Optimize rendering for large outputs:
@@ -836,14 +863,14 @@ Optimize rendering for large outputs:
 
 ---
 
-#### 8.8.3 Debounced Property Updates
+#### 8.9.3 Debounced Property Updates
 **File:** `src/features/apogee/model/useDocumentManager.ts`
 
 Optimize re-execution:
 
-- Debounce property updates (500ms)
+- Debounce property updates (500ms) ✅ DONE
 - Update local state immediately (no cursor jump)
-- Trigger execution after idle period
+- Trigger execution after idle period ✅ DONE
 
 **Testing:** Type in text inputs, verify smooth typing with delayed execution.
 
@@ -851,7 +878,7 @@ Optimize re-execution:
 
 ---
 
-### 8.9 Error Handling & Edge Cases
+### 8.10 Error Handling & Edge Cases
 
 - Empty input states with helpful placeholders
 - Invalid transform configurations (validation in property schemas)
@@ -863,7 +890,7 @@ Optimize re-execution:
 
 ---
 
-### 8.10 Accessibility & Dark Mode
+### 8.11 Accessibility & Dark Mode
 
 - Ensure all interactive elements are keyboard accessible
 - ARIA labels for screen readers
@@ -871,19 +898,46 @@ Optimize re-execution:
 - Focus indicators for keyboard navigation
 - Semantic HTML structure
 
+
 **Testing:** Test with keyboard only, verify screen reader compatibility.
 
 ---
 
-## Summary of Build Order
+## Summary of Phases
 
-1. **Phase 1**: Core Infrastructure (types, registry, engine)
-2. **Phase 2**: Format Entity Layer (JSON, CSV, YAML, XML, TOML)
-3. **Phase 3**: Basic Transform Implementations (JSON Convert, CSV Convert, Encode, Hash)
-4. **Phase 4**: Document State Management (hook, context provider)
-5. **Phase 5**: Basic UI Components (DataBlock, InputForm, TransformBlock, Pipeline)
-6. **Phase 6**: Advanced UI Features (StatsBar, Lens, Palette)
-7. **Phase 7**: Transform Catalog Expansion (YAML/TOML/XML, more Encode/Decode/Hash, Manipulate, Compress, Analyze)
-8. **Phase 8**: Export Actions & Polish (exports, document list, keyboard shortcuts, performance, accessibility)
+1. **Phase 1**: Core Infrastructure ✅ DONE
+   - Types, transform registry, execution engine, lens placeholders
 
-Each phase builds on the previous, ensuring components can be tested in isolation before integration. The core execution engine works by Phase 3, basic UI is functional by Phase 5, and advanced features are progressively added in Phases 6-8.
+2. **Phase 2**: Format Entity Layer ✅ DONE
+   - JSON, CSV, YAML, XML, TOML parsers/serializers
+
+3. **Phase 3**: Initial Transform Implementations ✅ DONE
+   - 22 transforms across 5 categories (Convert, Encode, Decode, Hash, Manipulate)
+
+4. **Phase 4**: State Management ✅ DONE
+   - useDocumentManager hook, ApogeeProvider context, LocalStorage persistence
+
+5. **Phase 5**: Transform Catalog Expansion ❌ TODO
+   - Additional Convert (YAML↔XML↔TOML)
+   - Additional Encode/Decode (Base91, ASCII85, Z85, JWT, etc.)
+   - Additional Hash (SHA-384, SHA-3, BLAKE3, Murmur3)
+   - Additional Manipulate (regex-replace, sort-lines, extract-lines)
+   - Compress/Decompress (Gzip, Bzip2, Brotli, Zstd)
+   - Analyze (charts, frequency, validator, heatmap)
+
+6. **Phase 6**: UI Components ✅ DONE
+   - ConfigurationPanel, DataBlock, InputForm, TransformBlock, TransformPipeline
+
+7. **Phase 7**: Advanced UI Features ❌ TODO
+   - StatsBar, Lens configuration panel, Enhanced TransformPalette
+   - Syntax highlighting integration
+
+8. **Phase 8**: Advanced Features & Polish ❌ TODO
+   - JSONPath & XPath support
+   - Export actions (download, share, templates)
+   - Additional transforms (future)
+   - Performance optimizations (Web Workers, virtual scrolling)
+   - Error handling & accessibility
+
+Each phase builds on the previous, ensuring components can be tested in isolation before integration. The core execution engine worked by Phase 3, basic UI is functional after Phase 6, and advanced features are progressively added in Phases 7-8.
+
