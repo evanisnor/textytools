@@ -17,17 +17,6 @@ import {
  */
 export const jsonConvertPropertySchema: PropertySchema[] = [
   {
-    key: "indentation",
-    label: "Indentation",
-    type: "toggle-group",
-    options: [
-      { value: "2", label: "2 spaces" },
-      { value: "4", label: "4 spaces" },
-      { value: "tab", label: "Tab" },
-    ],
-    defaultValue: "2",
-  },
-  {
     key: "sortKeys",
     label: "Sort Keys",
     type: "toggle",
@@ -38,6 +27,17 @@ export const jsonConvertPropertySchema: PropertySchema[] = [
     label: "Minify",
     type: "toggle",
     defaultValue: false,
+  },
+  {
+    key: "indentation",
+    label: "Indentation",
+    type: "toggle-group",
+    options: [
+      { value: "2", label: "2 spaces" },
+      { value: "4", label: "4 spaces" },
+      { value: "tab", label: "Tab" },
+    ],
+    defaultValue: "2",
   },
 ];
 
