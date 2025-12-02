@@ -11,10 +11,6 @@ import type {
   TransformCategory,
 } from "../model/types";
 
-import {
-  brotliCompressDefinition,
-  brotliDecompressDefinition,
-} from "@/entities/transform/brotli-compress";
 import { csvConvertDefinition } from "@/entities/transform/csv-convert";
 import { extractLinesDefinition } from "@/entities/transform/extract-lines";
 import {
@@ -64,10 +60,6 @@ import { textSanitizeTransform } from "@/entities/transform/text-sanitize";
 import { tomlConvertDefinition } from "@/entities/transform/toml-convert";
 import { xmlConvertDefinition } from "@/entities/transform/xml-convert";
 import { yamlConvertDefinition } from "@/entities/transform/yaml-convert";
-import {
-  zstdCompressDefinition,
-  zstdDecompressDefinition,
-} from "@/entities/transform/zstd-compress";
 
 /**
  * Global transform registry
@@ -129,14 +121,36 @@ export const TRANSFORM_REGISTRY: Record<string, TransformDefinition> = {
 
   // Compress transforms
   "gzip-compress": gzipCompressDefinition as TransformDefinition,
-  "brotli-compress": brotliCompressDefinition as TransformDefinition,
-  "zstd-compress": zstdCompressDefinition as TransformDefinition,
 
   // Decompress transforms
   "gzip-decompress": gzipDecompressDefinition as TransformDefinition,
-  "brotli-decompress": brotliDecompressDefinition as TransformDefinition,
-  "zstd-decompress": zstdDecompressDefinition as TransformDefinition,
 };
+
+// Lazy-loaded transforms (use dynamic imports to avoid bundling Node.js dependencies client-side)
+let brotliTransformsLoaded = false;
+let zstdTransformsLoaded = false;
+
+/**
+ * Dynamically load brotli transforms (DISABLED - requires Node.js fs module)
+ */
+async function ensureBrotliTransforms(): Promise<void> {
+  if (brotliTransformsLoaded) return;
+
+  // Brotli disabled - the library requires Node.js fs module which doesn't work client-side
+  console.warn("Brotli transforms are disabled (requires Node.js fs module)");
+  brotliTransformsLoaded = true;
+}
+
+/**
+ * Dynamically load zstd transforms (DISABLED - requires Node.js module)
+ */
+async function ensureZstdTransforms(): Promise<void> {
+  if (zstdTransformsLoaded) return;
+
+  // Zstd disabled - the library requires Node.js modules which don't work client-side
+  console.warn("Zstd transforms are disabled (requires Node.js modules)");
+  zstdTransformsLoaded = true;
+}
 
 /**
  * Get a transform definition by type
@@ -145,6 +159,32 @@ export function getTransform(
   type: TransformType,
 ): TransformDefinition | undefined {
   return TRANSFORM_REGISTRY[type];
+}
+
+/**
+ * Get a transform definition by type (async version that loads lazy transforms)
+ */
+export async function getTransformAsync(
+  type: TransformType,
+): Promise<TransformDefinition | undefined> {
+  // Try to get from registry first
+  if (TRANSFORM_REGISTRY[type]) {
+    return TRANSFORM_REGISTRY[type];
+  }
+
+  // Load brotli transforms if needed
+  if (type.startsWith("brotli-")) {
+    await ensureBrotliTransforms();
+    return TRANSFORM_REGISTRY[type];
+  }
+
+  // Load zstd transforms if needed
+  if (type.startsWith("zstd-")) {
+    await ensureZstdTransforms();
+    return TRANSFORM_REGISTRY[type];
+  }
+
+  return undefined;
 }
 
 /**

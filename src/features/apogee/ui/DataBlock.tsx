@@ -66,10 +66,12 @@ export function DataBlock({
   }, []);
 
   return (
-    <div className="border border-zinc-200 rounded-lg overflow-hidden">
+    <div className="border border-zinc-200 dark:border-zinc-700 rounded-lg overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between bg-zinc-50 border-b border-zinc-200 px-4 py-2">
-        <h3 className="text-sm font-medium text-zinc-700">{title}</h3>
+      <div className="flex items-center justify-between bg-zinc-50 dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-700 px-4 py-2">
+        <h3 className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+          {title}
+        </h3>
         <div className="flex items-center gap-2">
           {/* Wrap Toggle */}
           <button
@@ -77,8 +79,8 @@ export function DataBlock({
             onClick={handleWrapToggle}
             className={`px-2 py-1 text-xs rounded transition-colors ${
               wrap
-                ? "bg-blue-100 text-blue-700"
-                : "bg-white text-zinc-600 hover:bg-zinc-100"
+                ? "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300"
+                : "bg-white dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-600"
             }`}
             title={wrap ? "Disable word wrap" : "Enable word wrap"}
           >
@@ -89,7 +91,7 @@ export function DataBlock({
           <button
             type="button"
             onClick={handleCopy}
-            className="px-2 py-1 text-xs bg-white text-zinc-600 rounded hover:bg-zinc-100 transition-colors"
+            className="px-2 py-1 text-xs bg-white dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 rounded hover:bg-zinc-100 dark:hover:bg-zinc-600 transition-colors"
             title="Copy to clipboard"
           >
             {copied ? "Copied!" : "Copy"}
@@ -100,7 +102,7 @@ export function DataBlock({
             <button
               type="button"
               onClick={onClear}
-              className="px-2 py-1 text-xs bg-white text-zinc-600 rounded hover:bg-zinc-100 transition-colors"
+              className="px-2 py-1 text-xs bg-white dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 rounded hover:bg-zinc-100 dark:hover:bg-zinc-600 transition-colors"
               title="Clear content"
             >
               Clear
@@ -112,7 +114,7 @@ export function DataBlock({
             <button
               type="button"
               onClick={onRemove}
-              className="px-2 py-1 text-xs bg-white text-red-600 rounded hover:bg-red-50 transition-colors"
+              className="px-2 py-1 text-xs bg-white dark:bg-zinc-700 text-red-600 dark:text-red-400 rounded hover:bg-red-50 dark:hover:bg-red-950 transition-colors"
               title="Remove this block"
             >
               Remove
@@ -123,7 +125,7 @@ export function DataBlock({
 
       {/* Stats Bar */}
       {stats && stats.length > 0 && (
-        <div className="flex items-center gap-3 bg-zinc-50 border-b border-zinc-200 px-4 py-2 overflow-x-auto">
+        <div className="flex items-center gap-3 bg-zinc-50 dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-700 px-4 py-2 overflow-x-auto">
           {stats.map((stat, index) => (
             <StatPill key={index} stat={stat} />
           ))}
@@ -131,7 +133,7 @@ export function DataBlock({
       )}
 
       {/* Content */}
-      <div className="bg-white">
+      <div className="bg-white dark:bg-zinc-900">
         <TextEditor
           value={value}
           onChange={onChange}
@@ -152,10 +154,13 @@ interface StatPillProps {
 
 function StatPill({ stat }: StatPillProps) {
   const alertColors = {
-    info: "bg-blue-100 text-blue-700 border-blue-200",
-    warning: "bg-yellow-100 text-yellow-700 border-yellow-200",
-    error: "bg-red-100 text-red-700 border-red-200",
-    default: "bg-zinc-100 text-zinc-700 border-zinc-200",
+    info: "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-700",
+    warning:
+      "bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300 border-yellow-200 dark:border-yellow-700",
+    error:
+      "bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 border-red-200 dark:border-red-700",
+    default:
+      "bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-700",
   };
 
   const colorClass = stat.alert ? alertColors[stat.alert] : alertColors.default;

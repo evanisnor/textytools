@@ -66,4 +66,7 @@ export {
   InputForm,
   TransformBlock,
   TransformPipeline,
+  TransformPalette,
+  ApogeeShell,
+  ApogeeProvider as ApogeeProviderUI,
 } from "./ui";

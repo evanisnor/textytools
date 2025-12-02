@@ -127,13 +127,7 @@ export function useDocumentManager(): DocumentManager {
     const loadedDocs = loadDocuments();
     setDocuments(loadedDocs);
 
-    // Set current document to most recently updated
-    if (loadedDocs.length > 0) {
-      const mostRecent = loadedDocs.reduce((latest, doc) =>
-        doc.updatedAt > latest.updatedAt ? doc : latest,
-      );
-      setCurrentDocumentState(mostRecent);
-    }
+    // Don't auto-select any document - let user choose or create new
   }, []);
 
   // Save documents whenever they change

@@ -82,8 +82,8 @@ export type ManipulateTransform =
 export type CompressTransform =
   | "gzip-compress"
   | "bzip2-compress"
-  | "brotli-compress"
-  | "zstd-compress"
+  // | "brotli-compress"
+  // | "zstd-compress"
   | "lzma2-compress"
   | "xz-compress";
 
