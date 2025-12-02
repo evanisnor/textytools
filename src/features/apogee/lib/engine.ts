@@ -46,7 +46,7 @@ export class ApogeeEngine {
       }
 
       // PHASE 2: Transform Pass
-      const transformResult = transform.execute(
+      const transformResult = await transform.execute(
         lensResult.data,
         step.properties,
       );
@@ -101,7 +101,7 @@ export class ApogeeEngine {
         continue;
       }
 
-      const transformResult = transform.execute(
+      const transformResult = await transform.execute(
         lensResult.data,
         step.properties,
       );

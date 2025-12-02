@@ -10,3 +10,11 @@ export type {
 
 // Codec function
 export { hashText } from "./lib/codec";
+
+// Transform Definitions (Apogee support)
+export {
+  md5HashDefinition,
+  sha1HashDefinition,
+  sha256HashDefinition,
+  sha512HashDefinition,
+} from "./lib/transforms";

@@ -213,72 +213,26 @@ export interface Document {
 // Transform Definition Schema
 // ============================================================================
 
-/**
- * Property schema types for UI generation
- */
-export type PropertyType =
-  | "text"
-  | "number"
-  | "select"
-  | "toggle"
-  | "toggle-group"
-  | "multi-select";
+import type {
+  PropertyType as SharedPropertyType,
+  PropertySchema as SharedPropertySchema,
+  TransformStat as SharedTransformStat,
+  TransformResult as SharedTransformResult,
+  TransformDefinition as SharedTransformDefinition,
+} from "@/entities/transform/shared/types";
+
+// Re-export shared types
+export type PropertyType = SharedPropertyType;
+export type PropertySchema = SharedPropertySchema;
+export type TransformStat = SharedTransformStat;
+export type TransformResult = SharedTransformResult;
 
 /**
- * Schema for a single property/option
+ * Complete transform definition with Apogee-specific types
  */
-export interface PropertySchema {
-  key: string;
-  label: string;
-  type: PropertyType;
-  placeholder?: string;
-  options?: string[] | { value: string; label: string }[];
-  defaultValue: unknown;
-  validation?: (value: unknown) => string | null;
-}
-
-/**
- * Statistical metadata about transform result
- */
-export interface TransformStat {
-  label: string;
-  value: string | number | boolean;
-  alert?: "info" | "warning" | "error";
-}
-
-/**
- * Result from transform execution
- */
-export interface TransformResult {
-  success: boolean;
-  data: string;
-  error?: string;
-  mimeType: string;
-  stats?: TransformStat[];
-}
-
-/**
- * Complete transform definition
- */
-export interface TransformDefinition {
+export interface TransformDefinition extends SharedTransformDefinition {
   type: TransformType;
-  name: string;
-  description: string;
   category: TransformCategory;
-
-  // Input/Output Type Compatibility
-  acceptsInput: string[];
-  producesOutput: string;
-
-  // UI Configuration Schema
-  propertySchema: PropertySchema[];
-  defaultProperties: Record<string, unknown>;
-
-  // Execution
-  execute: (
-    input: string,
-    properties: Record<string, unknown>,
-  ) => TransformResult;
 
   // Optional features
   supportsInputSelection?: boolean; // Default: true

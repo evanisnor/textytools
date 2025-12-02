@@ -6,36 +6,115 @@ Domain logic for bidirectional data format conversion and text transformation. T
 
 The transform entity is organized by transformation type, allowing for multiple transform implementations that can be composed and reused across features.
 
+**Note**: Many transforms now include Apogee-compatible `TransformDefinition` exports for use in the Apogee pipeline. See individual transform READMEs for details.
+
 ## Structure
 
 ```
 transform/
-├── csv-json/           # CSV ↔ JSON conversion
-│   ├── lib/
-│   ├── model/
-│   └── index.ts
+├── csv-convert/        # CSV conversion (Apogee)
+├── csv-json/           # CSV ↔ JSON conversion (legacy)
+├── json-convert/       # JSON conversion (Apogee)
 ├── jwt/                # JWT decoding
-│   ├── lib/
-│   ├── model/
-│   └── index.ts
+├── regex-match-csv/    # Regex match to CSV
+├── regex-match-json/   # Regex match to JSON
 ├── text-case/          # Text case transformations
-│   ├── lib/
-│   ├── model/
-│   └── index.ts
-├── text-encoding/      # Text encoding/decoding
-│   ├── lib/
-│   ├── model/
-│   └── index.ts
-├── text-hash/          # Cryptographic hashing
-│   ├── lib/
-│   ├── model/
-│   └── index.ts
+├── text-encoding/      # Text encoding/decoding (Apogee support)
+├── text-hash/          # Cryptographic hashing (Apogee support)
+├── text-sanitize/      # Text cleanup
+├── toml-convert/       # TOML conversion (Apogee)
+├── xml-convert/        # XML conversion (Apogee)
+├── yaml-convert/       # YAML conversion (Apogee)
 └── index.ts            # Public API aggregating all transforms
 ```
 
 ## Current Transforms
 
-### CSV-JSON Converter
+### Apogee Format Conversion Transforms
+
+The following transforms are designed for use in the Apogee pipeline and include `TransformDefinition` exports:
+
+#### JSON Convert
+Parse and convert various formats (JSON, CSV, YAML, XML, TOML) to JSON with formatting options.
+
+**Location**: [json-convert/](./json-convert/)
+
+**Usage**:
+```typescript
+import { jsonConvertDefinition } from "@/entities/transform/json-convert";
+
+// Register in Apogee pipeline or use directly
+const result = jsonConvertDefinition.execute(input, {
+  indentation: "2",
+  sortKeys: true,
+  minify: false,
+});
+```
+
+#### CSV Convert
+Convert JSON or CSV to CSV format with customizable delimiters.
+
+**Location**: [csv-convert/](./csv-convert/)
+
+#### YAML Convert
+Parse and convert data to YAML format with version control.
+
+**Location**: [yaml-convert/](./yaml-convert/)
+
+#### XML Convert
+Parse and convert data to XML with JSON interoperability.
+
+**Location**: [xml-convert/](./xml-convert/)
+
+#### TOML Convert
+Parse and convert data to TOML configuration format.
+
+**Location**: [toml-convert/](./toml-convert/)
+
+### Text Encoding Transforms (Apogee Support)
+
+Bidirectional encoding/decoding with `TransformDefinition` exports:
+
+- **Base64 Encode/Decode** - Standard Base64 encoding
+- **Base58 Encode/Decode** - Bitcoin-style encoding
+- **Hex Encode/Decode** - Hexadecimal representation
+- **URL Encode** - URL-safe encoding
+- **HTML Entity Encode** - HTML special character encoding
+
+**Location**: [text-encoding/](./text-encoding/)
+
+**Usage**:
+```typescript
+import { base64EncodeDefinition } from "@/entities/transform/text-encoding";
+
+// Use in Apogee pipeline
+const result = base64EncodeDefinition.execute(input, {});
+```
+
+### Text Hashing Transforms (Apogee Support)
+
+Cryptographic hashing with security warnings:
+
+- **MD5 Hash** - Legacy, with deprecation warning
+- **SHA-1 Hash** - Legacy, with deprecation warning
+- **SHA-256 Hash** - Secure, recommended
+- **SHA-512 Hash** - Maximum security
+
+**Location**: [text-hash/](./text-hash/)
+
+**Usage**:
+```typescript
+import { sha256HashDefinition } from "@/entities/transform/text-hash";
+
+// Use in Apogee pipeline (async supported)
+const result = await sha256HashDefinition.execute(input, {});
+```
+
+---
+
+### Legacy Transforms
+
+#### CSV-JSON Converter
 
 Bidirectional conversion between CSV and JSON formats.
 
@@ -61,10 +140,27 @@ JWT (JSON Web Token) decoding and standard claim parsing.
 
 **See**: [jwt/README.md](./jwt/README.md) for detailed documentation.
 
-**Usage:**
-```typescript
-import { decodeJWT, isExpired, isNotYetValid } from "@/entities/transform";
+## Apogee Integration
 
+Transforms with `TransformDefinition` exports are automatically registered in the Apogee pipeline via the transform registry:
+
+```typescript
+import { getTransform, getTransformsByCategory } from "@/features/apogee/lib/registry";
+
+// Get a specific transform
+const jsonTransform = getTransform("json-convert");
+
+// Get all convert transforms
+const convertTransforms = getTransformsByCategory("convert");
+```
+
+See [Apogee README](../../features/apogee/README.md) for pipeline documentation.
+
+## Used By
+
+- **[apogee feature](../../features/apogee)** - Transformation pipeline (primary consumer)
+- [csv-json-converter feature](../../features/csv-json-converter) - CSV/JSON conversion tool
+- [jwt-decoder feature](../../features/jwt-decoder) - JWT decoder tool
 // Decode JWT
 const decoded = decodeJWT(token);
 

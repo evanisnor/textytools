@@ -11,11 +11,58 @@ import type {
   TransformCategory,
 } from "../model/types";
 
+import { csvConvertDefinition } from "@/entities/transform/csv-convert";
+import { jsonConvertDefinition } from "@/entities/transform/json-convert";
+import {
+  base64DecodeDefinition,
+  base64EncodeDefinition,
+  base58DecodeDefinition,
+  base58EncodeDefinition,
+  hexDecodeDefinition,
+  hexEncodeDefinition,
+  htmlEntityEncodeDefinition,
+  urlEncodeDefinition,
+} from "@/entities/transform/text-encoding";
+import {
+  md5HashDefinition,
+  sha1HashDefinition,
+  sha256HashDefinition,
+  sha512HashDefinition,
+} from "@/entities/transform/text-hash";
+import { tomlConvertDefinition } from "@/entities/transform/toml-convert";
+import { xmlConvertDefinition } from "@/entities/transform/xml-convert";
+import { yamlConvertDefinition } from "@/entities/transform/yaml-convert";
+
 /**
  * Global transform registry
- * Transforms will be registered as they are implemented
+ * Populated with all implemented transforms
  */
-export const TRANSFORM_REGISTRY: Record<string, TransformDefinition> = {};
+export const TRANSFORM_REGISTRY: Record<string, TransformDefinition> = {
+  // Convert transforms
+  "json-convert": jsonConvertDefinition as TransformDefinition,
+  "csv-convert": csvConvertDefinition as TransformDefinition,
+  "yaml-convert": yamlConvertDefinition as TransformDefinition,
+  "xml-convert": xmlConvertDefinition as TransformDefinition,
+  "toml-convert": tomlConvertDefinition as TransformDefinition,
+
+  // Encode transforms
+  "base64-encode": base64EncodeDefinition as TransformDefinition,
+  "base58-encode": base58EncodeDefinition as TransformDefinition,
+  "hex-encode": hexEncodeDefinition as TransformDefinition,
+  "url-encode": urlEncodeDefinition as TransformDefinition,
+  "html-entity-encode": htmlEntityEncodeDefinition as TransformDefinition,
+
+  // Decode transforms
+  "base64-decode": base64DecodeDefinition as TransformDefinition,
+  "base58-decode": base58DecodeDefinition as TransformDefinition,
+  "hex-decode": hexDecodeDefinition as TransformDefinition,
+
+  // Hash transforms
+  "md5-hash": md5HashDefinition as TransformDefinition,
+  "sha1-hash": sha1HashDefinition as TransformDefinition,
+  "sha256-hash": sha256HashDefinition as TransformDefinition,
+  "sha512-hash": sha512HashDefinition as TransformDefinition,
+};
 
 /**
  * Get a transform definition by type

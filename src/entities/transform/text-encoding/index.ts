@@ -10,3 +10,15 @@ export type {
 
 // Codec functions
 export { encodeText, decodeText } from "./lib/codec";
+
+// Transform Definitions (Apogee support)
+export {
+  base64EncodeDefinition,
+  base64DecodeDefinition,
+  base58EncodeDefinition,
+  base58DecodeDefinition,
+  hexEncodeDefinition,
+  hexDecodeDefinition,
+  urlEncodeDefinition,
+  htmlEntityEncodeDefinition,
+} from "./lib/transforms";

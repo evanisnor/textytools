@@ -1,10 +1,24 @@
 # Apogee: The Next Generation Transformation Pipeline
 
+**Implementation Status:** Phase 3 Complete (Transforms) | [Phase 2 Summary](./README_PHASE2.md) | [Phase 3 Summary](./README_PHASE3.md)
+
 Apogee is a linear data transformation pipeline that lets users convert, encode, hash, compress, and manipulate text data through a sequence of configurable steps. Each step takes input, optionally extracts a subset via an "Input Lens," applies a transformation, and produces output with metadata and statistics. The pipeline flows from top to bottom—no branching, no complexity—just a clear chain of transformations from raw input to final result.
 
 The core innovation is the Input Lens: before any transformation executes, users can define how to parse the input (regex extraction, JSONPath queries, CSV column selection). This means you can extract a JSON blob from log files, convert it to YAML, encode it as Base64, and compress it—all in one visual pipeline. The lens handles the "what data" question, while the transform handles the "what to do with it" question.
 
 Every transform returns structured results with validation stats, error alerts, and MIME type detection. This powers real-time UI feedback: see key counts for JSON, compression ratios for Gzip, collision resistance warnings for MD5. The system is built for discoverability—transforms are organized by action verbs (Convert, Encode, Hash, Compress) and automatically filter based on compatibility with the current output type.
+
+## Current Implementation
+
+**✅ Phase 1 Complete:** Core types and architecture defined  
+**✅ Phase 2 Complete:** Format entities (JSON, CSV, YAML, XML, TOML) implemented  
+**✅ Phase 3 Complete:** 20 transforms implemented and registered
+- Convert: JSON, CSV, YAML, XML, TOML (5 transforms)
+- Encode: Base64, Base58, Hex, URL, HTML (5 transforms)
+- Decode: Base64, Base58, Hex (3 transforms)
+- Hash: MD5, SHA-1, SHA-256, SHA-512 (4 transforms)
+
+**🚧 Next:** Phase 4 - State management and pipeline execution
 
 ## 1. Core Philosophy
 
