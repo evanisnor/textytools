@@ -4,19 +4,23 @@
  */
 
 import type { EncodingType } from "../model/types";
-import { toBase64, fromBase64 } from "./encoding/base64";
-import { toBase58, fromBase58 } from "./encoding/base58";
-import { toBase91, fromBase91 } from "./encoding/base91";
+
 import { toAscii85, fromAscii85 } from "./encoding/ascii85";
+import { toBase58, fromBase58 } from "./encoding/base58";
+import { toBase64, fromBase64 } from "./encoding/base64";
+import { toBase91, fromBase91 } from "./encoding/base91";
 import { toZ85, fromZ85 } from "./encoding/z85";
-import { toUrlEncoding, fromUrlEncoding } from "./text/url";
-import { toHtmlEntities, fromHtmlEntities } from "./text/html";
-import { toHex, fromHex } from "./text/hex";
 import { toBinary, fromBinary } from "./text/binary";
-import { toUnicodeEscape, fromUnicodeEscape } from "./text/unicode";
-import { toQuotedPrintable, fromQuotedPrintable } from "./text/quoted-printable";
-import { toRot13, fromRot13 } from "./text/rot13";
+import { toHex, fromHex } from "./text/hex";
+import { toHtmlEntities, fromHtmlEntities } from "./text/html";
 import { toMorse, fromMorse } from "./text/morse";
+import {
+  toQuotedPrintable,
+  fromQuotedPrintable,
+} from "./text/quoted-printable";
+import { toRot13, fromRot13 } from "./text/rot13";
+import { toUnicodeEscape, fromUnicodeEscape } from "./text/unicode";
+import { toUrlEncoding, fromUrlEncoding } from "./text/url";
 
 /**
  * Encode text using the specified encoding type
@@ -97,6 +101,7 @@ export function decodeText(text: string, type: EncodingType): string {
 /**
  * Check if an encoding type supports decoding
  */
-export function supportsDecoding(type: EncodingType): boolean {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function supportsDecoding(_type: EncodingType): boolean {
   return true; // All encoding types support bidirectional transformation
 }

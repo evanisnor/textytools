@@ -2,6 +2,7 @@
  * Apogee Feature Public API
  *
  * Phase 1: Core Infrastructure
+ * Phase 4: State Management (Complete)
  */
 
 // Types
@@ -30,7 +31,11 @@ export type {
   ExportResult,
   ExportDefinition,
   LensResult,
-} from "./model/types";
+  DocumentManagerState,
+  DocumentManagerActions,
+  DocumentManager,
+  ApogeeProviderProps,
+} from "./model";
 
 // Registry
 export {
@@ -49,3 +54,6 @@ export { ApogeeEngine } from "./lib/engine";
 
 // Lens
 export { executeLensPass } from "./lib/lens";
+
+// State Management
+export { useDocumentManager, ApogeeProvider, useApogeeContext } from "./model";
