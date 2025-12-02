@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useRef, useEffect } from "react";
 
 import type { PropertySchema } from "../model/types";
 
@@ -8,6 +8,7 @@ interface ConfigurationPanelProps {
   schema: PropertySchema[];
   values: Record<string, unknown>;
   onChange: (key: string, value: unknown) => void;
+  onBatchChange?: (updates: Record<string, unknown>) => void;
 }
 
 /**
@@ -29,7 +30,40 @@ export function ConfigurationPanel({
   schema,
   values,
   onChange,
+  onBatchChange,
 }: ConfigurationPanelProps) {
+  // Use ref to access current values without causing re-renders
+  const valuesRef = useRef(values);
+  useEffect(() => {
+    valuesRef.current = values;
+  }, [values]);
+
+  // Handle combined toggle value and order update
+  const handleToggleWithOrder = useCallback(
+    (key: string, newValue: boolean) => {
+      const currentOrder = (valuesRef.current._optionOrder as string[]) || [];
+      const updatedOrder = newValue
+        ? currentOrder.includes(key)
+          ? currentOrder
+          : [...currentOrder, key]
+        : currentOrder.filter((k) => k !== key);
+
+      // Use batch update if available to update both properties atomically
+      if (
+        onBatchChange &&
+        JSON.stringify(currentOrder) !== JSON.stringify(updatedOrder)
+      ) {
+        onBatchChange({
+          [key]: newValue,
+          _optionOrder: updatedOrder,
+        });
+      } else {
+        onChange(key, newValue);
+      }
+    },
+    [onChange, onBatchChange],
+  );
+
   if (schema.length === 0) {
     return (
       <div className="px-4 py-3 text-sm text-zinc-500">
@@ -39,13 +73,14 @@ export function ConfigurationPanel({
   }
 
   return (
-    <div className="space-y-4 px-4 py-3">
+    <div className="flex flex-wrap gap-2 px-4 py-3">
       {schema.map((property) => (
         <PropertyControl
           key={property.key}
           property={property}
           value={values[property.key] ?? property.defaultValue}
           onChange={(value) => onChange(property.key, value)}
+          onToggleWithOrder={handleToggleWithOrder}
         />
       ))}
     </div>
@@ -56,23 +91,22 @@ interface PropertyControlProps {
   property: PropertySchema;
   value: unknown;
   onChange: (value: unknown) => void;
+  onToggleWithOrder?: (key: string, newValue: boolean) => void;
 }
 
-function PropertyControl({ property, value, onChange }: PropertyControlProps) {
-  const handleChange = useCallback(
-    (newValue: unknown) => {
-      onChange(newValue);
-    },
-    [onChange],
-  );
-
+function PropertyControl({
+  property,
+  value,
+  onChange,
+  onToggleWithOrder,
+}: PropertyControlProps) {
   switch (property.type) {
     case "text":
       return (
         <TextControl
           property={property}
           value={value as string}
-          onChange={handleChange}
+          onChange={onChange}
         />
       );
 
@@ -81,17 +115,13 @@ function PropertyControl({ property, value, onChange }: PropertyControlProps) {
         <NumberControl
           property={property}
           value={value as number}
-          onChange={handleChange}
+          onChange={onChange}
         />
       );
 
     case "select":
       return (
-        <SelectControl
-          property={property}
-          value={value}
-          onChange={handleChange}
-        />
+        <SelectControl property={property} value={value} onChange={onChange} />
       );
 
     case "toggle":
@@ -99,7 +129,7 @@ function PropertyControl({ property, value, onChange }: PropertyControlProps) {
         <ToggleControl
           property={property}
           value={value as boolean}
-          onChange={handleChange}
+          onToggleWithOrder={onToggleWithOrder}
         />
       );
 
@@ -108,7 +138,7 @@ function PropertyControl({ property, value, onChange }: PropertyControlProps) {
         <ToggleGroupControl
           property={property}
           value={value}
-          onChange={handleChange}
+          onChange={onChange}
         />
       );
 
@@ -117,7 +147,7 @@ function PropertyControl({ property, value, onChange }: PropertyControlProps) {
         <MultiSelectControl
           property={property}
           value={value as unknown[]}
-          onChange={handleChange}
+          onChange={onChange}
         />
       );
 
@@ -138,17 +168,20 @@ interface TextControlProps {
 
 function TextControl({ property, value, onChange }: TextControlProps) {
   return (
-    <div>
-      <label htmlFor={property.key} className="block text-sm font-medium mb-1">
-        {property.label}
+    <div className="flex items-center gap-1">
+      <label
+        htmlFor={property.key}
+        className="text-xs text-zinc-500 dark:text-zinc-400"
+      >
+        {property.label}:
       </label>
       <input
         id={property.key}
         type="text"
         value={value ?? ""}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        placeholder={property.label}
+        className="px-2 py-1 text-xs border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+        placeholder={property.placeholder || property.label}
       />
     </div>
   );
@@ -162,16 +195,19 @@ interface NumberControlProps {
 
 function NumberControl({ property, value, onChange }: NumberControlProps) {
   return (
-    <div>
-      <label htmlFor={property.key} className="block text-sm font-medium mb-1">
-        {property.label}
+    <div className="flex items-center gap-1">
+      <label
+        htmlFor={property.key}
+        className="text-xs text-zinc-500 dark:text-zinc-400"
+      >
+        {property.label}:
       </label>
       <input
         id={property.key}
         type="number"
         value={value ?? 0}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="w-16 px-2 py-1 text-xs border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
     </div>
   );
@@ -196,9 +232,12 @@ function SelectControl({ property, value, onChange }: SelectControlProps) {
   );
 
   return (
-    <div>
-      <label htmlFor={property.key} className="block text-sm font-medium mb-1">
-        {property.label}
+    <div className="flex items-center gap-1">
+      <label
+        htmlFor={property.key}
+        className="text-xs text-zinc-500 dark:text-zinc-400"
+      >
+        {property.label}:
       </label>
       <select
         id={property.key}
@@ -209,7 +248,7 @@ function SelectControl({ property, value, onChange }: SelectControlProps) {
           );
           onChange(option?.value);
         }}
-        className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="px-2 py-1 text-xs border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
       >
         {normalizedOptions.map((option) => (
           <option key={String(option.value)} value={String(option.value)}>
@@ -224,32 +263,34 @@ function SelectControl({ property, value, onChange }: SelectControlProps) {
 interface ToggleControlProps {
   property: PropertySchema;
   value: boolean;
-  onChange: (value: boolean) => void;
+  onToggleWithOrder?: (key: string, newValue: boolean) => void;
 }
 
-function ToggleControl({ property, value, onChange }: ToggleControlProps) {
+function ToggleControl({
+  property,
+  value,
+  onToggleWithOrder,
+}: ToggleControlProps) {
+  const handleClick = useCallback(() => {
+    const newValue = !value;
+    if (onToggleWithOrder) {
+      onToggleWithOrder(property.key, newValue);
+    }
+  }, [value, onToggleWithOrder, property.key]);
+
   return (
-    <div className="flex items-center justify-between">
-      <label htmlFor={property.key} className="text-sm font-medium">
-        {property.label}
-      </label>
-      <button
-        id={property.key}
-        type="button"
-        role="switch"
-        aria-checked={value ?? false}
-        onClick={() => onChange(!value)}
-        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-          value ? "bg-blue-600" : "bg-zinc-300"
-        }`}
-      >
-        <span
-          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-            value ? "translate-x-6" : "translate-x-1"
-          }`}
-        />
-      </button>
-    </div>
+    <button
+      type="button"
+      onClick={handleClick}
+      className={`px-3 py-1.5 text-xs rounded transition-colors ${
+        value
+          ? "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300"
+          : "bg-zinc-100 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-600"
+      }`}
+      title={value ? `Disable ${property.label}` : `Enable ${property.label}`}
+    >
+      {property.label}
+    </button>
   );
 }
 
@@ -278,26 +319,24 @@ function ToggleGroupControl({
   );
 
   return (
-    <div>
-      <label className="block text-sm font-medium mb-2">{property.label}</label>
-      <div className="space-y-2">
-        {normalizedOptions.map((option) => (
-          <label
-            key={String(option.value)}
-            className="flex items-center space-x-2 cursor-pointer"
-          >
-            <input
-              type="radio"
-              name={property.key}
-              value={String(option.value)}
-              checked={value === option.value}
-              onChange={() => onChange(option.value)}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500"
-            />
-            <span className="text-sm">{option.label}</span>
-          </label>
-        ))}
-      </div>
+    <div className="flex items-center gap-1">
+      <span className="text-xs text-zinc-500 dark:text-zinc-400 mr-1">
+        {property.label}:
+      </span>
+      {normalizedOptions.map((option) => (
+        <button
+          key={String(option.value)}
+          type="button"
+          onClick={() => onChange(option.value)}
+          className={`px-3 py-1.5 text-xs rounded transition-colors ${
+            value === option.value
+              ? "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300"
+              : "bg-zinc-100 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-600"
+          }`}
+        >
+          {option.label}
+        </button>
+      ))}
     </div>
   );
 }
@@ -335,25 +374,24 @@ function MultiSelectControl({
   };
 
   return (
-    <div>
-      <label className="block text-sm font-medium mb-2">{property.label}</label>
-      <div className="space-y-2">
-        {normalizedOptions.map((option) => (
-          <label
-            key={String(option.value)}
-            className="flex items-center space-x-2 cursor-pointer"
-          >
-            <input
-              type="checkbox"
-              value={String(option.value)}
-              checked={(value ?? []).includes(option.value)}
-              onChange={() => handleToggle(option.value)}
-              className="h-4 w-4 text-blue-600 rounded focus:ring-blue-500"
-            />
-            <span className="text-sm">{option.label}</span>
-          </label>
-        ))}
-      </div>
+    <div className="flex items-center gap-1">
+      <span className="text-xs text-zinc-500 dark:text-zinc-400 mr-1">
+        {property.label}:
+      </span>
+      {normalizedOptions.map((option) => (
+        <button
+          key={String(option.value)}
+          type="button"
+          onClick={() => handleToggle(option.value)}
+          className={`px-3 py-1.5 text-xs rounded transition-colors ${
+            (value ?? []).includes(option.value)
+              ? "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300"
+              : "bg-zinc-100 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-600"
+          }`}
+        >
+          {option.label}
+        </button>
+      ))}
     </div>
   );
 }

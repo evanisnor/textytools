@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, useRef, useEffect } from "react";
 
 import type { TransformStep, TransformDefinition } from "../model/types";
 
@@ -48,14 +48,29 @@ export function TransformBlock({
   const [wrap, setWrap] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  const stepPropertiesRef = useRef(step.properties);
+  useEffect(() => {
+    stepPropertiesRef.current = step.properties;
+  }, [step.properties]);
+
   const handlePropertyChange = useCallback(
     (key: string, value: unknown) => {
       onUpdateProperties({
-        ...step.properties,
+        ...stepPropertiesRef.current,
         [key]: value,
       });
     },
-    [step.properties, onUpdateProperties],
+    [onUpdateProperties],
+  );
+
+  const handleBatchPropertyChange = useCallback(
+    (updates: Record<string, unknown>) => {
+      onUpdateProperties({
+        ...stepPropertiesRef.current,
+        ...updates,
+      });
+    },
+    [onUpdateProperties],
   );
 
   const handleCopy = useCallback(async () => {
@@ -133,6 +148,7 @@ export function TransformBlock({
               schema={transform.propertySchema}
               values={step.properties}
               onChange={handlePropertyChange}
+              onBatchChange={handleBatchPropertyChange}
             />
           )}
         </div>

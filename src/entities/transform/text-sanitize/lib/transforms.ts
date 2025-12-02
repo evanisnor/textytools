@@ -140,17 +140,40 @@ export const textSanitizeTransform: TransformDefinition = {
     }
 
     // Convert properties to SanitizationOption format
-    const options: SanitizationOption[] = SANITIZATION_SCHEMA.map((schema) => ({
-      id: schema.key as SanitizationOptionId,
-      label: schema.label,
-      description: `${schema.label} operation`,
-      enabled: Boolean(properties[schema.key]),
-    }));
+    // Use _optionOrder to track the sequence in which options were enabled
+    const optionOrder = (properties._optionOrder as string[]) || [];
 
-    const enabledCount = options.filter((opt) => opt.enabled).length;
+    // Create all options
+    const allOptions: SanitizationOption[] = SANITIZATION_SCHEMA.map(
+      (schema) => ({
+        id: schema.key as SanitizationOptionId,
+        label: schema.label,
+        description: `${schema.label} operation`,
+        enabled: Boolean(properties[schema.key]),
+      }),
+    );
+
+    // Sort enabled options by user selection order
+    const enabledOptions = allOptions.filter((opt) => opt.enabled);
+    const sortedOptions = enabledOptions.sort((a, b) => {
+      const aIndex = optionOrder.indexOf(a.id);
+      const bIndex = optionOrder.indexOf(b.id);
+
+      // If both are in order list, sort by their position
+      if (aIndex !== -1 && bIndex !== -1) {
+        return aIndex - bIndex;
+      }
+      // If only one is in order list, prioritize it
+      if (aIndex !== -1) return -1;
+      if (bIndex !== -1) return 1;
+      // If neither is in order list, maintain schema order
+      return 0;
+    });
+
+    const enabledCount = sortedOptions.length;
 
     try {
-      const output = sanitizeText(input, options);
+      const output = sanitizeText(input, sortedOptions);
 
       const inputLines = input.split("\n").length;
       const outputLines = output.split("\n").length;
