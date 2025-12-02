@@ -1,19 +1,25 @@
 # JSON Entity
 
-Domain logic for JSON manipulation, including flattening nested structures and type inference.
+Domain logic for JSON manipulation, including parsing, formatting, flattening nested structures, and statistics.
 
 ## Overview
 
 The JSON entity provides:
-- Object flattening with dot notation for CSV conversion
-- Nested value setting for object reconstruction
-- Type parsing for CSV-to-JSON conversion
+- **Parsing & Validation** - Parse JSON with detailed error messages (Apogee support)
+- **Formatting** - Format JSON with indentation, key sorting, and minification (Apogee support)
+- **Statistics** - Calculate key count, depth, and size (Apogee support)
+- **Object Flattening** - Flatten nested objects with dot notation for CSV conversion
+- **Nested Value Setting** - Reconstruct nested objects from dot notation
+- **Type Parsing** - Infer types for CSV-to-JSON conversion
 
 ## Structure
 
 ```
 json/
 ├── lib/
+│   ├── parse.ts        # Parse and validate JSON (Apogee)
+│   ├── format.ts       # Format JSON with options (Apogee)
+│   ├── stats.ts        # Calculate JSON statistics (Apogee)
 │   ├── flatten.ts      # Flatten nested objects
 │   ├── unflatten.ts    # Set nested values
 │   └── type-parser.ts  # Parse string types
@@ -23,6 +29,82 @@ json/
 ```
 
 ## Usage
+
+### Parsing JSON (Apogee Support)
+
+```typescript
+import { parseJSON, validateJSON } from "@/entities/json";
+
+// Parse JSON with error handling
+const result = parseJSON('{"name":"Alice","age":30}');
+if (result.success) {
+  console.log(result.data); // { name: "Alice", age: 30 }
+} else {
+  console.error(result.error); // Detailed error message
+}
+
+// Validate JSON without parsing
+const { valid, error } = validateJSON('{"invalid": }');
+console.log(valid); // false
+console.log(error); // "Invalid JSON: Unexpected token..."
+```
+
+### Formatting JSON (Apogee Support)
+
+```typescript
+import { formatJSON } from "@/entities/json";
+
+const data = { name: "Alice", age: 30, city: "Seattle" };
+
+// Pretty print with 2-space indentation
+formatJSON(data, { indentation: 2 });
+// {
+//   "name": "Alice",
+//   "age": 30,
+//   "city": "Seattle"
+// }
+
+// Sort keys alphabetically
+formatJSON(data, { indentation: 2, sortKeys: true });
+// {
+//   "age": 30,
+//   "city": "Seattle",
+//   "name": "Alice"
+// }
+
+// Minify
+formatJSON(data, { minify: true });
+// {"name":"Alice","age":30,"city":"Seattle"}
+
+// Use tab indentation
+formatJSON(data, { indentation: "tab" });
+```
+
+### JSON Statistics (Apogee Support)
+
+```typescript
+import { getJSONStats, countKeys, getDepth } from "@/entities/json";
+
+const data = {
+  users: [
+    { name: "Alice", age: 30 },
+    { name: "Bob", age: 25 }
+  ]
+};
+
+// Get comprehensive stats
+const stats = getJSONStats(data);
+console.log(stats);
+// {
+//   keyCount: 5,    // Total keys across all nested objects
+//   depth: 3,       // Maximum nesting depth
+//   size: 89        // Size in bytes
+// }
+
+// Individual stat functions
+countKeys(data);  // 5
+getDepth(data);   // 3
+```
 
 ### Flattening Objects
 
@@ -103,7 +185,56 @@ parseValue("hello");   // "hello" (string)
 
 ## API Reference
 
-### `flattenObject(obj: unknown, prefix?: string): Record<string, string | number | boolean | null>`
+### Apogee Support Functions
+
+#### `parseJSON(input: string): JsonParseResult`
+
+Parse JSON string with detailed error messages.
+
+**Returns:** `{ success: boolean, data?: unknown, error?: string }`
+
+**Example:**
+```typescript
+const result = parseJSON('{"valid": true}');
+if (result.success) {
+  console.log(result.data);
+}
+```
+
+#### `validateJSON(input: string): { valid: boolean, error?: string }`
+
+Validate JSON without parsing to full structure.
+
+**Returns:** Validation result with error message if invalid.
+
+#### `formatJSON(data: unknown, options?: JsonFormatOptions): string`
+
+Format JSON with customizable options.
+
+**Options:**
+- `indentation?: number | "tab"` - Indentation (default: 2)
+- `sortKeys?: boolean` - Sort keys alphabetically (default: false)
+- `minify?: boolean` - Remove whitespace (default: false)
+
+**Returns:** Formatted JSON string
+
+#### `getJSONStats(data: unknown): JsonStats`
+
+Calculate comprehensive statistics for JSON data.
+
+**Returns:** `{ keyCount: number, depth: number, size: number }`
+
+#### `countKeys(obj: unknown): number`
+
+Count total number of keys in nested structure.
+
+#### `getDepth(obj: unknown): number`
+
+Calculate maximum nesting depth.
+
+### CSV Conversion Functions
+
+#### `flattenObject(obj: unknown, prefix?: string): Record<string, string | number | boolean | null>`
 
 Recursively flattens nested objects using dot notation.
 
@@ -164,5 +295,6 @@ interface JsonObject {
 
 ## Used By
 
+- **[apogee feature](../../features/apogee)** - JSON Convert transform
 - [converter/csv-json](../converter/csv-json) - CSV/JSON conversion
 - [csv-json-converter feature](../../features/csv-json-converter) - CSV/JSON tool
