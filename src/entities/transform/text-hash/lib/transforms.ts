@@ -155,6 +155,55 @@ export const sha256HashDefinition: TransformDefinition = {
 };
 
 /**
+ * SHA-384 Hash Transform
+ */
+export const sha384HashDefinition: TransformDefinition = {
+  type: "sha384-hash",
+  name: "SHA-384 Hash",
+  description: "Generate SHA-384 hash (384-bit, secure)",
+  category: "hash",
+  acceptsInput: ["*"],
+  producesOutput: "text/plain",
+  propertySchema: [],
+  defaultProperties: {},
+  execute: async (input: string): Promise<TransformResult> => {
+    if (!input) {
+      return {
+        success: false,
+        data: "",
+        error: "Input is empty",
+        mimeType: "text/plain",
+      };
+    }
+
+    try {
+      const output = await hashText(input, "sha384");
+      return {
+        success: true,
+        data: output,
+        mimeType: "text/plain",
+        stats: [
+          { label: "Algorithm", value: "SHA-384" },
+          { label: "Output Length", value: "384 bits (96 hex chars)" },
+          {
+            label: "Security",
+            value: "Cryptographically secure",
+            alert: "info",
+          },
+        ],
+      };
+    } catch (err) {
+      return {
+        success: false,
+        data: "",
+        error: `Hashing failed: ${err instanceof Error ? err.message : "Unknown error"}`,
+        mimeType: "text/plain",
+      };
+    }
+  },
+};
+
+/**
  * SHA-512 Hash Transform
  */
 export const sha512HashDefinition: TransformDefinition = {

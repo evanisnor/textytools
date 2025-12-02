@@ -12,7 +12,15 @@ import type {
 } from "../model/types";
 
 import { csvConvertDefinition } from "@/entities/transform/csv-convert";
+import { extractLinesDefinition } from "@/entities/transform/extract-lines";
+import {
+  gzipCompressDefinition,
+  gzipDecompressDefinition,
+} from "@/entities/transform/gzip-compress";
 import { jsonConvertDefinition } from "@/entities/transform/json-convert";
+import { jwtDecodeDefinition } from "@/entities/transform/jwt";
+import { regexReplaceDefinition } from "@/entities/transform/regex-replace";
+import { sortLinesDefinition } from "@/entities/transform/sort-lines";
 import { caseConvertTransform } from "@/entities/transform/text-case";
 import {
   base64DecodeDefinition,
@@ -23,11 +31,25 @@ import {
   hexEncodeDefinition,
   htmlEntityEncodeDefinition,
   urlEncodeDefinition,
+  rot13EncodeDefinition,
+  morseEncodeDefinition,
+  morseDecodeDefinition,
+  quotedPrintableEncodeDefinition,
+  quotedPrintableDecodeDefinition,
+  base91EncodeDefinition,
+  base91DecodeDefinition,
+  ascii85EncodeDefinition,
+  ascii85DecodeDefinition,
+  z85EncodeDefinition,
+  z85DecodeDefinition,
+  unicodeEncodeDefinition,
+  unicodeDecodeDefinition,
 } from "@/entities/transform/text-encoding";
 import {
   md5HashDefinition,
   sha1HashDefinition,
   sha256HashDefinition,
+  sha384HashDefinition,
   sha512HashDefinition,
 } from "@/entities/transform/text-hash";
 import { textSanitizeTransform } from "@/entities/transform/text-sanitize";
@@ -53,21 +75,47 @@ export const TRANSFORM_REGISTRY: Record<string, TransformDefinition> = {
   "hex-encode": hexEncodeDefinition as TransformDefinition,
   "url-encode": urlEncodeDefinition as TransformDefinition,
   "html-entity-encode": htmlEntityEncodeDefinition as TransformDefinition,
+  "rot13-encode": rot13EncodeDefinition as TransformDefinition,
+  "morse-encode": morseEncodeDefinition as TransformDefinition,
+  "quoted-printable-encode":
+    quotedPrintableEncodeDefinition as TransformDefinition,
+  "base91-encode": base91EncodeDefinition as TransformDefinition,
+  "ascii85-encode": ascii85EncodeDefinition as TransformDefinition,
+  "z85-encode": z85EncodeDefinition as TransformDefinition,
+  "unicode-encode": unicodeEncodeDefinition as TransformDefinition,
 
   // Decode transforms
   "base64-decode": base64DecodeDefinition as TransformDefinition,
   "base58-decode": base58DecodeDefinition as TransformDefinition,
   "hex-decode": hexDecodeDefinition as TransformDefinition,
+  "morse-decode": morseDecodeDefinition as TransformDefinition,
+  "quoted-printable-decode":
+    quotedPrintableDecodeDefinition as TransformDefinition,
+  "base91-decode": base91DecodeDefinition as TransformDefinition,
+  "ascii85-decode": ascii85DecodeDefinition as TransformDefinition,
+  "z85-decode": z85DecodeDefinition as TransformDefinition,
+  "jwt-decode": jwtDecodeDefinition as TransformDefinition,
+  "unicode-decode": unicodeDecodeDefinition as TransformDefinition,
 
   // Hash transforms
   "md5-hash": md5HashDefinition as TransformDefinition,
   "sha1-hash": sha1HashDefinition as TransformDefinition,
   "sha256-hash": sha256HashDefinition as TransformDefinition,
+  "sha384-hash": sha384HashDefinition as TransformDefinition,
   "sha512-hash": sha512HashDefinition as TransformDefinition,
 
   // Manipulate transforms
   "text-sanitize": textSanitizeTransform as TransformDefinition,
   "case-convert": caseConvertTransform as TransformDefinition,
+  "regex-replace": regexReplaceDefinition as TransformDefinition,
+  "sort-lines": sortLinesDefinition as TransformDefinition,
+  "extract-lines": extractLinesDefinition as TransformDefinition,
+
+  // Compress transforms
+  "gzip-compress": gzipCompressDefinition as TransformDefinition,
+
+  // Decompress transforms
+  "gzip-decompress": gzipDecompressDefinition as TransformDefinition,
 };
 
 /**

@@ -6,7 +6,7 @@
 import type { HashType } from "../model/types";
 
 import { toMd5 } from "./md5";
-import { toSha1, toSha256, toSha512 } from "./sha";
+import { toSha1, toSha256, toSha384, toSha512 } from "./sha";
 
 /**
  * Generate hash for text using the specified hash type
@@ -21,6 +21,8 @@ export async function hashText(text: string, type: HashType): Promise<string> {
       return await toSha1(text);
     case "sha256":
       return await toSha256(text);
+    case "sha384":
+      return await toSha384(text);
     case "sha512":
       return await toSha512(text);
     default:

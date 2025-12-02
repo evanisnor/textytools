@@ -29,9 +29,10 @@ export type EncodeTransform =
   | "url-encode"
   | "html-entity-encode"
   | "hex-encode"
-  | "quoted-printable"
+  | "quoted-printable-encode"
   | "rot13-encode"
-  | "morse-encode";
+  | "morse-encode"
+  | "unicode-encode";
 
 /**
  * Decode: Inspect and revert encodings
@@ -40,7 +41,12 @@ export type DecodeTransform =
   | "jwt-decode"
   | "base64-decode"
   | "base58-decode"
+  | "base91-decode"
+  | "ascii85-decode"
+  | "z85-decode"
   | "hex-decode"
+  | "quoted-printable-decode"
+  | "morse-decode"
   | "unicode-decode";
 
 /**

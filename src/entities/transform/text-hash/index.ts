@@ -16,5 +16,6 @@ export {
   md5HashDefinition,
   sha1HashDefinition,
   sha256HashDefinition,
+  sha384HashDefinition,
   sha512HashDefinition,
 } from "./lib/transforms";

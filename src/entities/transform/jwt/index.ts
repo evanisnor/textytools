@@ -9,3 +9,6 @@ export { decodeJWT } from "./lib/decoder";
 
 // Re-export validation utilities from jwt entity
 export { isExpired, isNotYetValid, formatDate } from "@/entities/jwt";
+
+// Transform Definition (Apogee support)
+export { jwtDecodeDefinition } from "./lib/jwtDecode";
