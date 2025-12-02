@@ -20,3 +20,6 @@ export { toWords } from "./lib/word-detection";
 
 // Hooks
 export { useCaseConversion } from "./model/useCaseConversion";
+
+// Transform Definition (for Apogee)
+export { caseConvertTransform } from "./lib/transforms";

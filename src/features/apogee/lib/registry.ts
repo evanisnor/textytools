@@ -13,6 +13,7 @@ import type {
 
 import { csvConvertDefinition } from "@/entities/transform/csv-convert";
 import { jsonConvertDefinition } from "@/entities/transform/json-convert";
+import { caseConvertTransform } from "@/entities/transform/text-case";
 import {
   base64DecodeDefinition,
   base64EncodeDefinition,
@@ -29,6 +30,7 @@ import {
   sha256HashDefinition,
   sha512HashDefinition,
 } from "@/entities/transform/text-hash";
+import { textSanitizeTransform } from "@/entities/transform/text-sanitize";
 import { tomlConvertDefinition } from "@/entities/transform/toml-convert";
 import { xmlConvertDefinition } from "@/entities/transform/xml-convert";
 import { yamlConvertDefinition } from "@/entities/transform/yaml-convert";
@@ -62,6 +64,10 @@ export const TRANSFORM_REGISTRY: Record<string, TransformDefinition> = {
   "sha1-hash": sha1HashDefinition as TransformDefinition,
   "sha256-hash": sha256HashDefinition as TransformDefinition,
   "sha512-hash": sha512HashDefinition as TransformDefinition,
+
+  // Manipulate transforms
+  "text-sanitize": textSanitizeTransform as TransformDefinition,
+  "case-convert": caseConvertTransform as TransformDefinition,
 };
 
 /**

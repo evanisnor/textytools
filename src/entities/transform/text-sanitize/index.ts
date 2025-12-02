@@ -10,3 +10,6 @@ export type {
 
 // Core logic
 export { sanitizeText } from "./lib/sanitizer";
+
+// Transform Definition (for Apogee)
+export { textSanitizeTransform } from "./lib/transforms";

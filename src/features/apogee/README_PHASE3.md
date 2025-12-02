@@ -6,7 +6,7 @@
 
 ## Overview
 
-Phase 3 focused on implementing the transform layer - converting the format entities from Phase 2 into executable transforms with proper UI schemas, statistics generation, and registry integration. This phase delivers 20 working transforms across 4 categories (Convert, Encode, Decode, Hash).
+Phase 3 focused on implementing the transform layer - converting the format entities from Phase 2 into executable transforms with proper UI schemas, statistics generation, and registry integration. This phase delivers **22 working transforms** across **5 categories** (Convert, Encode, Decode, Hash, Manipulate).
 
 ## Completed Components
 
@@ -197,11 +197,87 @@ Enhanced existing hashing utilities with security warnings:
 
 #### Updated Files:
 - `lib/transforms.ts` (new) - All TransformDefinition instances
+#### Updated Files:
+- `lib/transforms.ts` (new) - All TransformDefinition instances
 - `index.ts` - Export transform definitions
 
 ---
 
-### 3.8 Transform Registry Population ✅
+### 3.8 Text Sanitization Transform ✅
+
+**Location:** `src/entities/transform/text-sanitize/lib/transforms.ts`
+
+Comprehensive text sanitization with 12 configurable options:
+
+#### Transform Type: `text-sanitize`
+- **Category:** manipulate
+- **Display Name:** "Text Sanitizer"
+- **Description:** "Clean and normalize text with configurable sanitization rules"
+
+#### Configuration Options:
+1. **trimLines** - Remove leading/trailing whitespace from each line
+2. **removeEmptyLines** - Remove lines containing only whitespace
+3. **removeLeadingEmptyLines** - Remove empty lines from start
+4. **removeTrailingEmptyLines** - Remove empty lines from end
+5. **trimLeadingWhitespace** - Remove all leading whitespace
+6. **trimTrailingWhitespace** - Remove all trailing whitespace
+7. **normalizeLineEndings** - Standardize to \n
+8. **collapseWhitespace** - Reduce multiple spaces to single space
+9. **removeNonPrintable** - Strip control characters
+10. **removeBOM** - Strip byte order marks
+11. **normalizeWhitespace** - Convert all whitespace to spaces
+12. **deduplicateLines** - Remove duplicate lines
+
+#### Key Features:
+- **Schema-driven UI** - All 12 options exposed as boolean toggles
+- **Composable** - Multiple options can be combined
+- **Non-destructive** - Original data preserved in pipeline
+- **Statistics** - Line count, character count, byte size
+
+#### Files Created:
+- `lib/transforms.ts` (165 lines) - TransformDefinition wrapper
+- Updated `index.ts` - Export transform definition
+
+---
+
+### 3.9 Case Conversion Transform ✅
+
+**Location:** `src/entities/transform/text-case/lib/transforms.ts`
+
+Comprehensive case conversion with 11 supported formats:
+
+#### Transform Type: `case-convert`
+- **Category:** manipulate
+- **Display Name:** "Case Converter"
+- **Description:** "Convert text between different case formats"
+
+#### Supported Case Types:
+1. **upper** - UPPERCASE (all letters capitalized)
+2. **lower** - lowercase (all letters lowercase)
+3. **title** - Title Case (words capitalized)
+4. **sentence** - Sentence case (first letter capitalized)
+5. **camel** - camelCase (no spaces, capital humps)
+6. **pascal** - PascalCase (like camel, starts capital)
+7. **snake** - snake_case (underscores, lowercase)
+8. **kebab** - kebab-case (hyphens, lowercase)
+9. **constant** - CONSTANT_CASE (underscores, uppercase)
+10. **dot** - dot.case (periods separator)
+11. **path** - path/case (forward slashes)
+
+#### Key Features:
+- **Select property** - Dropdown UI for case type selection
+- **Comprehensive coverage** - 11 common case formats
+- **Programming-friendly** - Includes camel, pascal, snake, kebab
+- **File system support** - dot.case and path/case for filenames
+- **Statistics** - Character count, word count, byte size
+
+#### Files Created:
+- `lib/transforms.ts` (106 lines) - TransformDefinition wrapper
+- Updated `index.ts` - Export transform definition
+
+---
+
+### 3.10 Transform Registry Population ✅
 
 **Location:** `src/features/apogee/lib/registry.ts`
 
@@ -221,8 +297,13 @@ TRANSFORM_REGISTRY: Record<string, TransformDefinition> = {
   
   // Hash (4 transforms)
   "md5-hash", "sha1-hash", "sha256-hash", "sha512-hash",
+  
+  // Manipulate (2 transforms)
+  "text-sanitize", "case-convert",
 }
 ```
+
+**Total: 22 transforms across 5 categories**
 
 #### Query Functions:
 - `getTransform(type)` - Get specific transform definition
@@ -419,14 +500,18 @@ Phase 3 transforms successfully compose Phase 2 entities:
 - `src/entities/transform/text-encoding/index.ts` (updated exports)
 - `src/entities/transform/text-hash/lib/transforms.ts` (new, 195 lines)
 - `src/entities/transform/text-hash/index.ts` (updated exports)
+- `src/entities/transform/text-sanitize/lib/transforms.ts` (new, 165 lines)
+- `src/entities/transform/text-sanitize/index.ts` (updated exports)
+- `src/entities/transform/text-case/lib/transforms.ts` (new, 106 lines)
+- `src/entities/transform/text-case/index.ts` (updated exports)
 
 ### Core Infrastructure:
-- `src/features/apogee/lib/registry.ts` (populated with 20 transforms)
+- `src/features/apogee/lib/registry.ts` (populated with 22 transforms)
 - `src/features/apogee/lib/engine.ts` (async support added)
 - `src/features/apogee/model/types.ts` (re-exports shared types, adds Apogee-specific types)
 - `src/entities/transform/README.md` (documented Apogee integration)
 
-**Total:** ~1,200 lines of production code + schemas
+**Total:** ~1,600 lines of production code + schemas
 
 ---
 
@@ -437,9 +522,12 @@ Phase 3 transforms successfully compose Phase 2 entities:
 - **Encode** - 5 transforms (Base64, Base58, Hex, URL, HTML)
 - **Decode** - 3 transforms (Base64, Base58, Hex)
 - **Hash** - 4 transforms (MD5, SHA-1, SHA-256, SHA-512)
+- **Manipulate** - 2 transforms (Text Sanitizer, Case Converter)
+
+**Total: 22 transforms**
 
 ### By Input Compatibility:
-- **Universal (`*`)** - 17 transforms accept any input
+- **Universal (`*`)** - 19 transforms accept any input
 - **Text only** - 3 decode transforms require text/plain
 
 ### By Output Type:
@@ -448,37 +536,25 @@ Phase 3 transforms successfully compose Phase 2 entities:
 - **YAML** - 1 transform
 - **XML** - 1 transform
 - **TOML** - 1 transform
-- **Plain text** - 15 transforms (encodings, hashes)
+- **Plain text** - 17 transforms (encodings, hashes, manipulations)
 
 ---
 
-## Next Steps (Phase 4)
+## Next Steps (Phase 5)
 
-With transforms implemented, Phase 4 will build state management:
+With transforms implemented (Phase 3) and state management complete (Phase 4), Phase 5 will build UI components:
 
-1. **Document Manager Hook** (`useDocumentManager`)
-   - Pipeline state management
-   - Transform step CRUD operations
-   - LocalStorage persistence
-
-2. **Execution Engine Integration**
-   - Call transform execute() functions
-   - Handle async transforms
-   - Cache step outputs
-   - Error recovery
-
-3. **Incremental Execution**
-   - Re-execute from modified step onwards
-   - Skip unchanged steps (performance optimization)
-
-4. **React Context Provider**
-   - Wrap document manager in context
-   - Provide state to UI components
+1. **DataBlock Component** - Display transform outputs
+2. **InputForm Component** - Initial data entry
+3. **TransformBlock Component** - Step configuration
+4. **ConfigurationPanel Component** - Schema-driven form generation
+5. **TransformPipeline Component** - Main pipeline display
 
 ---
 
 ## Conclusion
 
-Phase 3 successfully delivered a complete transform layer with 20 working transforms, intelligent input detection, comprehensive statistics, and a flexible property schema system. All transforms are registered and ready for execution by the pipeline engine in Phase 4.
+Phase 3 successfully delivered a complete transform layer with **22 working transforms** across **5 categories**, intelligent input detection, comprehensive statistics, and a flexible property schema system. All transforms are registered and ready for execution by the pipeline engine.
 
-**Status:** ✅ **PHASE 3 COMPLETE** - Ready to proceed to Phase 4 (State Management)
+**Status:** ✅ **PHASE 3 COMPLETE** - State Management (Phase 4) also complete, ready for Phase 5 (UI Components)
+
