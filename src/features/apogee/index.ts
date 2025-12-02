@@ -3,6 +3,7 @@
  *
  * Phase 1: Core Infrastructure
  * Phase 4: State Management (Complete)
+ * Phase 5: UI Components (Complete)
  */
 
 // Types
@@ -57,3 +58,12 @@ export { executeLensPass } from "./lib/lens";
 
 // State Management
 export { useDocumentManager, ApogeeProvider, useApogeeContext } from "./model";
+
+// UI Components
+export {
+  ConfigurationPanel,
+  DataBlock,
+  InputForm,
+  TransformBlock,
+  TransformPipeline,
+} from "./ui";
