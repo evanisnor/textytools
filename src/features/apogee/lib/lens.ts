@@ -41,20 +41,65 @@ export async function executeLensPass(
           selection.regexPattern,
           selection.regexFlags || "",
         );
-        const matches = input.match(regex);
 
-        if (!matches || matches.length === 0) {
-          return {
-            success: false,
-            data: "",
-            error: `Pattern not found: ${selection.regexPattern}`,
-            metadata: { mode: "regex", matchCount: 0 },
-          };
+        // Check if pattern has named groups
+        const namedGroupPattern = /\(\?<(\w+)>/g;
+        const namedGroups: string[] = [];
+        let match;
+        while (
+          (match = namedGroupPattern.exec(selection.regexPattern)) !== null
+        ) {
+          namedGroups.push(match[1]);
         }
 
-        // Join all matches with newlines
-        extracted = matches.join("\n");
-        metadata = { mode: "regex", matchCount: matches.length };
+        if (namedGroups.length > 0) {
+          // Extract with named groups - create structured data
+          const results: Record<string, string>[] = [];
+          const globalRegex = new RegExp(
+            selection.regexPattern,
+            (selection.regexFlags || "").includes("g")
+              ? selection.regexFlags
+              : (selection.regexFlags || "") + "g",
+          );
+
+          let execMatch;
+          while ((execMatch = globalRegex.exec(input)) !== null) {
+            const obj: Record<string, string> = {};
+            for (const groupName of namedGroups) {
+              obj[groupName] = execMatch.groups?.[groupName] || "";
+            }
+            results.push(obj);
+          }
+
+          if (results.length === 0) {
+            return {
+              success: false,
+              data: "",
+              error: `Pattern not found: ${selection.regexPattern}`,
+              metadata: { mode: "regex", matchCount: 0 },
+            };
+          }
+
+          // Return as JSON array
+          extracted = JSON.stringify(results, null, 2);
+          metadata = { mode: "regex", matchCount: results.length };
+        } else {
+          // No named groups - return simple matches
+          const matches = input.match(regex);
+
+          if (!matches || matches.length === 0) {
+            return {
+              success: false,
+              data: "",
+              error: `Pattern not found: ${selection.regexPattern}`,
+              metadata: { mode: "regex", matchCount: 0 },
+            };
+          }
+
+          // Join all matches with newlines
+          extracted = matches.join("\n");
+          metadata = { mode: "regex", matchCount: matches.length };
+        }
       } catch (err) {
         return {
           success: false,

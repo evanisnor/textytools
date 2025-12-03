@@ -34,6 +34,7 @@ export function TransformPipeline() {
     updateInputData,
     addTransform,
     updateTransformProperties,
+    updateTransformInputSelection,
     removeTransform,
     executePipeline,
   } = useApogeeContext();
@@ -123,14 +124,24 @@ export function TransformPipeline() {
             );
           }
 
+          // Get previous output for lens visibility detection
+          const previousOutput =
+            index === 0
+              ? currentDocument.inputData
+              : currentDocument.transforms[index - 1].output;
+
           return (
             <div key={step.id}>
               <TransformBlock
                 step={step}
                 stepNumber={index + 1}
                 transform={transform}
+                previousOutput={previousOutput}
                 onUpdateProperties={(properties) =>
                   updateTransformProperties(step.id, properties)
+                }
+                onUpdateInputSelection={(selection) =>
+                  updateTransformInputSelection(step.id, selection)
                 }
                 onRemove={() => removeTransform(step.id)}
               />

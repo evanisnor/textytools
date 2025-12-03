@@ -1,18 +1,26 @@
 "use client";
 
-import { useCallback, useState, useRef, useEffect } from "react";
+import { useCallback, useState, useRef, useEffect, useMemo } from "react";
 
-import type { TransformStep, TransformDefinition } from "../model/types";
+import type {
+  TransformStep,
+  TransformDefinition,
+  InputSelection,
+} from "../model/types";
 
 import { ConfigurationPanel } from "./ConfigurationPanel";
+import { LensConfig } from "./LensConfig";
 
 import { TextEditor } from "@/entities/editor";
+import { detectFormat } from "@/entities/transform/shared";
 
 interface TransformBlockProps {
   step: TransformStep;
   stepNumber: number;
   transform: TransformDefinition;
+  previousOutput?: string;
   onUpdateProperties: (properties: Record<string, unknown>) => void;
+  onUpdateInputSelection?: (selection: InputSelection) => void;
   onRemove: () => void;
 }
 
@@ -40,7 +48,9 @@ export function TransformBlock({
   step,
   stepNumber,
   transform,
+  previousOutput,
   onUpdateProperties,
+  onUpdateInputSelection,
   onRemove,
 }: TransformBlockProps) {
   const [configExpanded, setConfigExpanded] = useState(true);
@@ -52,6 +62,21 @@ export function TransformBlock({
   useEffect(() => {
     stepPropertiesRef.current = step.properties;
   }, [step.properties]);
+
+  // Determine if lens should be shown
+  // Show lens for Convert transforms when input is unstructured
+  const shouldShowLens = useMemo(() => {
+    if (transform.category !== "convert") {
+      return false;
+    }
+
+    if (!previousOutput) {
+      return true; // Show for first transform
+    }
+
+    const detectedFormat = detectFormat(previousOutput);
+    return detectedFormat === "unknown";
+  }, [transform.category, previousOutput]);
 
   const handlePropertyChange = useCallback(
     (key: string, value: unknown) => {
@@ -71,6 +96,15 @@ export function TransformBlock({
       });
     },
     [onUpdateProperties],
+  );
+
+  const handleInputSelectionUpdate = useCallback(
+    (selection: InputSelection) => {
+      if (onUpdateInputSelection) {
+        onUpdateInputSelection(selection);
+      }
+    },
+    [onUpdateInputSelection],
   );
 
   const handleCopy = useCallback(async () => {
@@ -115,6 +149,15 @@ export function TransformBlock({
           </button>
         </div>
       </div>
+
+      {/* Lens Configuration (only for Convert transforms with unstructured input) */}
+      {shouldShowLens && onUpdateInputSelection && (
+        <LensConfig
+          inputSelection={step.inputSelection}
+          onUpdate={handleInputSelectionUpdate}
+          previousOutput={previousOutput}
+        />
+      )}
 
       {/* Configuration Section */}
       {transform.propertySchema.length > 0 && (

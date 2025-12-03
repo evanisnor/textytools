@@ -87,14 +87,24 @@ export function PipelineEditor({ documentManager }: PipelineEditorProps) {
         const transform = transformDefinitions.get(step.transformType);
         if (!transform) return null;
 
+        // Get previous output for lens visibility detection
+        const previousOutput =
+          index === 0
+            ? currentDocument.inputData
+            : currentDocument.transforms[index - 1].output;
+
         return (
           <TransformBlock
             key={step.id}
             step={step}
             stepNumber={index + 1}
             transform={transform}
+            previousOutput={previousOutput}
             onUpdateProperties={(props) =>
               documentManager.updateTransformProperties(step.id, props)
+            }
+            onUpdateInputSelection={(selection) =>
+              documentManager.updateTransformInputSelection(step.id, selection)
             }
             onRemove={() => documentManager.removeTransform(step.id)}
           />
