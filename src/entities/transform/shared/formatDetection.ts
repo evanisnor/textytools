@@ -5,6 +5,7 @@
 
 import { isCSV } from "@/entities/csv";
 import { isJSON } from "@/entities/json";
+import { isJWT } from "@/entities/jwt";
 import { isTOML } from "@/entities/toml";
 import { isXML } from "@/entities/xml";
 import { isYAML } from "@/entities/yaml";
@@ -12,18 +13,26 @@ import { isYAML } from "@/entities/yaml";
 /**
  * Known data formats that can be detected
  */
-export type DataFormat = "json" | "csv" | "yaml" | "xml" | "toml" | "unknown";
+export type DataFormat =
+  | "json"
+  | "csv"
+  | "yaml"
+  | "xml"
+  | "toml"
+  | "jwt"
+  | "unknown";
 
 /**
  * Detect the format of input data
  * Order matters! Checks most specific formats first to avoid false positives
  *
  * Detection order:
- * 1. JSON - Must start with { or [ and parse to object/array
- * 2. XML - Must start with < and have valid XML structure
- * 3. TOML - Must have TOML-specific syntax ([section], key = value)
- * 4. CSV - Must have consistent column structure (checked before YAML!)
- * 5. YAML - Must have YAML syntax AND parse to object/array (not plain strings)
+ * 1. JWT - Must match JWT pattern (three base64url parts with valid header)
+ * 2. JSON - Must start with { or [ and parse to object/array
+ * 3. XML - Must start with < and have valid XML structure
+ * 4. TOML - Must have TOML-specific syntax ([section], key = value)
+ * 5. CSV - Must have consistent column structure (checked before YAML!)
+ * 6. YAML - Must have YAML syntax AND parse to object/array (not plain strings)
  *
  * @param input - The input string to analyze
  * @returns The detected format or "unknown"
@@ -31,6 +40,11 @@ export type DataFormat = "json" | "csv" | "yaml" | "xml" | "toml" | "unknown";
 export function detectFormat(input: string): DataFormat {
   if (!input || input.trim() === "") {
     return "unknown";
+  }
+
+  // JWT - very specific pattern (checked first to avoid confusion with base64)
+  if (isJWT(input)) {
+    return "jwt";
   }
 
   // JSON - very specific (must start with { or [)
@@ -87,6 +101,8 @@ export function isFormat(input: string, expectedFormat: DataFormat): boolean {
       return isXML(input);
     case "toml":
       return isTOML(input);
+    case "jwt":
+      return isJWT(input);
     default:
       return false;
   }

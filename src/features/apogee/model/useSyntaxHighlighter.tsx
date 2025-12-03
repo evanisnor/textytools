@@ -6,6 +6,7 @@ import type { InputType } from "../model/types";
 
 import { useCsvSyntaxHighlighter } from "@/entities/csv";
 import { useJsonSyntaxHighlighter } from "@/entities/json";
+import { useJwtSyntaxHighlighter } from "@/entities/jwt";
 import { useTomlSyntaxHighlighter } from "@/entities/toml";
 import { useXmlSyntaxHighlighter } from "@/entities/xml";
 import { useYamlSyntaxHighlighter } from "@/entities/yaml";
@@ -44,9 +45,9 @@ export function useSyntaxHighlighter(
   const tomlHighlighter = useTomlSyntaxHighlighter({
     enabled: enabled && inputType === "toml",
   });
-
-  // JWT is a special case - it's not in InputType but could be a transform output
-  // For now we'll handle it separately if needed
+  const jwtHighlighter = useJwtSyntaxHighlighter({
+    enabled: enabled && inputType === "jwt",
+  });
 
   return useMemo(() => {
     if (!enabled || !inputType) {
@@ -74,6 +75,10 @@ export function useSyntaxHighlighter(
         return tomlHighlighter
           ? { renderContent: tomlHighlighter.renderContent }
           : {};
+      case "jwt":
+        return jwtHighlighter
+          ? { renderContent: jwtHighlighter.renderContent }
+          : {};
       case "auto":
       case "text":
       case "file":
@@ -88,5 +93,6 @@ export function useSyntaxHighlighter(
     yamlHighlighter,
     xmlHighlighter,
     tomlHighlighter,
+    jwtHighlighter,
   ]);
 }

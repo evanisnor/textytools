@@ -7,6 +7,7 @@ import type {
   TransformDefinition,
   InputSelection,
   InputType,
+  TransformStat,
 } from "../model/types";
 import { useSyntaxHighlighter } from "../model/useSyntaxHighlighter";
 
@@ -92,6 +93,7 @@ export function TransformBlock({
       "text/xml": "xml",
       "application/toml": "toml",
       "text/toml": "toml",
+      "application/jwt": "jwt",
       "text/plain": "text",
       // Fallback for simple format names (if used)
       json: "json",
@@ -99,6 +101,7 @@ export function TransformBlock({
       yaml: "yaml",
       xml: "xml",
       toml: "toml",
+      jwt: "jwt",
       text: "text",
     };
 
@@ -230,10 +233,21 @@ export function TransformBlock({
       {/* Output Section */}
       <div>
         <div className="w-full flex items-center justify-between px-4 py-2 bg-zinc-50 dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-700">
-          <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-            Output
-          </span>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3 flex-1 overflow-x-auto">
+            <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              Output
+            </span>
+            {/* Stats Pills */}
+            {step.stats && step.stats.length > 0 && (
+              <>
+                <span className="text-zinc-400">|</span>
+                {step.stats.map((stat, index) => (
+                  <StatPill key={index} stat={stat} />
+                ))}
+              </>
+            )}
+          </div>
+          <div className="flex items-center gap-2 flex-shrink-0">
             {/* Wrap Toggle */}
             <button
               type="button"
@@ -283,6 +297,7 @@ export function TransformBlock({
             </button>
           </div>
         </div>
+
         {outputExpanded && (
           <div className="bg-white dark:bg-zinc-900">
             <TextEditor
@@ -298,6 +313,39 @@ export function TransformBlock({
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+interface StatPillProps {
+  stat: TransformStat;
+}
+
+function StatPill({ stat }: StatPillProps) {
+  const alertColors = {
+    info: "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-700",
+    warning:
+      "bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300 border-yellow-200 dark:border-yellow-700",
+    error:
+      "bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 border-red-200 dark:border-red-700",
+    default:
+      "bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-700",
+  };
+
+  const colorClass =
+    stat.alert && stat.alert in alertColors
+      ? alertColors[stat.alert as keyof typeof alertColors]
+      : alertColors.default;
+
+  return (
+    <div
+      className={`inline-flex items-center gap-1.5 px-2 py-1 rounded border text-xs whitespace-nowrap ${colorClass}`}
+      title={
+        stat.alert ? `${stat.alert.toUpperCase()}: ${stat.label}` : undefined
+      }
+    >
+      <span className="font-medium">{stat.label}:</span>
+      <span>{stat.value}</span>
     </div>
   );
 }

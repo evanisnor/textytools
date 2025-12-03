@@ -203,6 +203,7 @@ export interface TransformStep {
 
   // Phase 3: Cached Output
   output: string;
+  stats?: TransformStat[];
   createdAt: number;
 }
 
@@ -217,13 +218,20 @@ export type InputType =
   | "yaml"
   | "xml"
   | "toml"
+  | "jwt"
   | "file";
 
 /**
  * Detectable input types (subset of InputType that can be auto-detected)
  * Excludes "auto", "text", "file", and "unknown"
  */
-export type DetectableInputType = "csv" | "json" | "yaml" | "xml" | "toml";
+export type DetectableInputType =
+  | "csv"
+  | "json"
+  | "yaml"
+  | "xml"
+  | "toml"
+  | "jwt";
 
 /**
  * Document containing input data and transform pipeline

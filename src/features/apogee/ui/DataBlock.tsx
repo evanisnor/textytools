@@ -106,6 +106,7 @@ export function DataBlock({
                   <option value="xml">XML</option>
                   <option value="yaml">YAML</option>
                   <option value="toml">TOML</option>
+                  <option value="jwt">JWT</option>
                 </select>
               </div>
             </>

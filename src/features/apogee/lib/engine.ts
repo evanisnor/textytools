@@ -58,8 +58,9 @@ export class ApogeeEngine {
         continue;
       }
 
-      // Success - cache output and continue
+      // Success - cache output, stats, and continue
       step.output = transformResult.data;
+      step.stats = transformResult.stats;
       currentData = transformResult.data;
     }
 
@@ -108,6 +109,7 @@ export class ApogeeEngine {
       step.output = transformResult.success
         ? transformResult.data
         : transformResult.error || "";
+      step.stats = transformResult.stats;
       currentData = step.output;
     }
   }
