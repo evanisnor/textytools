@@ -5,9 +5,131 @@
 
 import { sha3_224, sha3_256, sha3_384, sha3_512 } from "js-sha3";
 
-import type { TransformDefinition, TransformResult } from "../../shared/types";
+import type {
+  TransformDefinition,
+  TransformResult,
+  TransformStat,
+} from "../../shared/types";
 
 import { hashText } from "./codec";
+
+/**
+ * Execute hash transform using codec
+ */
+async function executeHashTransform(
+  input: string,
+  properties: Record<string, unknown>,
+  algorithm: "md5" | "sha1" | "sha256" | "sha384" | "sha512",
+  algorithmLabel: string,
+  outputLength: string,
+  securityMessage: string,
+  securityAlert: "info" | "warning" = "info",
+): Promise<TransformResult> {
+  if (!input) {
+    return {
+      success: false,
+      data: "",
+      error: "Input is empty",
+      mimeType: "text/plain",
+    };
+  }
+
+  try {
+    const lineByLine = properties.lineByLine === true;
+    const output = await hashText(input, algorithm, lineByLine);
+    const stats: TransformStat[] = [
+      { label: "Algorithm", value: algorithmLabel },
+      { label: "Output Length", value: outputLength },
+      {
+        label: "Security",
+        value: securityMessage,
+        alert: securityAlert,
+      },
+    ];
+
+    if (lineByLine) {
+      const lineCount = input.split("\n").length;
+      stats.push({ label: "Lines Processed", value: lineCount });
+    }
+
+    return {
+      success: true,
+      data: output,
+      mimeType: "text/plain",
+      stats,
+    };
+  } catch (err) {
+    return {
+      success: false,
+      data: "",
+      error: `Hashing failed: ${err instanceof Error ? err.message : "Unknown error"}`,
+      mimeType: "text/plain",
+    };
+  }
+}
+
+/**
+ * Execute SHA3 hash transform (uses js-sha3 directly)
+ */
+async function executeSha3HashTransform(
+  input: string,
+  properties: Record<string, unknown>,
+  hashFunction: (input: string) => string,
+  algorithmLabel: string,
+  outputLength: string,
+  securityMessage: string = "Modern cryptographic standard",
+): Promise<TransformResult> {
+  if (!input) {
+    return {
+      success: false,
+      data: "",
+      error: "Input is empty",
+      mimeType: "text/plain",
+    };
+  }
+
+  try {
+    const lineByLine = properties.lineByLine === true;
+    let output: string;
+
+    if (lineByLine) {
+      const lines = input.split("\n");
+      const hashedLines = lines.map((line) => hashFunction(line));
+      output = hashedLines.join("\n");
+    } else {
+      output = hashFunction(input);
+    }
+
+    const stats: TransformStat[] = [
+      { label: "Algorithm", value: algorithmLabel },
+      { label: "Output Length", value: outputLength },
+      {
+        label: "Security",
+        value: securityMessage,
+        alert: "info",
+      },
+    ];
+
+    if (lineByLine) {
+      const lineCount = input.split("\n").length;
+      stats.push({ label: "Lines Processed", value: lineCount });
+    }
+
+    return {
+      success: true,
+      data: output,
+      mimeType: "text/plain",
+      stats,
+    };
+  } catch (err) {
+    return {
+      success: false,
+      data: "",
+      error: `Hashing failed: ${err instanceof Error ? err.message : "Unknown error"}`,
+      mimeType: "text/plain",
+    };
+  }
+}
 
 /**
  * MD5 Hash Transform
@@ -19,43 +141,26 @@ export const md5HashDefinition: TransformDefinition = {
   category: "hash",
   acceptsInput: ["*"],
   producesOutput: "text/plain",
-  propertySchema: [],
-  defaultProperties: {},
-  execute: async (input: string): Promise<TransformResult> => {
-    if (!input) {
-      return {
-        success: false,
-        data: "",
-        error: "Input is empty",
-        mimeType: "text/plain",
-      };
-    }
-
-    try {
-      const output = await hashText(input, "md5");
-      return {
-        success: true,
-        data: output,
-        mimeType: "text/plain",
-        stats: [
-          { label: "Algorithm", value: "MD5" },
-          { label: "Output Length", value: "128 bits (32 hex chars)" },
-          {
-            label: "Security",
-            value: "Deprecated - Use SHA-256 or stronger",
-            alert: "warning",
-          },
-        ],
-      };
-    } catch (err) {
-      return {
-        success: false,
-        data: "",
-        error: `Hashing failed: ${err instanceof Error ? err.message : "Unknown error"}`,
-        mimeType: "text/plain",
-      };
-    }
-  },
+  supportsLineByLine: true,
+  propertySchema: [
+    {
+      key: "lineByLine",
+      label: "Line-by-Line",
+      type: "toggle",
+      defaultValue: false,
+    },
+  ],
+  defaultProperties: { lineByLine: false },
+  execute: (input, properties) =>
+    executeHashTransform(
+      input,
+      properties,
+      "md5",
+      "MD5",
+      "128 bits (32 hex chars)",
+      "Deprecated - Use SHA-256 or stronger",
+      "warning",
+    ),
 };
 
 /**
@@ -68,43 +173,26 @@ export const sha1HashDefinition: TransformDefinition = {
   category: "hash",
   acceptsInput: ["*"],
   producesOutput: "text/plain",
-  propertySchema: [],
-  defaultProperties: {},
-  execute: async (input: string): Promise<TransformResult> => {
-    if (!input) {
-      return {
-        success: false,
-        data: "",
-        error: "Input is empty",
-        mimeType: "text/plain",
-      };
-    }
-
-    try {
-      const output = await hashText(input, "sha1");
-      return {
-        success: true,
-        data: output,
-        mimeType: "text/plain",
-        stats: [
-          { label: "Algorithm", value: "SHA-1" },
-          { label: "Output Length", value: "160 bits (40 hex chars)" },
-          {
-            label: "Security",
-            value: "Deprecated - Use SHA-256 or stronger",
-            alert: "warning",
-          },
-        ],
-      };
-    } catch (err) {
-      return {
-        success: false,
-        data: "",
-        error: `Hashing failed: ${err instanceof Error ? err.message : "Unknown error"}`,
-        mimeType: "text/plain",
-      };
-    }
-  },
+  supportsLineByLine: true,
+  propertySchema: [
+    {
+      key: "lineByLine",
+      label: "Line-by-Line",
+      type: "toggle",
+      defaultValue: false,
+    },
+  ],
+  defaultProperties: { lineByLine: false },
+  execute: (input, properties) =>
+    executeHashTransform(
+      input,
+      properties,
+      "sha1",
+      "SHA-1",
+      "160 bits (40 hex chars)",
+      "Deprecated - Use SHA-256 or stronger",
+      "warning",
+    ),
 };
 
 /**
@@ -117,43 +205,25 @@ export const sha256HashDefinition: TransformDefinition = {
   category: "hash",
   acceptsInput: ["*"],
   producesOutput: "text/plain",
-  propertySchema: [],
-  defaultProperties: {},
-  execute: async (input: string): Promise<TransformResult> => {
-    if (!input) {
-      return {
-        success: false,
-        data: "",
-        error: "Input is empty",
-        mimeType: "text/plain",
-      };
-    }
-
-    try {
-      const output = await hashText(input, "sha256");
-      return {
-        success: true,
-        data: output,
-        mimeType: "text/plain",
-        stats: [
-          { label: "Algorithm", value: "SHA-256" },
-          { label: "Output Length", value: "256 bits (64 hex chars)" },
-          {
-            label: "Security",
-            value: "Cryptographically secure",
-            alert: "info",
-          },
-        ],
-      };
-    } catch (err) {
-      return {
-        success: false,
-        data: "",
-        error: `Hashing failed: ${err instanceof Error ? err.message : "Unknown error"}`,
-        mimeType: "text/plain",
-      };
-    }
-  },
+  supportsLineByLine: true,
+  propertySchema: [
+    {
+      key: "lineByLine",
+      label: "Line-by-Line",
+      type: "toggle",
+      defaultValue: false,
+    },
+  ],
+  defaultProperties: { lineByLine: false },
+  execute: (input, properties) =>
+    executeHashTransform(
+      input,
+      properties,
+      "sha256",
+      "SHA-256",
+      "256 bits (64 hex chars)",
+      "Cryptographically secure",
+    ),
 };
 
 /**
@@ -166,43 +236,25 @@ export const sha384HashDefinition: TransformDefinition = {
   category: "hash",
   acceptsInput: ["*"],
   producesOutput: "text/plain",
-  propertySchema: [],
-  defaultProperties: {},
-  execute: async (input: string): Promise<TransformResult> => {
-    if (!input) {
-      return {
-        success: false,
-        data: "",
-        error: "Input is empty",
-        mimeType: "text/plain",
-      };
-    }
-
-    try {
-      const output = await hashText(input, "sha384");
-      return {
-        success: true,
-        data: output,
-        mimeType: "text/plain",
-        stats: [
-          { label: "Algorithm", value: "SHA-384" },
-          { label: "Output Length", value: "384 bits (96 hex chars)" },
-          {
-            label: "Security",
-            value: "Cryptographically secure",
-            alert: "info",
-          },
-        ],
-      };
-    } catch (err) {
-      return {
-        success: false,
-        data: "",
-        error: `Hashing failed: ${err instanceof Error ? err.message : "Unknown error"}`,
-        mimeType: "text/plain",
-      };
-    }
-  },
+  supportsLineByLine: true,
+  propertySchema: [
+    {
+      key: "lineByLine",
+      label: "Line-by-Line",
+      type: "toggle",
+      defaultValue: false,
+    },
+  ],
+  defaultProperties: { lineByLine: false },
+  execute: (input, properties) =>
+    executeHashTransform(
+      input,
+      properties,
+      "sha384",
+      "SHA-384",
+      "384 bits (96 hex chars)",
+      "Cryptographically secure",
+    ),
 };
 
 /**
@@ -215,43 +267,25 @@ export const sha512HashDefinition: TransformDefinition = {
   category: "hash",
   acceptsInput: ["*"],
   producesOutput: "text/plain",
-  propertySchema: [],
-  defaultProperties: {},
-  execute: async (input: string): Promise<TransformResult> => {
-    if (!input) {
-      return {
-        success: false,
-        data: "",
-        error: "Input is empty",
-        mimeType: "text/plain",
-      };
-    }
-
-    try {
-      const output = await hashText(input, "sha512");
-      return {
-        success: true,
-        data: output,
-        mimeType: "text/plain",
-        stats: [
-          { label: "Algorithm", value: "SHA-512" },
-          { label: "Output Length", value: "512 bits (128 hex chars)" },
-          {
-            label: "Security",
-            value: "Maximum cryptographic security",
-            alert: "info",
-          },
-        ],
-      };
-    } catch (err) {
-      return {
-        success: false,
-        data: "",
-        error: `Hashing failed: ${err instanceof Error ? err.message : "Unknown error"}`,
-        mimeType: "text/plain",
-      };
-    }
-  },
+  supportsLineByLine: true,
+  propertySchema: [
+    {
+      key: "lineByLine",
+      label: "Line-by-Line",
+      type: "toggle",
+      defaultValue: false,
+    },
+  ],
+  defaultProperties: { lineByLine: false },
+  execute: (input, properties) =>
+    executeHashTransform(
+      input,
+      properties,
+      "sha512",
+      "SHA-512",
+      "512 bits (128 hex chars)",
+      "Maximum cryptographic security",
+    ),
 };
 
 /**
@@ -264,43 +298,24 @@ export const sha3_224HashDefinition: TransformDefinition = {
   category: "hash",
   acceptsInput: ["*"],
   producesOutput: "text/plain",
-  propertySchema: [],
-  defaultProperties: {},
-  execute: async (input: string): Promise<TransformResult> => {
-    if (!input) {
-      return {
-        success: false,
-        data: "",
-        error: "Input is empty",
-        mimeType: "text/plain",
-      };
-    }
-
-    try {
-      const output = sha3_224(input);
-      return {
-        success: true,
-        data: output,
-        mimeType: "text/plain",
-        stats: [
-          { label: "Algorithm", value: "SHA3-224" },
-          { label: "Output Length", value: "224 bits (56 hex chars)" },
-          {
-            label: "Security",
-            value: "Modern cryptographic standard",
-            alert: "info",
-          },
-        ],
-      };
-    } catch (err) {
-      return {
-        success: false,
-        data: "",
-        error: `Hashing failed: ${err instanceof Error ? err.message : "Unknown error"}`,
-        mimeType: "text/plain",
-      };
-    }
-  },
+  supportsLineByLine: true,
+  propertySchema: [
+    {
+      key: "lineByLine",
+      label: "Line-by-Line",
+      type: "toggle",
+      defaultValue: false,
+    },
+  ],
+  defaultProperties: { lineByLine: false },
+  execute: (input, properties) =>
+    executeSha3HashTransform(
+      input,
+      properties,
+      sha3_224,
+      "SHA3-224",
+      "224 bits (56 hex chars)",
+    ),
 };
 
 /**
@@ -313,43 +328,24 @@ export const sha3_256HashDefinition: TransformDefinition = {
   category: "hash",
   acceptsInput: ["*"],
   producesOutput: "text/plain",
-  propertySchema: [],
-  defaultProperties: {},
-  execute: async (input: string): Promise<TransformResult> => {
-    if (!input) {
-      return {
-        success: false,
-        data: "",
-        error: "Input is empty",
-        mimeType: "text/plain",
-      };
-    }
-
-    try {
-      const output = sha3_256(input);
-      return {
-        success: true,
-        data: output,
-        mimeType: "text/plain",
-        stats: [
-          { label: "Algorithm", value: "SHA3-256" },
-          { label: "Output Length", value: "256 bits (64 hex chars)" },
-          {
-            label: "Security",
-            value: "Modern cryptographic standard",
-            alert: "info",
-          },
-        ],
-      };
-    } catch (err) {
-      return {
-        success: false,
-        data: "",
-        error: `Hashing failed: ${err instanceof Error ? err.message : "Unknown error"}`,
-        mimeType: "text/plain",
-      };
-    }
-  },
+  supportsLineByLine: true,
+  propertySchema: [
+    {
+      key: "lineByLine",
+      label: "Line-by-Line",
+      type: "toggle",
+      defaultValue: false,
+    },
+  ],
+  defaultProperties: { lineByLine: false },
+  execute: (input, properties) =>
+    executeSha3HashTransform(
+      input,
+      properties,
+      sha3_256,
+      "SHA3-256",
+      "256 bits (64 hex chars)",
+    ),
 };
 
 /**
@@ -362,43 +358,25 @@ export const sha3_384HashDefinition: TransformDefinition = {
   category: "hash",
   acceptsInput: ["*"],
   producesOutput: "text/plain",
-  propertySchema: [],
-  defaultProperties: {},
-  execute: async (input: string): Promise<TransformResult> => {
-    if (!input) {
-      return {
-        success: false,
-        data: "",
-        error: "Input is empty",
-        mimeType: "text/plain",
-      };
-    }
-
-    try {
-      const output = sha3_384(input);
-      return {
-        success: true,
-        data: output,
-        mimeType: "text/plain",
-        stats: [
-          { label: "Algorithm", value: "SHA3-384" },
-          { label: "Output Length", value: "384 bits (96 hex chars)" },
-          {
-            label: "Security",
-            value: "High cryptographic security",
-            alert: "info",
-          },
-        ],
-      };
-    } catch (err) {
-      return {
-        success: false,
-        data: "",
-        error: `Hashing failed: ${err instanceof Error ? err.message : "Unknown error"}`,
-        mimeType: "text/plain",
-      };
-    }
-  },
+  supportsLineByLine: true,
+  propertySchema: [
+    {
+      key: "lineByLine",
+      label: "Line-by-Line",
+      type: "toggle",
+      defaultValue: false,
+    },
+  ],
+  defaultProperties: { lineByLine: false },
+  execute: (input, properties) =>
+    executeSha3HashTransform(
+      input,
+      properties,
+      sha3_384,
+      "SHA3-384",
+      "384 bits (96 hex chars)",
+      "High cryptographic security",
+    ),
 };
 
 /**
@@ -411,41 +389,23 @@ export const sha3_512HashDefinition: TransformDefinition = {
   category: "hash",
   acceptsInput: ["*"],
   producesOutput: "text/plain",
-  propertySchema: [],
-  defaultProperties: {},
-  execute: async (input: string): Promise<TransformResult> => {
-    if (!input) {
-      return {
-        success: false,
-        data: "",
-        error: "Input is empty",
-        mimeType: "text/plain",
-      };
-    }
-
-    try {
-      const output = sha3_512(input);
-      return {
-        success: true,
-        data: output,
-        mimeType: "text/plain",
-        stats: [
-          { label: "Algorithm", value: "SHA3-512" },
-          { label: "Output Length", value: "512 bits (128 hex chars)" },
-          {
-            label: "Security",
-            value: "Maximum cryptographic security",
-            alert: "info",
-          },
-        ],
-      };
-    } catch (err) {
-      return {
-        success: false,
-        data: "",
-        error: `Hashing failed: ${err instanceof Error ? err.message : "Unknown error"}`,
-        mimeType: "text/plain",
-      };
-    }
-  },
+  supportsLineByLine: true,
+  propertySchema: [
+    {
+      key: "lineByLine",
+      label: "Line-by-Line",
+      type: "toggle",
+      defaultValue: false,
+    },
+  ],
+  defaultProperties: { lineByLine: false },
+  execute: (input, properties) =>
+    executeSha3HashTransform(
+      input,
+      properties,
+      sha3_512,
+      "SHA3-512",
+      "512 bits (128 hex chars)",
+      "Maximum cryptographic security",
+    ),
 };

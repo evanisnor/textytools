@@ -11,8 +11,35 @@ import { toSha1, toSha256, toSha384, toSha512 } from "./sha";
 /**
  * Generate hash for text using the specified hash type
  */
-export async function hashText(text: string, type: HashType): Promise<string> {
+export async function hashText(
+  text: string,
+  type: HashType,
+  lineByLine = false,
+): Promise<string> {
   if (!text) return "";
+
+  if (lineByLine) {
+    const lines = text.split("\n");
+    const hashedLines = await Promise.all(
+      lines.map(async (line) => {
+        switch (type) {
+          case "md5":
+            return toMd5(line);
+          case "sha1":
+            return await toSha1(line);
+          case "sha256":
+            return await toSha256(line);
+          case "sha384":
+            return await toSha384(line);
+          case "sha512":
+            return await toSha512(line);
+          default:
+            return line;
+        }
+      }),
+    );
+    return hashedLines.join("\n");
+  }
 
   switch (type) {
     case "md5":

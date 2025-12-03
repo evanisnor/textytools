@@ -74,5 +74,6 @@ export interface TransformDefinition {
 
   // Optional features
   supportsInputSelection?: boolean; // Default: true
+  supportsLineByLine?: boolean; // Default: false
   supportsStreaming?: boolean; // Default: false (future)
 }
