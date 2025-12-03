@@ -37,6 +37,7 @@ export interface DocumentManagerActions {
   createDocument: (inputData: string, inputType: Document["inputType"]) => void;
   deleteDocument: (documentId: string) => void;
   setCurrentDocument: (documentId: string | null) => void;
+  updateDocumentName: (name: string) => void;
   updateInputData: (data: string) => void;
   updateInputType: (type: Document["inputType"]) => void;
   addTransform: (type: TransformType) => void;
@@ -65,6 +66,32 @@ export type DocumentManager = DocumentManagerState & DocumentManagerActions;
  */
 function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+}
+
+/**
+ * Generate document name from current date/time
+ * Format: "Jan 18, 2025 11:34pm"
+ */
+function generateDocumentName(): string {
+  const now = new Date();
+
+  // Format: "Jan 18, 2025"
+  const dateOptions: Intl.DateTimeFormatOptions = {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  };
+  const datePart = now.toLocaleDateString("en-US", dateOptions);
+
+  // Format: "11:34pm"
+  const timeOptions: Intl.DateTimeFormatOptions = {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  };
+  const timePart = now.toLocaleTimeString("en-US", timeOptions).toLowerCase();
+
+  return `${datePart} ${timePart}`;
 }
 
 /**
@@ -146,7 +173,7 @@ export function useDocumentManager(): DocumentManager {
     (inputData: string, inputType: Document["inputType"]) => {
       const newDoc: Document = {
         id: generateId(),
-        name: `Document ${documents.length + 1}`,
+        name: generateDocumentName(),
         inputType,
         inputData,
         transforms: [],
@@ -157,7 +184,7 @@ export function useDocumentManager(): DocumentManager {
       setDocuments((prev) => [...prev, newDoc]);
       setCurrentDocumentState(newDoc);
     },
-    [documents.length],
+    [],
   );
 
   const deleteDocument = useCallback((documentId: string) => {
@@ -188,6 +215,25 @@ export function useDocumentManager(): DocumentManager {
         setCurrentDocumentState(doc);
       }
       return prev;
+    });
+  }, []);
+
+  const updateDocumentName = useCallback((name: string) => {
+    setCurrentDocumentState((current) => {
+      if (!current) return null;
+
+      const updated = {
+        ...current,
+        name,
+        updatedAt: Date.now(),
+      };
+
+      // Update in documents array
+      setDocuments((prev) =>
+        prev.map((doc) => (doc.id === current.id ? updated : doc)),
+      );
+
+      return updated;
     });
   }, []);
 
@@ -547,6 +593,7 @@ export function useDocumentManager(): DocumentManager {
     createDocument,
     deleteDocument,
     setCurrentDocument,
+    updateDocumentName,
     updateInputData,
     updateInputType,
     addTransform,
