@@ -12,7 +12,7 @@ import {
   getCSVStats,
   type CsvFormatOptions,
 } from "@/entities/csv";
-import { parseJSON } from "@/entities/json";
+import { parseJSON, flattenObject } from "@/entities/json";
 
 /**
  * Property schema for CSV conversion options
@@ -61,15 +61,25 @@ function jsonToCsv(data: unknown): string[][] {
 
     // Check if it's an array of objects
     if (typeof data[0] === "object" && data[0] !== null) {
-      // Extract headers from first object
-      const headers = Object.keys(data[0] as Record<string, unknown>);
-      const rows: string[][] = [headers];
+      // Flatten all objects first to handle nested structures
+      const flattenedRows = data.map((item) => flattenObject(item));
 
-      // Convert each object to row
-      for (const item of data) {
-        const row = headers.map((header) =>
-          String((item as Record<string, unknown>)[header] ?? ""),
-        );
+      // Collect all unique keys from flattened objects
+      const allKeys = Array.from(
+        new Set(flattenedRows.flatMap((row) => Object.keys(row))),
+      ).sort();
+
+      const rows: string[][] = [allKeys];
+
+      // Convert each flattened object to row
+      for (const flatRow of flattenedRows) {
+        const row = allKeys.map((key) => {
+          const value = flatRow[key];
+          if (value === null || value === undefined) {
+            return "";
+          }
+          return String(value);
+        });
         rows.push(row);
       }
 
@@ -81,11 +91,12 @@ function jsonToCsv(data: unknown): string[][] {
   }
 
   if (typeof data === "object" && data !== null) {
-    // Single object - convert to key-value pairs
-    const entries = Object.entries(data);
+    // Single object - flatten and convert to key-value pairs
+    const flattened = flattenObject(data);
+    const entries = Object.entries(flattened);
     return [
       ["Key", "Value"],
-      ...entries.map(([key, value]) => [key, String(value)]),
+      ...entries.map(([key, value]) => [key, String(value ?? "")]),
     ];
   }
 
