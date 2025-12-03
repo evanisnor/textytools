@@ -70,11 +70,9 @@ export function PipelineEditor({ documentManager }: PipelineEditorProps) {
         value={currentDocument.inputData}
         mimeType={currentDocument.inputType}
         onChange={(value) => documentManager.updateInputData(value)}
+        inputType={currentDocument.inputType}
+        onInputTypeChange={(type) => documentManager.updateInputType(type)}
         stats={[
-          {
-            label: "Type",
-            value: currentDocument.inputType,
-          },
           {
             label: "Size",
             value: `${currentDocument.inputData.length} chars`,
