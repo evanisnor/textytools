@@ -10,12 +10,14 @@
 
 import { useState } from "react";
 
-import type { TransformType } from "../model/types";
+import type { TransformType, InputType } from "../model/types";
 import type { DocumentManager } from "../model/useDocumentManager";
 
 import { DataBlock } from "./DataBlock";
 import { PipelineEditor } from "./PipelineEditor";
 import { TransformPalette } from "./TransformPalette";
+
+import { detectFormat } from "@/entities/transform/shared/formatDetection";
 
 export interface ApogeeShellProps {
   documentManager: DocumentManager;
@@ -31,16 +33,26 @@ export function ApogeeShell({ documentManager }: ApogeeShellProps) {
     deleteDocument,
   } = documentManager;
   const [inputText, setInputText] = useState("");
+  const [inputType, setInputType] = useState<InputType>("auto");
   const [hoveredDocId, setHoveredDocId] = useState<string | null>(null);
+
+  // Auto-detect format from current input (derived state)
+  const effectiveInputType: InputType =
+    inputType === "auto" && inputText
+      ? detectFormat(inputText) !== "unknown"
+        ? (detectFormat(inputText) as "csv" | "json" | "yaml" | "xml" | "toml")
+        : "auto"
+      : inputType;
 
   const handleTransformSelect = (type: TransformType) => {
     if (!inputText.trim()) return;
 
-    // Create document with input text
-    createDocument(inputText, "text");
+    // Create document with input text and detected type
+    createDocument(inputText, effectiveInputType);
 
     // Clear input for next time
     setInputText("");
+    setInputType("auto");
 
     // Note: The document creation will trigger a re-render with currentDocument set,
     // then PipelineEditor will be shown. We need to add the transform after the document is created.
@@ -142,6 +154,8 @@ export function ApogeeShell({ documentManager }: ApogeeShellProps) {
                 value={inputText}
                 onChange={setInputText}
                 onClear={() => setInputText("")}
+                inputType={effectiveInputType}
+                onInputTypeChange={setInputType}
                 stats={[
                   {
                     label: "Size",

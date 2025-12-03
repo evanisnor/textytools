@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react";
 
-import type { TransformStat } from "../model/types";
+import type { TransformStat, InputType } from "../model/types";
 
 import { TextEditor } from "@/entities/editor";
 
@@ -15,6 +15,8 @@ interface DataBlockProps {
   onClear?: () => void;
   stats?: TransformStat[];
   mimeType?: string; // For future syntax highlighting support
+  inputType?: InputType; // Current input type selection
+  onInputTypeChange?: (type: InputType) => void; // Handler for input type changes
 }
 
 /**
@@ -47,6 +49,8 @@ export function DataBlock({
   stats,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   mimeType, // Not used yet, reserved for Phase 6 syntax highlighting
+  inputType,
+  onInputTypeChange,
 }: DataBlockProps) {
   const [wrap, setWrap] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -69,9 +73,40 @@ export function DataBlock({
     <div className="border border-zinc-200 dark:border-zinc-700 rounded-lg overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between bg-zinc-50 dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-700 px-4 py-2">
-        <h3 className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-          {title}
-        </h3>
+        <div className="flex items-center gap-4">
+          <h3 className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            {title}
+          </h3>
+          {inputType && onInputTypeChange && (
+            <>
+              <span className="text-zinc-400">|</span>
+              <div className="flex items-center gap-2">
+                <label
+                  htmlFor="data-type"
+                  className="text-xs font-medium text-zinc-600 dark:text-zinc-400"
+                >
+                  Type:
+                </label>
+                <select
+                  id="data-type"
+                  value={inputType}
+                  onChange={(e) =>
+                    onInputTypeChange(e.target.value as InputType)
+                  }
+                  className="px-2 py-1 text-xs border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="auto">Auto-detect</option>
+                  <option value="text">Plain Text</option>
+                  <option value="json">JSON</option>
+                  <option value="csv">CSV</option>
+                  <option value="xml">XML</option>
+                  <option value="yaml">YAML</option>
+                  <option value="toml">TOML</option>
+                </select>
+              </div>
+            </>
+          )}
+        </div>
         <div className="flex items-center gap-2">
           {/* Wrap Toggle */}
           <button

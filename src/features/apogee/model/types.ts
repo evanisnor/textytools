@@ -207,12 +207,25 @@ export interface TransformStep {
 }
 
 /**
+ * Input type for documents
+ */
+export type InputType =
+  | "auto"
+  | "text"
+  | "csv"
+  | "json"
+  | "yaml"
+  | "xml"
+  | "toml"
+  | "file";
+
+/**
  * Document containing input data and transform pipeline
  */
 export interface Document {
   id: string;
   name: string;
-  inputType: "text" | "csv" | "json" | "file";
+  inputType: InputType;
   inputData: string;
   transforms: TransformStep[];
   createdAt: number;

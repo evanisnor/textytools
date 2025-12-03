@@ -38,6 +38,7 @@ export interface DocumentManagerActions {
   deleteDocument: (documentId: string) => void;
   setCurrentDocument: (documentId: string | null) => void;
   updateInputData: (data: string) => void;
+  updateInputType: (type: Document["inputType"]) => void;
   addTransform: (type: TransformType) => void;
   updateTransformProperties: (
     stepId: string,
@@ -259,6 +260,32 @@ export function useDocumentManager(): DocumentManager {
         );
 
         // Trigger pipeline re-execution
+        lastModifiedStepRef.current = 0;
+        scheduleExecution(updated, 0);
+
+        return updated;
+      });
+    },
+    [scheduleExecution],
+  );
+
+  const updateInputType = useCallback(
+    (type: Document["inputType"]) => {
+      setCurrentDocumentState((current) => {
+        if (!current) return null;
+
+        const updated = {
+          ...current,
+          inputType: type,
+          updatedAt: Date.now(),
+        };
+
+        // Update in documents array
+        setDocuments((prev) =>
+          prev.map((doc) => (doc.id === current.id ? updated : doc)),
+        );
+
+        // Trigger pipeline re-execution if needed
         lastModifiedStepRef.current = 0;
         scheduleExecution(updated, 0);
 
@@ -521,6 +548,7 @@ export function useDocumentManager(): DocumentManager {
     deleteDocument,
     setCurrentDocument,
     updateInputData,
+    updateInputType,
     addTransform,
     updateTransformProperties,
     updateTransformInputSelection,
