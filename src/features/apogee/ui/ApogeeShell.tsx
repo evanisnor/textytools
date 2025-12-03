@@ -76,18 +76,15 @@ export function ApogeeShell({ documentManager }: ApogeeShellProps) {
   };
 
   const handleNewDocument = () => {
-    // Check if we need confirmation:
-    // 1. If viewing a document, always confirm (will lose document)
-    // 2. If on input screen with text, confirm (will lose input text)
+    // Only confirm if on input screen with unsaved text
+    // Documents are auto-saved, so no confirmation needed when viewing a document
     const needsConfirmation =
-      currentDocument !== null || inputText.trim().length > 0;
+      currentDocument === null && inputText.trim().length > 0;
 
     if (needsConfirmation) {
-      const message = currentDocument
-        ? "Starting a new document will close the current document. Continue?"
-        : "Creating a new document will lose your current input data. Continue?";
-
-      setConfirmMessage(message);
+      setConfirmMessage(
+        "Creating a new document will lose your current input data. Continue?",
+      );
       setShowConfirmModal(true);
     } else {
       // No confirmation needed, proceed directly
