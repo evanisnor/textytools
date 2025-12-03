@@ -234,13 +234,9 @@ export function TransformBlock({
       <div>
         <div className="w-full flex items-center justify-between px-4 py-2 bg-zinc-50 dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-700">
           <div className="flex items-center gap-3 flex-1 overflow-x-auto">
-            <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-              Output
-            </span>
             {/* Stats Pills */}
             {step.stats && step.stats.length > 0 && (
               <>
-                <span className="text-zinc-400">|</span>
                 {step.stats.map((stat, index) => (
                   <StatPill key={index} stat={stat} />
                 ))}

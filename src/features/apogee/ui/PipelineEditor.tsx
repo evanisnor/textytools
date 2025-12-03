@@ -155,7 +155,6 @@ export function PipelineEditor({ documentManager }: PipelineEditorProps) {
 
       {/* Input Data Block */}
       <DataBlock
-        title="Input"
         value={currentDocument.inputData}
         mimeType={currentDocument.inputType}
         onChange={(value) => documentManager.updateInputData(value)}

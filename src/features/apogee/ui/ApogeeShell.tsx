@@ -233,7 +233,6 @@ export function ApogeeShell({ documentManager }: ApogeeShellProps) {
               >
                 {/* Initial Input Block */}
                 <DataBlock
-                  title="Input"
                   value={inputText}
                   onChange={setInputText}
                   onClear={() => setInputText("")}

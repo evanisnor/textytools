@@ -8,7 +8,6 @@ import { useSyntaxHighlighter } from "../model/useSyntaxHighlighter";
 import { TextEditor } from "@/entities/editor";
 
 interface DataBlockProps {
-  title: string;
   value: string;
   readOnly?: boolean;
   onChange?: (value: string) => void;
@@ -34,7 +33,6 @@ interface DataBlockProps {
  * @example
  * ```tsx
  * <DataBlock
- *   title="Step 1: JSON Convert"
  *   value={step.output}
  *   readOnly
  *   stats={transformResult.stats}
@@ -42,7 +40,6 @@ interface DataBlockProps {
  * ```
  */
 export function DataBlock({
-  title,
   value,
   readOnly = false,
   onChange,
@@ -96,12 +93,8 @@ export function DataBlock({
       {!hideHeader && (
         <div className="flex items-center justify-between bg-zinc-50 dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-700 px-4 py-2">
           <div className="flex items-center gap-4">
-            <h3 className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-              {title}
-            </h3>
             {inputType && onInputTypeChange && (
               <>
-                <span className="text-zinc-400">|</span>
                 <div className="flex items-center gap-2">
                   <label
                     htmlFor="data-type"
