@@ -6,7 +6,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 import { getTransformAsync } from "../lib/registry";
 import type { TransformDefinition, TransformType } from "../model/types";
@@ -25,6 +25,8 @@ export function PipelineEditor({ documentManager }: PipelineEditorProps) {
   const [transformDefinitions, setTransformDefinitions] = useState<
     Map<string, TransformDefinition>
   >(new Map());
+  const lastTransformRef = useRef<HTMLDivElement>(null);
+  const previousTransformCount = useRef<number>(0);
 
   // Load transform definitions for current document
   useEffect(() => {
@@ -58,12 +60,35 @@ export function PipelineEditor({ documentManager }: PipelineEditorProps) {
     documentManager.addTransform(type);
   };
 
+  // Scroll to new transform when added
+  useEffect(() => {
+    if (!currentDocument) return;
+
+    const currentCount = currentDocument.transforms.length;
+    if (currentCount > previousTransformCount.current) {
+      // Wait for transform definition to load and DOM to render
+      setTimeout(() => {
+        if (lastTransformRef.current) {
+          lastTransformRef.current.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+        }
+      }, 300);
+    }
+    previousTransformCount.current = currentCount;
+  }, [
+    currentDocument,
+    currentDocument?.transforms.length,
+    transformDefinitions.size,
+  ]);
+
   if (!currentDocument) {
     return null;
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-96">
       {/* Input Data Block */}
       <DataBlock
         title="Input"
@@ -91,21 +116,27 @@ export function PipelineEditor({ documentManager }: PipelineEditorProps) {
             ? currentDocument.inputData
             : currentDocument.transforms[index - 1].output;
 
+        const isLastTransform = index === currentDocument.transforms.length - 1;
+
         return (
-          <TransformBlock
-            key={step.id}
-            step={step}
-            stepNumber={index + 1}
-            transform={transform}
-            previousOutput={previousOutput}
-            onUpdateProperties={(props) =>
-              documentManager.updateTransformProperties(step.id, props)
-            }
-            onUpdateInputSelection={(selection) =>
-              documentManager.updateTransformInputSelection(step.id, selection)
-            }
-            onRemove={() => documentManager.removeTransform(step.id)}
-          />
+          <div key={step.id} ref={isLastTransform ? lastTransformRef : null}>
+            <TransformBlock
+              step={step}
+              stepNumber={index + 1}
+              transform={transform}
+              previousOutput={previousOutput}
+              onUpdateProperties={(props) =>
+                documentManager.updateTransformProperties(step.id, props)
+              }
+              onUpdateInputSelection={(selection) =>
+                documentManager.updateTransformInputSelection(
+                  step.id,
+                  selection,
+                )
+              }
+              onRemove={() => documentManager.removeTransform(step.id)}
+            />
+          </div>
         );
       })}
 
