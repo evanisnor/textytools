@@ -18,6 +18,7 @@ interface DataBlockProps {
   mimeType?: string; // For future syntax highlighting support
   inputType?: InputType; // Current input type selection
   onInputTypeChange?: (type: InputType) => void; // Handler for input type changes
+  hideTypeSelector?: boolean; // Hide type selector when true
 }
 
 /**
@@ -52,6 +53,7 @@ export function DataBlock({
   mimeType, // Not used yet, reserved for Phase 6 syntax highlighting
   inputType,
   onInputTypeChange,
+  hideTypeSelector = false,
 }: DataBlockProps) {
   // Auto-enable word wrap for Plain Text and JWT types
   // Use derived state to avoid cascading renders
@@ -96,7 +98,7 @@ export function DataBlock({
           <h3 className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
             {title}
           </h3>
-          {inputType && onInputTypeChange && (
+          {inputType && onInputTypeChange && !hideTypeSelector && (
             <>
               <span className="text-zinc-400">|</span>
               <div className="flex items-center gap-2">

@@ -236,6 +236,7 @@ export function ApogeeShell({ documentManager }: ApogeeShellProps) {
                 onClear={() => setInputText("")}
                 inputType={effectiveInputType}
                 onInputTypeChange={setInputType}
+                hideTypeSelector={inputText.length === 0}
                 stats={
                   inputText.length > 0
                     ? [
