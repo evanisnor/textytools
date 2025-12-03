@@ -19,10 +19,11 @@ export const yamlConvertPropertySchema: PropertySchema[] = [
   {
     key: "indentation",
     label: "Indentation",
-    type: "select",
+    type: "toggle-group",
     options: [
       { value: "2", label: "2 spaces" },
       { value: "4", label: "4 spaces" },
+      { value: "tab", label: "Tab" },
     ],
     defaultValue: "2",
   },
@@ -93,11 +94,14 @@ export function executeYamlConvert(
     };
   }
 
-  const indentation = Number(properties.indentation);
+  const indentationValue = properties.indentation as string;
+  const useTabs = indentationValue === "tab";
+  const indentation = useTabs ? 2 : Number(indentationValue);
   const version = properties.version as "1.1" | "1.2";
 
   const formatOptions: YamlFormatOptions = {
     indentation,
+    useTabs,
     version,
   };
 

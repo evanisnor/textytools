@@ -140,10 +140,14 @@ export function executeXmlConvert(
       // Convert from other format to XML
       const rootElementName = (properties.rootElementName as string) || "root";
       const preferAttributes = properties.preferAttributes as boolean;
+      const indentationValue = properties.indentation as string;
+      const indentation =
+        indentationValue === "tab" ? "tab" : Number(indentationValue);
 
       output = jsonToXML(parseResult.data, {
         rootElementName,
         preferAttributes,
+        indentation,
       });
 
       // Parse the generated XML to get stats

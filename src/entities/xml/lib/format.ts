@@ -29,16 +29,24 @@ export function formatXML(
  */
 export function jsonToXML(
   data: unknown,
-  options: { rootElementName?: string; preferAttributes?: boolean } = {},
+  options: {
+    rootElementName?: string;
+    preferAttributes?: boolean;
+    indentation?: number | "tab";
+  } = {},
 ): string {
-  const { rootElementName = "root", preferAttributes = false } = options;
+  const {
+    rootElementName = "root",
+    preferAttributes = false,
+    indentation,
+  } = options;
 
   const doc = document.implementation.createDocument(null, rootElementName);
   const root = doc.documentElement;
 
   buildXmlNode(root, data, preferAttributes);
 
-  return formatXML(doc, {});
+  return formatXML(doc, indentation !== undefined ? { indentation } : {});
 }
 
 /**
@@ -140,7 +148,6 @@ function parseXmlNode(node: Element): unknown {
  * Prettify XML string with indentation
  */
 function prettifyXml(xml: string, indent: string): string {
-  const PADDING = " ".repeat(100);
   const reg = /(>)(<)(\/*)/g;
   let formatted = "";
   let pad = 0;
@@ -160,7 +167,7 @@ function prettifyXml(xml: string, indent: string): string {
       indent_level = 1;
     }
 
-    const padding = PADDING.substring(0, pad * indent.length);
+    const padding = indent.repeat(pad);
     formatted += padding + node + "\n";
     pad += indent_level;
   });
