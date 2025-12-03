@@ -236,12 +236,16 @@ export function ApogeeShell({ documentManager }: ApogeeShellProps) {
                 onClear={() => setInputText("")}
                 inputType={effectiveInputType}
                 onInputTypeChange={setInputType}
-                stats={[
-                  {
-                    label: "Size",
-                    value: `${inputText.length} chars`,
-                  },
-                ]}
+                stats={
+                  inputText.length > 0
+                    ? [
+                        {
+                          label: "Size",
+                          value: `${inputText.length} chars`,
+                        },
+                      ]
+                    : undefined
+                }
               />
 
               {/* Transform Palette - Only show when there's input text */}
