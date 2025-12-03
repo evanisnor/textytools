@@ -18,7 +18,7 @@ interface DataBlockProps {
   mimeType?: string; // For future syntax highlighting support
   inputType?: InputType; // Current input type selection
   onInputTypeChange?: (type: InputType) => void; // Handler for input type changes
-  hideTypeSelector?: boolean; // Hide type selector when true
+  hideHeader?: boolean; // Hide title and type selector when true
 }
 
 /**
@@ -53,7 +53,7 @@ export function DataBlock({
   mimeType, // Not used yet, reserved for Phase 6 syntax highlighting
   inputType,
   onInputTypeChange,
-  hideTypeSelector = false,
+  hideHeader = false,
 }: DataBlockProps) {
   // Auto-enable word wrap for Plain Text and JWT types
   // Use derived state to avoid cascading renders
@@ -93,95 +93,97 @@ export function DataBlock({
   return (
     <div className="border border-zinc-200 dark:border-zinc-700 rounded-lg overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between bg-zinc-50 dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-700 px-4 py-2">
-        <div className="flex items-center gap-4">
-          <h3 className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-            {title}
-          </h3>
-          {inputType && onInputTypeChange && !hideTypeSelector && (
-            <>
-              <span className="text-zinc-400">|</span>
-              <div className="flex items-center gap-2">
-                <label
-                  htmlFor="data-type"
-                  className="text-xs font-medium text-zinc-600 dark:text-zinc-400"
-                >
-                  Type:
-                </label>
-                <select
-                  id="data-type"
-                  value={inputType}
-                  onChange={(e) =>
-                    onInputTypeChange(e.target.value as InputType)
-                  }
-                  className="px-2 py-1 text-xs border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="auto">Auto-detect</option>
-                  <option value="text">Plain Text</option>
-                  <option value="json">JSON</option>
-                  <option value="csv">CSV</option>
-                  <option value="xml">XML</option>
-                  <option value="yaml">YAML</option>
-                  <option value="toml">TOML</option>
-                  <option value="jwt">JWT</option>
-                </select>
-              </div>
-            </>
-          )}
-        </div>
-        <div className="flex items-center gap-2">
-          {/* Wrap Toggle */}
-          <button
-            type="button"
-            onClick={handleWrapToggle}
-            className={`px-2 py-1 text-xs rounded transition-colors ${
-              wrap
-                ? "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300"
-                : "bg-white dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-600"
-            }`}
-            title={wrap ? "Disable word wrap" : "Enable word wrap"}
-          >
-            Wrap
-          </button>
-
-          {/* Copy Button */}
-          <button
-            type="button"
-            onClick={handleCopy}
-            className="px-2 py-1 text-xs bg-white dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 rounded hover:bg-zinc-100 dark:hover:bg-zinc-600 transition-colors"
-            title="Copy to clipboard"
-          >
-            {copied ? "Copied!" : "Copy"}
-          </button>
-
-          {/* Clear Button */}
-          {onClear && !readOnly && (
+      {!hideHeader && (
+        <div className="flex items-center justify-between bg-zinc-50 dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-700 px-4 py-2">
+          <div className="flex items-center gap-4">
+            <h3 className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              {title}
+            </h3>
+            {inputType && onInputTypeChange && (
+              <>
+                <span className="text-zinc-400">|</span>
+                <div className="flex items-center gap-2">
+                  <label
+                    htmlFor="data-type"
+                    className="text-xs font-medium text-zinc-600 dark:text-zinc-400"
+                  >
+                    Type:
+                  </label>
+                  <select
+                    id="data-type"
+                    value={inputType}
+                    onChange={(e) =>
+                      onInputTypeChange(e.target.value as InputType)
+                    }
+                    className="px-2 py-1 text-xs border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="auto">Auto-detect</option>
+                    <option value="text">Plain Text</option>
+                    <option value="json">JSON</option>
+                    <option value="csv">CSV</option>
+                    <option value="xml">XML</option>
+                    <option value="yaml">YAML</option>
+                    <option value="toml">TOML</option>
+                    <option value="jwt">JWT</option>
+                  </select>
+                </div>
+              </>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            {/* Wrap Toggle */}
             <button
               type="button"
-              onClick={handleClear}
+              onClick={handleWrapToggle}
+              className={`px-2 py-1 text-xs rounded transition-colors ${
+                wrap
+                  ? "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300"
+                  : "bg-white dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-600"
+              }`}
+              title={wrap ? "Disable word wrap" : "Enable word wrap"}
+            >
+              Wrap
+            </button>
+
+            {/* Copy Button */}
+            <button
+              type="button"
+              onClick={handleCopy}
               className="px-2 py-1 text-xs bg-white dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 rounded hover:bg-zinc-100 dark:hover:bg-zinc-600 transition-colors"
-              title="Clear content"
+              title="Copy to clipboard"
             >
-              Clear
+              {copied ? "Copied!" : "Copy"}
             </button>
-          )}
 
-          {/* Remove Button */}
-          {onRemove && (
-            <button
-              type="button"
-              onClick={onRemove}
-              className="px-2 py-1 text-xs bg-white dark:bg-zinc-700 text-red-600 dark:text-red-400 rounded hover:bg-red-50 dark:hover:bg-red-950 transition-colors"
-              title="Remove this block"
-            >
-              Remove
-            </button>
-          )}
+            {/* Clear Button */}
+            {onClear && !readOnly && (
+              <button
+                type="button"
+                onClick={handleClear}
+                className="px-2 py-1 text-xs bg-white dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 rounded hover:bg-zinc-100 dark:hover:bg-zinc-600 transition-colors"
+                title="Clear content"
+              >
+                Clear
+              </button>
+            )}
+
+            {/* Remove Button */}
+            {onRemove && (
+              <button
+                type="button"
+                onClick={onRemove}
+                className="px-2 py-1 text-xs bg-white dark:bg-zinc-700 text-red-600 dark:text-red-400 rounded hover:bg-red-50 dark:hover:bg-red-950 transition-colors"
+                title="Remove this block"
+              >
+                Remove
+              </button>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Stats Bar */}
-      {stats && stats.length > 0 && (
+      {!hideHeader && stats && stats.length > 0 && (
         <div className="flex items-center gap-3 bg-zinc-50 dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-700 px-4 py-2 overflow-x-auto">
           {stats.map((stat, index) => (
             <StatPill key={index} stat={stat} />

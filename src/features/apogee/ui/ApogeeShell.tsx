@@ -228,31 +228,38 @@ export function ApogeeShell({ documentManager }: ApogeeShellProps) {
                 </p>
               </div>
 
-              {/* Initial Input Block */}
-              <DataBlock
-                title="Input"
-                value={inputText}
-                onChange={setInputText}
-                onClear={() => setInputText("")}
-                inputType={effectiveInputType}
-                onInputTypeChange={setInputType}
-                hideTypeSelector={inputText.length === 0}
-                stats={
-                  inputText.length > 0
-                    ? [
-                        {
-                          label: "Size",
-                          value: `${inputText.length} chars`,
-                        },
-                      ]
-                    : undefined
-                }
-              />
+              {/* Wrapper with compensating padding */}
+              <div
+                className={`${
+                  inputText.length > 0 ? "pt-0" : "pt-20"
+                } transition-[padding] duration-200`}
+              >
+                {/* Initial Input Block */}
+                <DataBlock
+                  title="Input"
+                  value={inputText}
+                  onChange={setInputText}
+                  onClear={() => setInputText("")}
+                  inputType={effectiveInputType}
+                  onInputTypeChange={setInputType}
+                  hideHeader={inputText.length === 0}
+                  stats={
+                    inputText.length > 0
+                      ? [
+                          {
+                            label: "Size",
+                            value: `${inputText.length} chars`,
+                          },
+                        ]
+                      : undefined
+                  }
+                />
 
-              {/* Transform Palette - Only show when there's input text */}
-              {inputText.trim() && (
-                <TransformPalette onSelect={handleTransformSelect} />
-              )}
+                {/* Transform Palette - Only show when there's input text */}
+                {inputText.trim() && (
+                  <TransformPalette onSelect={handleTransformSelect} />
+                )}
+              </div>
             </div>
           ) : (
             // Pipeline View
