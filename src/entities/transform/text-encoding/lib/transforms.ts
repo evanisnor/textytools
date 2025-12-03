@@ -3,7 +3,11 @@
  * Wraps existing encoding functions with TransformDefinition interface
  */
 
-import type { TransformDefinition, TransformResult } from "../../shared/types";
+import type {
+  TransformDefinition,
+  TransformResult,
+  TransformStat,
+} from "../../shared/types";
 
 import { encodeText, decodeText } from "./codec";
 
@@ -17,9 +21,22 @@ export const base64EncodeDefinition: TransformDefinition = {
   category: "encode",
   acceptsInput: ["*"],
   producesOutput: "text/plain",
-  propertySchema: [],
-  defaultProperties: {},
-  execute: (input: string): TransformResult => {
+  supportsLineByLine: true,
+  propertySchema: [
+    {
+      key: "lineByLine",
+      label: "Line-by-Line Mode",
+      type: "toggle",
+      defaultValue: false,
+    },
+  ],
+  defaultProperties: {
+    lineByLine: false,
+  },
+  execute: (
+    input: string,
+    properties: Record<string, unknown>,
+  ): TransformResult => {
     if (!input) {
       return {
         success: false,
@@ -30,20 +47,45 @@ export const base64EncodeDefinition: TransformDefinition = {
     }
 
     try {
-      const output = encodeText(input, "base64");
+      const lineByLine = properties.lineByLine === true;
+      let output: string;
+      let linesProcessed = 0;
+
+      if (lineByLine) {
+        // Process each line independently
+        const lines = input.split("\n");
+        output = lines
+          .map((line) => {
+            if (line.length > 0) {
+              linesProcessed++;
+            }
+            return encodeText(line, "base64");
+          })
+          .join("\n");
+      } else {
+        // Process entire input as one block
+        output = encodeText(input, "base64");
+      }
+
       const inputSize = new Blob([input]).size;
       const outputSize = new Blob([output]).size;
       const expansionRatio = ((outputSize / inputSize - 1) * 100).toFixed(1);
+
+      const stats: TransformStat[] = [
+        { label: "Input Size", value: `${inputSize} bytes` },
+        { label: "Output Size", value: `${outputSize} bytes` },
+        { label: "Expansion", value: `+${expansionRatio}%` },
+      ];
+
+      if (lineByLine) {
+        stats.push({ label: "Lines Processed", value: linesProcessed });
+      }
 
       return {
         success: true,
         data: output,
         mimeType: "text/plain",
-        stats: [
-          { label: "Input Size", value: `${inputSize} bytes` },
-          { label: "Output Size", value: `${outputSize} bytes` },
-          { label: "Expansion", value: `+${expansionRatio}%` },
-        ],
+        stats,
       };
     } catch (err) {
       return {
@@ -106,9 +148,22 @@ export const base58EncodeDefinition: TransformDefinition = {
   category: "encode",
   acceptsInput: ["*"],
   producesOutput: "text/plain",
-  propertySchema: [],
-  defaultProperties: {},
-  execute: (input: string): TransformResult => {
+  supportsLineByLine: true,
+  propertySchema: [
+    {
+      key: "lineByLine",
+      label: "Line-by-Line Mode",
+      type: "toggle",
+      defaultValue: false,
+    },
+  ],
+  defaultProperties: {
+    lineByLine: false,
+  },
+  execute: (
+    input: string,
+    properties: Record<string, unknown>,
+  ): TransformResult => {
     if (!input) {
       return {
         success: false,
@@ -119,20 +174,45 @@ export const base58EncodeDefinition: TransformDefinition = {
     }
 
     try {
-      const output = encodeText(input, "base58");
+      const lineByLine = properties.lineByLine === true;
+      let output: string;
+      let linesProcessed = 0;
+
+      if (lineByLine) {
+        // Process each line independently
+        const lines = input.split("\n");
+        output = lines
+          .map((line) => {
+            if (line.length > 0) {
+              linesProcessed++;
+            }
+            return encodeText(line, "base58");
+          })
+          .join("\n");
+      } else {
+        // Process entire input as one block
+        output = encodeText(input, "base58");
+      }
+
       const inputSize = new Blob([input]).size;
       const outputSize = new Blob([output]).size;
       const expansionRatio = ((outputSize / inputSize - 1) * 100).toFixed(1);
+
+      const stats: TransformStat[] = [
+        { label: "Input Size", value: `${inputSize} bytes` },
+        { label: "Output Size", value: `${outputSize} bytes` },
+        { label: "Expansion", value: `+${expansionRatio}%` },
+      ];
+
+      if (lineByLine) {
+        stats.push({ label: "Lines Processed", value: linesProcessed });
+      }
 
       return {
         success: true,
         data: output,
         mimeType: "text/plain",
-        stats: [
-          { label: "Input Size", value: `${inputSize} bytes` },
-          { label: "Output Size", value: `${outputSize} bytes` },
-          { label: "Expansion", value: `+${expansionRatio}%` },
-        ],
+        stats,
       };
     } catch (err) {
       return {
