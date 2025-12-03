@@ -13,3 +13,11 @@ export type { XmlFormatOptions } from "./lib/format";
 // Statistics
 export { getXMLStats } from "./lib/stats";
 export type { XmlStats } from "./lib/stats";
+
+// UI components
+export { highlightXml, DEFAULT_XML_THEME } from "./ui/XmlHighlighter";
+export type { XmlSyntaxTheme } from "./ui/XmlHighlighter";
+
+// Hooks
+export { useXmlSyntaxHighlighter } from "./model/useXmlSyntaxHighlighter";
+export type { XmlSyntaxRenderer } from "./model/useXmlSyntaxHighlighter";

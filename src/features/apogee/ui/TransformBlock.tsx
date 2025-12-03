@@ -6,7 +6,9 @@ import type {
   TransformStep,
   TransformDefinition,
   InputSelection,
+  InputType,
 } from "../model/types";
+import { useSyntaxHighlighter } from "../model/useSyntaxHighlighter";
 
 import { ConfigurationPanel } from "./ConfigurationPanel";
 import { LensConfig } from "./LensConfig";
@@ -77,6 +79,34 @@ export function TransformBlock({
     const detectedFormat = detectFormat(previousOutput);
     return detectedFormat === "unknown";
   }, [transform.category, previousOutput]);
+
+  // Determine output type for syntax highlighting
+  const outputType = useMemo((): InputType | undefined => {
+    // Map the transform's producesOutput (MIME type) to InputType
+    const outputTypeMap: Record<string, InputType> = {
+      "application/json": "json",
+      "text/csv": "csv",
+      "text/yaml": "yaml",
+      "application/yaml": "yaml",
+      "application/xml": "xml",
+      "text/xml": "xml",
+      "application/toml": "toml",
+      "text/toml": "toml",
+      "text/plain": "text",
+      // Fallback for simple format names (if used)
+      json: "json",
+      csv: "csv",
+      yaml: "yaml",
+      xml: "xml",
+      toml: "toml",
+      text: "text",
+    };
+
+    return outputTypeMap[transform.producesOutput] as InputType;
+  }, [transform.producesOutput]);
+
+  // Get syntax highlighting based on output type
+  const syntaxHighlighter = useSyntaxHighlighter(outputType, true);
 
   const handlePropertyChange = useCallback(
     (key: string, value: unknown) => {
@@ -262,6 +292,8 @@ export function TransformBlock({
               showLineNumbers={true}
               height="h-64"
               placeholder="No output"
+              renderContent={syntaxHighlighter.renderContent}
+              renderLineContent={syntaxHighlighter.renderLineContent}
             />
           </div>
         )}

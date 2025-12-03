@@ -43,6 +43,9 @@ export type {
 
 export { useDocumentManager } from "./useDocumentManager";
 
+// Syntax Highlighting
+export { useSyntaxHighlighter } from "./useSyntaxHighlighter";
+
 // Context Provider
 export type { ApogeeProviderProps } from "./ApogeeProvider";
 

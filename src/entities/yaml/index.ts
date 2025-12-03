@@ -16,3 +16,11 @@ export type { YamlStats } from "./lib/stats";
 
 // Types
 export type { YamlParseResult as YamlParseResultType } from "./model/types";
+
+// UI components
+export { highlightYaml, DEFAULT_YAML_THEME } from "./ui/YamlHighlighter";
+export type { YamlSyntaxTheme } from "./ui/YamlHighlighter";
+
+// Hooks
+export { useYamlSyntaxHighlighter } from "./model/useYamlSyntaxHighlighter";
+export type { YamlSyntaxRenderer } from "./model/useYamlSyntaxHighlighter";

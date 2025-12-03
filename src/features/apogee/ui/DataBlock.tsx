@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 
 import type { TransformStat, InputType } from "../model/types";
+import { useSyntaxHighlighter } from "../model/useSyntaxHighlighter";
 
 import { TextEditor } from "@/entities/editor";
 
@@ -54,6 +55,9 @@ export function DataBlock({
 }: DataBlockProps) {
   const [wrap, setWrap] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  // Get syntax highlighting based on input type
+  const syntaxHighlighter = useSyntaxHighlighter(inputType, true);
 
   const handleCopy = useCallback(async () => {
     try {
@@ -177,6 +181,8 @@ export function DataBlock({
           showLineNumbers={true}
           height="h-64"
           placeholder={readOnly ? "No output" : "Enter data..."}
+          renderContent={syntaxHighlighter.renderContent}
+          renderLineContent={syntaxHighlighter.renderLineContent}
         />
       </div>
     </div>
