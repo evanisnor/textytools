@@ -218,7 +218,7 @@ export function ApogeeShell({ documentManager }: ApogeeShellProps) {
         <div className="max-w-4xl mx-auto p-6">
           {!currentDocument ? (
             // Initial State - Input with optional transform palette
-            <div className="space-y-6">
+            <div className="space-y-6 pt-8">
               <div className="mb-8 text-center">
                 <h1 className="text-4xl font-bold tracking-tight mb-2">
                   Apogee
