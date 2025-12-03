@@ -26,7 +26,7 @@ interface DataBlockProps {
  * Displays transform step output with:
  * - Syntax highlighting (via TextEditor)
  * - Copy to clipboard button
- * - Word wrap toggle
+ * - Word wrap toggle (auto-enabled for Plain Text and JWT)
  * - Remove/Clear buttons (when applicable)
  * - Stats bar (when stats provided)
  *
@@ -53,8 +53,17 @@ export function DataBlock({
   inputType,
   onInputTypeChange,
 }: DataBlockProps) {
-  const [wrap, setWrap] = useState(false);
+  // Auto-enable word wrap for Plain Text and JWT types
+  // Use derived state to avoid cascading renders
+  const shouldAutoWrap = inputType === "text" || inputType === "jwt";
+  const [manualWrapOverride, setManualWrapOverride] = useState<boolean | null>(
+    null,
+  );
   const [copied, setCopied] = useState(false);
+
+  // Determine wrap state: manual override takes precedence, otherwise use auto-wrap
+  const wrap =
+    manualWrapOverride !== null ? manualWrapOverride : shouldAutoWrap;
 
   // Get syntax highlighting based on input type
   const syntaxHighlighter = useSyntaxHighlighter(inputType, true);
@@ -70,8 +79,14 @@ export function DataBlock({
   }, [value]);
 
   const handleWrapToggle = useCallback(() => {
-    setWrap((prev) => !prev);
-  }, []);
+    // Toggle based on current wrap state
+    setManualWrapOverride((prev) => (prev !== null ? !prev : !wrap));
+  }, [wrap]);
+
+  const handleClear = useCallback(() => {
+    setManualWrapOverride(null); // Reset to auto behavior
+    onClear?.();
+  }, [onClear]);
 
   return (
     <div className="border border-zinc-200 dark:border-zinc-700 rounded-lg overflow-hidden">
@@ -141,7 +156,7 @@ export function DataBlock({
           {onClear && !readOnly && (
             <button
               type="button"
-              onClick={onClear}
+              onClick={handleClear}
               className="px-2 py-1 text-xs bg-white dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 rounded hover:bg-zinc-100 dark:hover:bg-zinc-600 transition-colors"
               title="Clear content"
             >

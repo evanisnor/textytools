@@ -23,6 +23,8 @@ import { TransformPalette } from "./TransformPalette";
 
 import { detectFormat } from "@/entities/transform/shared/formatDetection";
 
+import { Modal } from "@/shared/ui/modal/Modal";
+
 export interface ApogeeShellProps {
   documentManager: DocumentManager;
 }
@@ -39,6 +41,8 @@ export function ApogeeShell({ documentManager }: ApogeeShellProps) {
   const [inputText, setInputText] = useState("");
   const [inputType, setInputType] = useState<InputType>("auto");
   const [hoveredDocId, setHoveredDocId] = useState<string | null>(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [confirmMessage, setConfirmMessage] = useState("");
 
   // Auto-detect format from current input (derived state)
   const effectiveInputType: InputType =
@@ -71,6 +75,37 @@ export function ApogeeShell({ documentManager }: ApogeeShellProps) {
     deleteDocument(docId);
   };
 
+  const handleNewDocument = () => {
+    // Check if we need confirmation:
+    // 1. If viewing a document, always confirm (will lose document)
+    // 2. If on input screen with text, confirm (will lose input text)
+    const needsConfirmation =
+      currentDocument !== null || inputText.trim().length > 0;
+
+    if (needsConfirmation) {
+      const message = currentDocument
+        ? "Starting a new document will close the current document. Continue?"
+        : "Creating a new document will lose your current input data. Continue?";
+
+      setConfirmMessage(message);
+      setShowConfirmModal(true);
+    } else {
+      // No confirmation needed, proceed directly
+      clearAndStartNew();
+    }
+  };
+
+  const clearAndStartNew = () => {
+    setInputText("");
+    setInputType("auto");
+    setCurrentDocument(null);
+    setShowConfirmModal(false);
+  };
+
+  const handleConfirmCancel = () => {
+    setShowConfirmModal(false);
+  };
+
   return (
     <div className="flex h-screen bg-zinc-50 dark:bg-zinc-950">
       {/* Left Sidebar - Document List */}
@@ -90,7 +125,7 @@ export function ApogeeShell({ documentManager }: ApogeeShellProps) {
           {/* Menu Section */}
           <div>
             <button
-              onClick={() => setCurrentDocument(null)}
+              onClick={handleNewDocument}
               className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
             >
               <svg
@@ -220,6 +255,32 @@ export function ApogeeShell({ documentManager }: ApogeeShellProps) {
           )}
         </div>
       </main>
+
+      {/* Confirmation Modal */}
+      <Modal isOpen={showConfirmModal} onClose={handleConfirmCancel}>
+        <div className="p-6">
+          <h2 className="text-xl font-bold mb-4 text-zinc-900 dark:text-zinc-100">
+            Confirm New Document
+          </h2>
+          <p className="text-zinc-700 dark:text-zinc-300 mb-6">
+            {confirmMessage}
+          </p>
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={handleConfirmCancel}
+              className="px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-600 rounded hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={clearAndStartNew}
+              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded transition-colors"
+            >
+              Continue
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
