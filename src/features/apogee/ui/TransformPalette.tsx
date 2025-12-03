@@ -34,45 +34,40 @@ export function TransformPalette({ onSelect }: TransformPaletteProps) {
   };
 
   return (
-    <div className="space-y-3">
-      {/* Category Buttons Row */}
-      <div className="flex flex-wrap gap-2">
+    <div className="flex flex-col items-center gap-2">
+      {/* Category Buttons - Compact Row */}
+      <div className="flex flex-wrap justify-center gap-1.5">
         {CATEGORIES.map((category) => {
           const isExpanded = expandedCategory === category.key;
           return (
             <button
               key={category.key}
               onClick={() => toggleCategory(category.key)}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded text-sm font-medium transition-all ${
                 isExpanded
-                  ? "bg-blue-600 text-white"
-                  : "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+                  ? "bg-blue-600 text-white shadow-md"
+                  : "bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700"
               }`}
             >
-              {category.label} {isExpanded ? "▲" : "▼"}
+              {category.label}
             </button>
           );
         })}
       </div>
 
-      {/* Expanded Category Transforms */}
+      {/* Expanded Category Transforms - Compact and Centered */}
       {expandedCategory && (
-        <div className="border border-zinc-200 dark:border-zinc-700 rounded-lg p-4 bg-zinc-50 dark:bg-zinc-800/50">
-          <h3 className="text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-3">
-            {CATEGORIES.find((c) => c.key === expandedCategory)?.label}:
-          </h3>
-          <div className="flex flex-wrap gap-2">
-            {getTransformsByCategory(expandedCategory).map((transform) => (
-              <button
-                key={transform.type}
-                onClick={() => onSelect(transform.type)}
-                className="px-4 py-2 border border-zinc-300 dark:border-zinc-600 rounded-lg hover:border-blue-500 dark:hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950 transition-colors text-sm font-medium"
-                title={transform.description}
-              >
-                {transform.name}
-              </button>
-            ))}
-          </div>
+        <div className="flex flex-wrap justify-center gap-1.5 px-4">
+          {getTransformsByCategory(expandedCategory).map((transform) => (
+            <button
+              key={transform.type}
+              onClick={() => onSelect(transform.type)}
+              className="px-3 py-1.5 text-sm rounded border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-900 hover:border-blue-500 dark:hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/50 transition-all"
+              title={transform.description}
+            >
+              {transform.name}
+            </button>
+          ))}
         </div>
       )}
     </div>
