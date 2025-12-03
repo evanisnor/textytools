@@ -10,7 +10,11 @@
 
 import { useState } from "react";
 
-import type { TransformType, InputType } from "../model/types";
+import type {
+  TransformType,
+  InputType,
+  DetectableInputType,
+} from "../model/types";
 import type { DocumentManager } from "../model/useDocumentManager";
 
 import { DataBlock } from "./DataBlock";
@@ -40,7 +44,7 @@ export function ApogeeShell({ documentManager }: ApogeeShellProps) {
   const effectiveInputType: InputType =
     inputType === "auto" && inputText
       ? detectFormat(inputText) !== "unknown"
-        ? (detectFormat(inputText) as "csv" | "json" | "yaml" | "xml" | "toml")
+        ? (detectFormat(inputText) as DetectableInputType)
         : "auto"
       : inputType;
 

@@ -220,6 +220,12 @@ export type InputType =
   | "file";
 
 /**
+ * Detectable input types (subset of InputType that can be auto-detected)
+ * Excludes "auto", "text", "file", and "unknown"
+ */
+export type DetectableInputType = "csv" | "json" | "yaml" | "xml" | "toml";
+
+/**
  * Document containing input data and transform pipeline
  */
 export interface Document {

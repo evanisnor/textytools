@@ -21,6 +21,8 @@ export type {
   InputSelection,
   TransformStep,
   Document,
+  InputType,
+  DetectableInputType,
   PropertyType,
   PropertySchema,
   TransformStat,
