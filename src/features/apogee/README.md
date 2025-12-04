@@ -143,7 +143,7 @@ Apogee inverts this: **every step includes a lens** that defines how to parse in
 - **Reusability**: The same "JSON Convert" transform works on raw JSON, CSV-containing-JSON, logs-containing-JSON, or XML-containing-JSON. The lens handles extraction.
 - **Discoverability**: Users see all transforms as available options. No more "I need to convert CSV to JSON" → search → "Wait, there's no CSV-to-JSON transform?" → give up. Just add "JSON Convert" and configure the lens to parse CSV.
 
-**Lens Visibility**: The lens is primarily useful for Convert transforms where users need to extract structured data from unstructured input. For other transform categories (Encode, Hash, Manipulate), the lens defaults to "all" mode and the UI panel remains collapsed or hidden.
+**Lens Visibility**: The lens is primarily useful for Convert transforms where users need to extract structured data from unstructured input. For other transform categories (Encode, Hash, Modify), the lens defaults to "all" mode and the UI panel remains collapsed or hidden.
 
 ### 1.5 Unified Metadata: Stats as First-Class Citizens
 
@@ -298,8 +298,8 @@ type HashTransform =
   | "blake3-hash"       // BLAKE3 with configurable output
   | "murmur3-hash";     // Murmur3 non-cryptographic
 
-// Manipulate: String-level text operations
-type ManipulateTransform =
+// Modify: String-level text operations
+type ModifyTransform =
   | "text-sanitize"     // Trim, remove empty/duplicate lines
   | "case-convert"      // camelCase, snake_case, etc.
   | "regex-replace"     // Find/replace with capture groups
@@ -337,7 +337,7 @@ type TransformType =
   | EncodeTransform
   | DecodeTransform
   | HashTransform
-  | ManipulateTransform
+  | ModifyTransform
   | CompressTransform
   | DecompressTransform
   | AnalyzeTransform;
@@ -1577,7 +1577,7 @@ The Apogee registry organizes transforms by purpose, with each transform exposin
   - Lines Processed: `Number` (when line-by-line enabled)
 - **MIME Type:** `text/plain`
 
-### 5.5 Manipulate
+### 5.5 Modify
 **Focus:** String-level text operations and cleanup.
 **Entity Locations:** `entities/transform/text-sanitize/` **[Exists]**, `entities/transform/text-case/` **[Exists]**, `entities/regex/` **[Planned]**
 
@@ -1912,7 +1912,7 @@ Group transforms by verb (action) in horizontal rows:
 ```
 Transform Pipeline:
 
-[Convert] [Encode] [Decode] [Hash] [Manipulate]
+[Convert] [Encode] [Decode] [Hash] [Modify]
 [Compress] [Decompress] [Analyze] 
 ```
 
@@ -1974,7 +1974,7 @@ Organize transforms as actionable verbs visible to users:
 4. **Hash** - Generate cryptographic signatures
    - MD5, SHA-1, SHA-256, SHA-384, SHA-512, SHA-3, BLAKE3, Murmur3
 
-5. **Manipulate** - Transform text content
+5. **Modify** - Transform text content
    - Sanitize, Change Case, Regex Replace, Sort Lines, Extract Lines
 
 6. **Compress** - Reduce size

@@ -20,7 +20,7 @@ const CATEGORIES: { key: TransformCategory; label: string }[] = [
   { key: "encode", label: "Encode" },
   { key: "decode", label: "Decode" },
   { key: "hash", label: "Hash" },
-  { key: "manipulate", label: "Manipulate" },
+  { key: "manipulate", label: "Modify" },
   { key: "compress", label: "Compress" },
   { key: "decompress", label: "Decompress" },
 ];

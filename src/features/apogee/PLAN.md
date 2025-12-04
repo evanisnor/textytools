@@ -351,7 +351,7 @@ Add more hash algorithms (currently have MD5, SHA-1, SHA-256, SHA-512):
 
 ---
 
-### 5.4 Additional Manipulate Transforms
+### 5.4 Additional Modify Transforms
 Expand text manipulation (currently have text-sanitize, case-convert):
 - Regex Replace
 - Sort Lines
@@ -675,7 +675,7 @@ Implement remaining Hash transforms:
 
 ---
 
-### 8.6 Manipulate Transforms (Future)
+### 8.6 Modify Transforms (Future)
 **Locations:**
 - `src/entities/transform/text-sanitize/` (augment existing)
 - `src/entities/transform/text-case/` (augment existing)
@@ -683,7 +683,7 @@ Implement remaining Hash transforms:
 - `src/entities/transform/sort-lines/` (new)
 - `src/entities/transform/extract-lines/` (new)
 
-Implement Manipulate category:
+Implement Modify category:
 
 - Sanitize (augment existing with all options)
 - Change Case (augment existing with all case types)
@@ -912,7 +912,7 @@ Optimize re-execution:
    - JSON, CSV, YAML, XML, TOML parsers/serializers
 
 3. **Phase 3**: Initial Transform Implementations ✅ DONE
-   - 22 transforms across 5 categories (Convert, Encode, Decode, Hash, Manipulate)
+   - 22 transforms across 5 categories (Convert, Encode, Decode, Hash, Modify)
 
 4. **Phase 4**: State Management ✅ DONE
    - useDocumentManager hook, ApogeeProvider context, LocalStorage persistence
@@ -921,7 +921,7 @@ Optimize re-execution:
    - Additional Convert (YAML↔XML↔TOML)
    - Additional Encode/Decode (Base91, ASCII85, Z85, JWT, etc.)
    - Additional Hash (SHA-384, SHA-3, BLAKE3, Murmur3)
-   - Additional Manipulate (regex-replace, sort-lines, extract-lines)
+   - Additional Modify (regex-replace, sort-lines, extract-lines)
    - Compress/Decompress (Gzip, Bzip2, Brotli, Zstd)
    - Analyze (charts, frequency, validator, heatmap)
 

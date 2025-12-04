@@ -63,9 +63,7 @@ async function verifyTransforms() {
   console.log(
     `✅ Phase 3 Complete: ${allTransforms.length} transforms registered`,
   );
-  console.log(
-    `✅ Manipulate category: 2 transforms (text-sanitize, case-convert)`,
-  );
+  console.log(`✅ Modify category: 2 transforms (text-sanitize, case-convert)`);
 }
 
 verifyTransforms().catch(console.error);

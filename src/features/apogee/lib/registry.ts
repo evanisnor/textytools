@@ -112,7 +112,7 @@ export const TRANSFORM_REGISTRY: Record<string, TransformDefinition> = {
   "sha3-384-hash": sha3_384HashDefinition as TransformDefinition,
   "sha3-512-hash": sha3_512HashDefinition as TransformDefinition,
 
-  // Manipulate transforms
+  // Modify transforms
   "text-sanitize": textSanitizeTransform as TransformDefinition,
   "case-convert": caseConvertTransform as TransformDefinition,
   "regex-replace": regexReplaceDefinition as TransformDefinition,

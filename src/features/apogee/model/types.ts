@@ -67,9 +67,9 @@ export type HashTransform =
   | "murmur3-hash";
 
 /**
- * Manipulate: String-level text operations
+ * Modify: String-level text operations
  */
-export type ManipulateTransform =
+export type ModifyTransform =
   | "text-sanitize"
   | "case-convert"
   | "regex-replace"
@@ -122,7 +122,7 @@ export type TransformType =
   | EncodeTransform
   | DecodeTransform
   | HashTransform
-  | ManipulateTransform
+  | ModifyTransform
   | CompressTransform
   | DecompressTransform
   | AnalyzeTransform

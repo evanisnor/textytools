@@ -12,7 +12,7 @@ export type {
   EncodeTransform,
   DecodeTransform,
   HashTransform,
-  ManipulateTransform,
+  ModifyTransform,
   CompressTransform,
   DecompressTransform,
   AnalyzeTransform,
