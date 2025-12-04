@@ -49,7 +49,7 @@ export function ApogeeShell({ documentManager }: ApogeeShellProps) {
     inputType === "auto" && inputText
       ? detectFormat(inputText) !== "unknown"
         ? (detectFormat(inputText) as DetectableInputType)
-        : "auto"
+        : "text" // Default to plain text for unknown formats
       : inputType;
 
   const handleTransformSelect = (type: TransformType) => {

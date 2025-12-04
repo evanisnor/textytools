@@ -77,13 +77,12 @@ export function LensConfig({ inputSelection, onUpdate }: LensConfigProps) {
             Parse As:
           </label>
           <select
-            value={inputSelection.parseAs || "auto"}
+            value={inputSelection.parseAs || "text"}
             onChange={(e) =>
               handlePropertyChange("parseAs", e.target.value as ParseAsFormat)
             }
             className="flex-1 px-2 py-1.5 text-xs border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 rounded focus:outline-none focus:ring-2 focus:ring-amber-500"
           >
-            <option value="auto">Auto-detect</option>
             <option value="text">Plain Text</option>
             <option value="json">JSON</option>
             <option value="csv">CSV</option>

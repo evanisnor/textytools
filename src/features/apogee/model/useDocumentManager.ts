@@ -124,9 +124,15 @@ function saveDocuments(documents: Document[]): void {
 /**
  * Create default input selection for a transform
  */
-function createDefaultInputSelection(): TransformStep["inputSelection"] {
+function createDefaultInputSelection(
+  inputType?: Document["inputType"],
+): TransformStep["inputSelection"] {
   return {
     mode: "all",
+    parseAs:
+      inputType && inputType !== "auto" && inputType !== "file"
+        ? (inputType as TransformStep["inputSelection"]["parseAs"])
+        : undefined,
   };
 }
 
@@ -361,7 +367,7 @@ export function useDocumentManager(): DocumentManager {
           documentId: current.id,
           order: current.transforms.length,
           transformType: type,
-          inputSelection: createDefaultInputSelection(),
+          inputSelection: createDefaultInputSelection(current.inputType),
           properties: { ...transform.defaultProperties },
           output: "",
           createdAt: Date.now(),

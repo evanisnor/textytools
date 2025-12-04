@@ -110,7 +110,6 @@ export function DataBlock({
                     }
                     className="px-2 py-1 text-xs border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value="auto">Auto-detect</option>
                     <option value="text">Plain Text</option>
                     <option value="json">JSON</option>
                     <option value="csv">CSV</option>
