@@ -1,10 +1,30 @@
 Read the README.md file
 
+## React Hooks
 
-Calling setState synchronously within an effect can trigger cascading renders
+Never call setState synchronously within useEffect. Effects should only:
+1. Sync with external systems (DOM, APIs)
+2. Subscribe to external updates (calling setState in callbacks only)
 
-Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
-* Update external systems with the latest state from React.
-* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+**Bad:**
+```typescript
+useEffect(() => {
+  if (value === "") {
+    setState("default"); // ❌ Synchronous setState
+    return;
+  }
+  // async work...
+}, [value]);
+```
 
-Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+**Good:**
+```typescript
+useEffect(() => {
+  if (value === "") {
+    return; // ✓ Early return, let useMemo handle empty case
+  }
+  // async work only...
+}, [value]);
+```
+
+Remove unnecessary dependencies from useEffect. Only include values that should trigger the effect.
