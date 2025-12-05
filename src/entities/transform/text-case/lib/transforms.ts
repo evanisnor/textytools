@@ -17,24 +17,29 @@ import { convertCase } from "./case-converters";
 // Property Schema
 // ============================================================================
 
+/**
+ * Case type options - shared with other transforms
+ */
+export const CASE_TYPE_OPTIONS = [
+  { value: "upper", label: "UPPER CASE" },
+  { value: "lower", label: "lower case" },
+  { value: "title", label: "Title Case" },
+  { value: "sentence", label: "Sentence case" },
+  { value: "camel", label: "camelCase" },
+  { value: "pascal", label: "PascalCase" },
+  { value: "snake", label: "snake_case" },
+  { value: "kebab", label: "kebab-case" },
+  { value: "constant", label: "CONSTANT_CASE" },
+  { value: "dot", label: "dot.case" },
+  { value: "path", label: "path/case" },
+];
+
 const CASE_SCHEMA: PropertySchema[] = [
   {
     key: "caseType",
     label: "Case Type",
     type: "select",
-    options: [
-      { value: "upper", label: "UPPER CASE" },
-      { value: "lower", label: "lower case" },
-      { value: "title", label: "Title Case" },
-      { value: "sentence", label: "Sentence case" },
-      { value: "camel", label: "camelCase" },
-      { value: "pascal", label: "PascalCase" },
-      { value: "snake", label: "snake_case" },
-      { value: "kebab", label: "kebab-case" },
-      { value: "constant", label: "CONSTANT_CASE" },
-      { value: "dot", label: "dot.case" },
-      { value: "path", label: "path/case" },
-    ],
+    options: CASE_TYPE_OPTIONS,
     defaultValue: "lower",
   },
 ];

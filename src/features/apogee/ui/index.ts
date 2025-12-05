@@ -6,6 +6,7 @@
 
 // Core Components
 export { ConfigurationPanel } from "./ConfigurationPanel";
+export { LensPanel } from "./LensPanel";
 export { DataBlock } from "./DataBlock";
 export { TransformBlock } from "./TransformBlock";
 export { TransformPalette } from "./TransformPalette";

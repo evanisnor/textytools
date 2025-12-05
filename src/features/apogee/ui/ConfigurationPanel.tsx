@@ -64,7 +64,25 @@ export function ConfigurationPanel({
     [onChange, onBatchChange],
   );
 
-  if (schema.length === 0) {
+  // Filter properties based on showWhen conditions and exclude lens properties
+  const visibleSchema = schema.filter((property) => {
+    // Exclude properties shown in Lens
+    if (property.showInLens === true) {
+      return false;
+    }
+
+    if (!property.showWhen) {
+      return true;
+    }
+
+    // Check if all conditions in showWhen are met
+    return Object.entries(property.showWhen).every(([key, expectedValue]) => {
+      const actualValue = values[key];
+      return actualValue === expectedValue;
+    });
+  });
+
+  if (visibleSchema.length === 0) {
     return (
       <div className="px-4 py-3 text-sm text-zinc-500">
         No configuration options available
@@ -74,7 +92,7 @@ export function ConfigurationPanel({
 
   return (
     <div className="flex flex-wrap gap-2 px-4 py-3">
-      {schema.map((property) => (
+      {visibleSchema.map((property) => (
         <PropertyControl
           key={property.key}
           property={property}
@@ -168,21 +186,28 @@ interface TextControlProps {
 
 function TextControl({ property, value, onChange }: TextControlProps) {
   return (
-    <div className="flex items-center gap-1">
-      <label
-        htmlFor={property.key}
-        className="text-xs text-zinc-500 dark:text-zinc-400"
-      >
-        {property.label}:
-      </label>
-      <input
-        id={property.key}
-        type="text"
-        value={value ?? ""}
-        onChange={(e) => onChange(e.target.value)}
-        className="px-2 py-1 text-xs border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-        placeholder={property.placeholder || property.label}
-      />
+    <div className="flex flex-col gap-0.5 w-full">
+      <div className="flex items-center gap-1">
+        <label
+          htmlFor={property.key}
+          className="text-xs text-zinc-500 dark:text-zinc-400"
+        >
+          {property.label}:
+        </label>
+        <input
+          id={property.key}
+          type="text"
+          value={value ?? ""}
+          onChange={(e) => onChange(e.target.value)}
+          className="flex-1 px-2 py-1 text-xs border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder={property.placeholder || property.label}
+        />
+      </div>
+      {property.helpText && (
+        <div className="text-xs text-zinc-400 dark:text-zinc-500 ml-1">
+          {property.helpText}
+        </div>
+      )}
     </div>
   );
 }
@@ -374,24 +399,31 @@ function MultiSelectControl({
   };
 
   return (
-    <div className="flex items-center gap-1">
-      <span className="text-xs text-zinc-500 dark:text-zinc-400 mr-1">
-        {property.label}:
-      </span>
-      {normalizedOptions.map((option) => (
-        <button
-          key={String(option.value)}
-          type="button"
-          onClick={() => handleToggle(option.value)}
-          className={`px-3 py-1.5 text-xs rounded transition-colors ${
-            (value ?? []).includes(option.value)
-              ? "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300"
-              : "bg-zinc-100 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-600"
-          }`}
-        >
-          {option.label}
-        </button>
-      ))}
+    <div className="flex flex-col gap-0.5 w-full">
+      <div className="flex items-center gap-1">
+        <span className="text-xs text-zinc-500 dark:text-zinc-400 mr-1">
+          {property.label}:
+        </span>
+        {normalizedOptions.map((option) => (
+          <button
+            key={String(option.value)}
+            type="button"
+            onClick={() => handleToggle(option.value)}
+            className={`px-3 py-1.5 text-xs rounded transition-colors ${
+              (value ?? []).includes(option.value)
+                ? "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300"
+                : "bg-zinc-100 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-600"
+            }`}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
+      {property.helpText && (
+        <div className="text-xs text-zinc-400 dark:text-zinc-500 ml-1">
+          {property.helpText}
+        </div>
+      )}
     </div>
   );
 }

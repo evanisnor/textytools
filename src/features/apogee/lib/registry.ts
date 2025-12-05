@@ -19,6 +19,7 @@ import {
 } from "@/entities/transform/gzip-compress";
 import { jsonConvertDefinition } from "@/entities/transform/json-convert";
 import { jwtDecodeDefinition } from "@/entities/transform/jwt";
+import { modifyFieldDefinition } from "@/entities/transform/modify-field";
 import { regexReplaceDefinition } from "@/entities/transform/regex-replace";
 import { sortLinesDefinition } from "@/entities/transform/sort-lines";
 import { caseConvertTransform } from "@/entities/transform/text-case";
@@ -118,6 +119,7 @@ export const TRANSFORM_REGISTRY: Record<string, TransformDefinition> = {
   "regex-replace": regexReplaceDefinition as TransformDefinition,
   "sort-lines": sortLinesDefinition as TransformDefinition,
   "extract-lines": extractLinesDefinition as TransformDefinition,
+  "modify-field": modifyFieldDefinition as TransformDefinition,
 
   // Compress transforms
   "gzip-compress": gzipCompressDefinition as TransformDefinition,

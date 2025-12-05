@@ -13,6 +13,7 @@ import { useSyntaxHighlighter } from "../model/useSyntaxHighlighter";
 
 import { ConfigurationPanel } from "./ConfigurationPanel";
 import { LensConfig } from "./LensConfig";
+import { LensPanel } from "./LensPanel";
 
 import { TextEditor } from "@/entities/editor";
 import { detectFormat } from "@/entities/transform/shared";
@@ -66,7 +67,7 @@ export function TransformBlock({
     stepPropertiesRef.current = step.properties;
   }, [step.properties]);
 
-  // Determine if lens should be shown
+  // Determine if standard lens (LensConfig) should be shown
   // Show lens for Convert transforms when input is unstructured
   const shouldShowLens = useMemo(() => {
     if (transform.category !== "convert") {
@@ -80,6 +81,12 @@ export function TransformBlock({
     const detectedFormat = detectFormat(previousOutput);
     return detectedFormat === "unknown";
   }, [transform.category, previousOutput]);
+
+  // Determine if custom lens panel should be shown
+  // Show when transform has properties marked with showInLens
+  const shouldShowLensPanel = useMemo(() => {
+    return transform.propertySchema.some((prop) => prop.showInLens === true);
+  }, [transform.propertySchema]);
 
   // Automatically set lens mode when lens should be shown
   useEffect(() => {
@@ -204,6 +211,15 @@ export function TransformBlock({
           inputSelection={step.inputSelection}
           onUpdate={handleInputSelectionUpdate}
           previousOutput={previousOutput}
+        />
+      )}
+
+      {/* Custom Lens Panel (for transforms with showInLens properties) */}
+      {shouldShowLensPanel && (
+        <LensPanel
+          schema={transform.propertySchema}
+          values={step.properties}
+          onChange={handlePropertyChange}
         />
       )}
 

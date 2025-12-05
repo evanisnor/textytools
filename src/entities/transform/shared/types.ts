@@ -25,6 +25,9 @@ export interface PropertySchema {
   options?: string[] | { value: string; label: string }[];
   defaultValue: unknown;
   validation?: (value: unknown) => string | null;
+  helpText?: string;
+  showWhen?: Record<string, unknown>;
+  showInLens?: boolean; // Show this property in Lens section instead of Configuration
 }
 
 /**

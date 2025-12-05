@@ -74,7 +74,8 @@ export type ModifyTransform =
   | "case-convert"
   | "regex-replace"
   | "sort-lines"
-  | "extract-lines";
+  | "extract-lines"
+  | "modify-field";
 
 /**
  * Compress: Size reduction algorithms

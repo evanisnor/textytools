@@ -22,4 +22,4 @@ export { toWords } from "./lib/word-detection";
 export { useCaseConversion } from "./model/useCaseConversion";
 
 // Transform Definition (for Apogee)
-export { caseConvertTransform } from "./lib/transforms";
+export { caseConvertTransform, CASE_TYPE_OPTIONS } from "./lib/transforms";
