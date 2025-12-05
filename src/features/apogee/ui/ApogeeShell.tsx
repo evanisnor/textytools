@@ -16,6 +16,7 @@ import type {
   DetectableInputType,
 } from "../model/types";
 import type { DocumentManager } from "../model/useDocumentManager";
+import { useFormatStats } from "../model/useFormatStats";
 
 import { DataBlock } from "./DataBlock";
 import { PipelineEditor } from "./PipelineEditor";
@@ -43,6 +44,9 @@ export function ApogeeShell({ documentManager }: ApogeeShellProps) {
   const [hoveredDocId, setHoveredDocId] = useState<string | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [confirmMessage, setConfirmMessage] = useState("");
+
+  // Calculate format-specific statistics based on input type
+  const inputStats = useFormatStats(inputText, inputType);
 
   // Auto-detect format from current input (derived state)
   const effectiveInputType: InputType =
@@ -239,16 +243,7 @@ export function ApogeeShell({ documentManager }: ApogeeShellProps) {
                   inputType={effectiveInputType}
                   onInputTypeChange={setInputType}
                   hideHeader={inputText.length === 0}
-                  stats={
-                    inputText.length > 0
-                      ? [
-                          {
-                            label: "Size",
-                            value: `${inputText.length} chars`,
-                          },
-                        ]
-                      : undefined
-                  }
+                  stats={inputStats}
                 />
 
                 {/* Transform Palette - Only show when there's input text */}

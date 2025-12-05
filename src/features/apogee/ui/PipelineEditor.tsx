@@ -11,6 +11,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { getTransformAsync } from "../lib/registry";
 import type { TransformDefinition, TransformType } from "../model/types";
 import type { DocumentManager } from "../model/useDocumentManager";
+import { useFormatStats } from "../model/useFormatStats";
 
 import { DataBlock } from "./DataBlock";
 import { TransformBlock } from "./TransformBlock";
@@ -33,6 +34,12 @@ export function PipelineEditor({ documentManager }: PipelineEditorProps) {
   const nameInputRef = useRef<HTMLInputElement>(null);
   const nameUpdateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastDocumentIdRef = useRef<string | undefined>(undefined);
+
+  // Calculate format-specific statistics for input data based on detected/selected type
+  const inputStats = useFormatStats(
+    currentDocument?.inputData || "",
+    currentDocument?.inputType || "text",
+  );
 
   // Initialize local name with current document name
   // Reset when switching documents
@@ -160,12 +167,7 @@ export function PipelineEditor({ documentManager }: PipelineEditorProps) {
         onChange={(value) => documentManager.updateInputData(value)}
         inputType={currentDocument.inputType}
         onInputTypeChange={(type) => documentManager.updateInputType(type)}
-        stats={[
-          {
-            label: "Size",
-            value: `${currentDocument.inputData.length} chars`,
-          },
-        ]}
+        stats={inputStats}
       />
 
       {/* Transform Pipeline */}
