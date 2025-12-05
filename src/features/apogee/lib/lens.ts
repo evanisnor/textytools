@@ -8,6 +8,94 @@
 import type { InputSelection, LensResult } from "../model/types";
 
 /**
+ * Preview result for regex patterns
+ */
+export interface RegexPreviewResult {
+  type: "success" | "error" | "info";
+  message: string;
+  count?: number;
+}
+
+/**
+ * Get a preview of the first match for a regex pattern
+ * Used for live feedback in the UI
+ */
+export function getRegexPreview(
+  pattern: string,
+  flags: string,
+  input: string,
+): RegexPreviewResult {
+  if (!pattern) {
+    return { type: "info", message: "Enter a pattern to preview" };
+  }
+
+  if (!input) {
+    return { type: "info", message: "No input data to preview" };
+  }
+
+  try {
+    // Validate regex pattern first
+    const regex = new RegExp(pattern, flags);
+
+    // Check for empty matches
+    if (regex.test("")) {
+      return {
+        type: "error",
+        message: "Pattern matches empty strings",
+      };
+    }
+
+    // Extract named groups
+    const namedGroupPattern = /\(\?<(\w+)>/g;
+    const namedGroups: string[] = [];
+    let match;
+    while ((match = namedGroupPattern.exec(pattern)) !== null) {
+      namedGroups.push(match[1]);
+    }
+
+    if (namedGroups.length > 0) {
+      // Named groups extraction
+      const globalRegex = new RegExp(
+        pattern,
+        flags.includes("g") ? flags : flags + "g",
+      );
+
+      const execMatch = globalRegex.exec(input);
+      if (!execMatch) {
+        return { type: "info", message: "No matches found" };
+      }
+
+      const obj: Record<string, string> = {};
+      for (const groupName of namedGroups) {
+        obj[groupName] = execMatch.groups?.[groupName] || "";
+      }
+
+      return {
+        type: "success",
+        message: `${JSON.stringify(obj)}`,
+      };
+    } else {
+      // Simple extraction
+      const matches = input.match(regex);
+      if (!matches || matches.length === 0) {
+        return { type: "info", message: "No matches found" };
+      }
+
+      return {
+        type: "success",
+        message: `${matches[0]}`,
+        count: matches.length,
+      };
+    }
+  } catch (err) {
+    return {
+      type: "error",
+      message: `Invalid regex: ${err instanceof Error ? err.message : String(err)}`,
+    };
+  }
+}
+
+/**
  * Execute the lens pass to extract and parse data
  */
 export async function executeLensPass(
@@ -52,6 +140,16 @@ export async function executeLensPass(
           namedGroups.push(match[1]);
         }
 
+        // Test if pattern can match empty strings
+        if (regex.test("")) {
+          return {
+            success: false,
+            data: "",
+            error:
+              "Pattern matches empty strings. Please use a pattern that matches actual content.",
+          };
+        }
+
         if (namedGroups.length > 0) {
           // Extract with named groups - create structured data
           const results: Record<string, string>[] = [];
@@ -69,6 +167,11 @@ export async function executeLensPass(
               obj[groupName] = execMatch.groups?.[groupName] || "";
             }
             results.push(obj);
+
+            // Prevent infinite loop on zero-length matches
+            if (execMatch[0].length === 0) {
+              globalRegex.lastIndex++;
+            }
           }
 
           if (results.length === 0) {

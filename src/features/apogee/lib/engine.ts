@@ -12,6 +12,8 @@ import type { Document, TransformDefinition } from "../model/types";
 import { executeLensPass } from "./lens";
 import { TRANSFORM_REGISTRY } from "./registry";
 
+import { detectFormat } from "@/entities/transform/shared";
+
 /**
  * Apogee Pipeline Execution Engine
  */
@@ -33,9 +35,30 @@ export class ApogeeEngine {
       }
 
       // PHASE 1: Lens Pass
+      // Only use lens extraction if:
+      // 1. Transform is a "convert" type AND
+      // 2. Input format is unknown (unstructured text)
+      // Otherwise, use mode "all" (pass-through)
+      const shouldUseLens =
+        transform.category === "convert" &&
+        detectFormat(currentData) === "unknown";
+
+      // When lens extraction is needed but mode is "all", it means
+      // the user hasn't configured extraction yet - skip this step
+      if (shouldUseLens && step.inputSelection.mode === "all") {
+        step.output =
+          "Enter an extraction pattern to convert unstructured text";
+        currentData = step.output;
+        continue;
+      }
+
+      const effectiveInputSelection = shouldUseLens
+        ? step.inputSelection
+        : { ...step.inputSelection, mode: "all" as const };
+
       const lensResult = await executeLensPass(
         currentData,
-        step.inputSelection,
+        effectiveInputSelection,
       );
 
       if (!lensResult.success) {

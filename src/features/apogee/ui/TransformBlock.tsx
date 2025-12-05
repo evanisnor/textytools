@@ -81,6 +81,21 @@ export function TransformBlock({
     return detectedFormat === "unknown";
   }, [transform.category, previousOutput]);
 
+  // Automatically set lens mode when lens should be shown
+  useEffect(() => {
+    if (
+      shouldShowLens &&
+      step.inputSelection.mode === "all" &&
+      onUpdateInputSelection
+    ) {
+      // Lens is needed but mode is still "all" - set it to regex for text input
+      onUpdateInputSelection({
+        ...step.inputSelection,
+        mode: "regex",
+      });
+    }
+  }, [shouldShowLens, step.inputSelection, onUpdateInputSelection]);
+
   // Determine output type for syntax highlighting
   const outputType = useMemo((): InputType | undefined => {
     // Map the transform's producesOutput (MIME type) to InputType

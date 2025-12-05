@@ -121,21 +121,6 @@ function saveDocuments(documents: Document[]): void {
   }
 }
 
-/**
- * Create default input selection for a transform
- */
-function createDefaultInputSelection(
-  inputType?: Document["inputType"],
-): TransformStep["inputSelection"] {
-  return {
-    mode: "all",
-    parseAs:
-      inputType && inputType !== "auto" && inputType !== "file"
-        ? (inputType as TransformStep["inputSelection"]["parseAs"])
-        : undefined,
-  };
-}
-
 // ============================================================================
 // Hook Implementation
 // ============================================================================
@@ -367,7 +352,10 @@ export function useDocumentManager(): DocumentManager {
           documentId: current.id,
           order: current.transforms.length,
           transformType: type,
-          inputSelection: createDefaultInputSelection(current.inputType),
+          inputSelection: {
+            mode: "all", // Default to pass-through (no lens extraction)
+            regexFlags: "g", // Default regex flags for when regex mode is selected
+          },
           properties: { ...transform.defaultProperties },
           output: "",
           createdAt: Date.now(),
