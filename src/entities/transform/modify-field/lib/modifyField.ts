@@ -347,8 +347,82 @@ function modifyFields(
     case "xpath":
       throw new Error("XPath selection is not yet implemented");
 
-    case "csv-column":
-      throw new Error("CSV column selection is not yet implemented");
+    case "csv-column": {
+      try {
+        // CSV data is an array of objects where keys are column names
+        if (!Array.isArray(data)) {
+          throw new Error("CSV data must be an array");
+        }
+
+        let modifiedCount = 0;
+        const sampleValues: unknown[] = [];
+        let operationError: Error | undefined;
+
+        // Iterate through each row
+        for (const row of data) {
+          if (typeof row !== "object" || row === null) {
+            continue;
+          }
+
+          const rowObj = row as Record<string, unknown>;
+
+          // Field path can be a column name or index
+          let columnKey: string | undefined;
+
+          // Try as column name first
+          if (props.fieldPath in rowObj) {
+            columnKey = props.fieldPath;
+          } else {
+            // Try as numeric index (convert "0", "1", etc. to column names)
+            const columnIndex = parseInt(props.fieldPath, 10);
+            if (!isNaN(columnIndex)) {
+              const keys = Object.keys(rowObj);
+              if (columnIndex >= 0 && columnIndex < keys.length) {
+                columnKey = keys[columnIndex];
+              }
+            }
+          }
+
+          if (!columnKey) {
+            continue;
+          }
+
+          const currentValue = rowObj[columnKey];
+
+          // Collect sample values (up to 5)
+          if (sampleValues.length < 5) {
+            sampleValues.push(currentValue);
+          }
+
+          // Only attempt modification if we haven't encountered an error yet
+          if (!operationError) {
+            try {
+              const modifiedValue = applyOperation(currentValue, props);
+              rowObj[columnKey] = modifiedValue;
+              modifiedCount++;
+            } catch (err) {
+              operationError =
+                err instanceof Error ? err : new Error(String(err));
+            }
+          }
+        }
+
+        // If we encountered an operation error, throw it with sample values
+        if (operationError) {
+          const sampleText =
+            sampleValues.length > 0
+              ? `\n\nSample values found (showing first ${sampleValues.length}):\n${sampleValues.map((v, i) => `  ${i + 1}. ${JSON.stringify(v)}`).join("\n")}`
+              : "";
+          throw new Error(`${operationError.message}${sampleText}`);
+        }
+
+        return modifiedCount;
+      } catch (err) {
+        throw new Error(
+          `CSV column operation failed: ${err instanceof Error ? err.message : "Unknown error"}`,
+        );
+      }
+    }
 
     default:
       throw new Error(`Unknown field selector: ${props.fieldSelector}`);
