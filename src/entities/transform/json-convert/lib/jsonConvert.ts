@@ -21,6 +21,7 @@ export const jsonConvertPropertySchema: PropertySchema[] = [
     label: "Sort Keys",
     type: "toggle",
     defaultValue: false,
+    width: "flex-start",
   },
   {
     key: "minify",
