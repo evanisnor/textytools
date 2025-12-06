@@ -2,10 +2,33 @@
 
 import type { PropertySchema } from "../model/types";
 
+import { ToggleGroupControl } from "./controls/ToggleGroupControl";
+
 interface LensPanelProps {
   schema: PropertySchema[];
   values: Record<string, unknown>;
   onChange: (key: string, value: unknown) => void;
+  inputMimeType?: string;
+}
+
+/**
+ * Get dynamic label for fieldPath based on input MIME type
+ */
+function getFieldPathLabel(inputMimeType?: string): string {
+  if (!inputMimeType) {
+    return "Field Path";
+  }
+
+  if (inputMimeType === "application/xml") {
+    return "XPath";
+  }
+
+  if (inputMimeType === "text/csv") {
+    return "CSV Column";
+  }
+
+  // JSON, YAML, TOML all use JSONPath
+  return "JSONPath";
 }
 
 /**
@@ -14,7 +37,12 @@ interface LensPanelProps {
  * Similar to ConfigurationPanel but specifically for lens properties
  * with a different visual style (amber background)
  */
-export function LensPanel({ schema, values, onChange }: LensPanelProps) {
+export function LensPanel({
+  schema,
+  values,
+  onChange,
+  inputMimeType,
+}: LensPanelProps) {
   // Filter to only properties marked with showInLens
   const lensSchema = schema.filter((property) => property.showInLens === true);
 
@@ -25,14 +53,22 @@ export function LensPanel({ schema, values, onChange }: LensPanelProps) {
   return (
     <div className="border-b border-zinc-200 dark:border-zinc-700 bg-amber-50 dark:bg-amber-950/20">
       <div className="px-4 py-3 space-y-3">
-        {lensSchema.map((property) => (
-          <PropertyControl
-            key={property.key}
-            property={property}
-            value={values[property.key] ?? property.defaultValue}
-            onChange={(value) => onChange(property.key, value)}
-          />
-        ))}
+        {lensSchema.map((property) => {
+          // Override label for fieldPath based on input type
+          const effectiveProperty =
+            property.key === "fieldPath"
+              ? { ...property, label: getFieldPathLabel(inputMimeType) }
+              : property;
+
+          return (
+            <PropertyControl
+              key={property.key}
+              property={effectiveProperty}
+              value={values[property.key] ?? property.defaultValue}
+              onChange={(value) => onChange(property.key, value)}
+            />
+          );
+        })}
       </div>
     </div>
   );
@@ -58,6 +94,16 @@ function PropertyControl({ property, value, onChange }: PropertyControlProps) {
     case "select":
       return (
         <SelectControl property={property} value={value} onChange={onChange} />
+      );
+
+    case "toggle-group":
+      return (
+        <ToggleGroupControl
+          property={property}
+          value={value}
+          onChange={onChange}
+          variant="lens"
+        />
       );
 
     default:

@@ -4,6 +4,8 @@ import { useCallback, useRef, useEffect } from "react";
 
 import type { PropertySchema } from "../model/types";
 
+import { ToggleGroupControl } from "./controls/ToggleGroupControl";
+
 interface ConfigurationPanelProps {
   schema: PropertySchema[];
   values: Record<string, unknown>;
@@ -78,6 +80,12 @@ export function ConfigurationPanel({
     // Check if all conditions in showWhen are met
     return Object.entries(property.showWhen).every(([key, expectedValue]) => {
       const actualValue = values[key];
+
+      // If expectedValue is an array, check if actualValue matches ANY of the values
+      if (Array.isArray(expectedValue)) {
+        return expectedValue.includes(actualValue);
+      }
+
       return actualValue === expectedValue;
     });
   });
@@ -90,17 +98,70 @@ export function ConfigurationPanel({
     );
   }
 
+  // Group properties into rows based on flex-start markers
+  const rows: PropertySchema[][] = [];
+  let currentRow: PropertySchema[] = [];
+
+  visibleSchema.forEach((property) => {
+    const width = property.width ?? "auto";
+
+    if (width === "flex-start") {
+      // Start a new row
+      if (currentRow.length > 0) {
+        rows.push(currentRow);
+      }
+      currentRow = [property];
+    } else if (
+      (width === "flex" || width === "auto") &&
+      currentRow.length > 0
+    ) {
+      // Add to current row if it was started by flex-start or flex
+      const firstInRow = currentRow[0];
+      if (firstInRow.width === "flex-start" || firstInRow.width === "flex") {
+        currentRow.push(property);
+      } else {
+        // Start a new row if current row doesn't support flex
+        rows.push(currentRow);
+        currentRow = [property];
+      }
+    } else {
+      // Non-flex items (full width) get their own row
+      if (currentRow.length > 0) {
+        rows.push(currentRow);
+      }
+      currentRow = [property];
+    }
+  });
+
+  // Add the last row
+  if (currentRow.length > 0) {
+    rows.push(currentRow);
+  }
+
   return (
-    <div className="flex flex-wrap gap-2 px-4 py-3">
-      {visibleSchema.map((property) => (
-        <PropertyControl
-          key={property.key}
-          property={property}
-          value={values[property.key] ?? property.defaultValue}
-          onChange={(value) => onChange(property.key, value)}
-          onToggleWithOrder={handleToggleWithOrder}
-        />
-      ))}
+    <div className="flex flex-col gap-2 px-4 py-3">
+      {rows.map((row, rowIndex) => {
+        const isFlexRow =
+          row.length > 1 &&
+          row.some((p) => p.width === "flex-start" || p.width === "flex");
+
+        return (
+          <div
+            key={rowIndex}
+            className={isFlexRow ? "flex gap-2" : "flex flex-wrap gap-2"}
+          >
+            {row.map((property) => (
+              <PropertyControl
+                key={property.key}
+                property={property}
+                value={values[property.key] ?? property.defaultValue}
+                onChange={(value) => onChange(property.key, value)}
+                onToggleWithOrder={handleToggleWithOrder}
+              />
+            ))}
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -169,6 +230,9 @@ function PropertyControl({
         />
       );
 
+    case "help":
+      return <HelpControl property={property} />;
+
     default:
       return (
         <div className="text-sm text-red-500">
@@ -185,8 +249,23 @@ interface TextControlProps {
 }
 
 function TextControl({ property, value, onChange }: TextControlProps) {
+  const width = property.width ?? "full";
+
+  // Map width to container and input classes
+  const containerClass =
+    width === "full"
+      ? "w-full"
+      : width === "flex" || width === "flex-start"
+        ? "flex-1"
+        : "w-auto";
+
+  const inputClass =
+    width === "full" || width === "flex" || width === "flex-start"
+      ? "flex-1"
+      : "w-16";
+
   return (
-    <div className="flex flex-col gap-0.5 w-full">
+    <div className={`flex flex-col gap-0.5 ${containerClass}`}>
       <div className="flex items-center gap-1">
         <label
           htmlFor={property.key}
@@ -199,7 +278,7 @@ function TextControl({ property, value, onChange }: TextControlProps) {
           type="text"
           value={value ?? ""}
           onChange={(e) => onChange(e.target.value)}
-          className="flex-1 px-2 py-1 text-xs border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className={`px-2 py-1 text-xs border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 ${inputClass}`}
           placeholder={property.placeholder || property.label}
         />
       </div>
@@ -251,13 +330,23 @@ function SelectControl({ property, value, onChange }: SelectControlProps) {
     );
   }
 
+  const width = property.width ?? "auto";
+
+  // Map width to container classes
+  const containerClass =
+    width === "full"
+      ? "w-full"
+      : width === "flex" || width === "flex-start"
+        ? "flex-1"
+        : "w-auto";
+
   // Normalize options to { value, label } format
   const normalizedOptions = property.options.map((opt) =>
     typeof opt === "string" ? { value: opt, label: opt } : opt,
   );
 
   return (
-    <div className="flex items-center gap-1">
+    <div className={`flex items-center gap-1 ${containerClass}`}>
       <label
         htmlFor={property.key}
         className="text-xs text-zinc-500 dark:text-zinc-400"
@@ -273,7 +362,11 @@ function SelectControl({ property, value, onChange }: SelectControlProps) {
           );
           onChange(option?.value);
         }}
-        className="px-2 py-1 text-xs border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className={`px-2 py-1 text-xs border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+          width === "full" || width === "flex" || width === "flex-start"
+            ? "flex-1"
+            : ""
+        }`}
       >
         {normalizedOptions.map((option) => (
           <option key={String(option.value)} value={String(option.value)}>
@@ -316,53 +409,6 @@ function ToggleControl({
     >
       {property.label}
     </button>
-  );
-}
-
-interface ToggleGroupControlProps {
-  property: PropertySchema;
-  value: unknown;
-  onChange: (value: unknown) => void;
-}
-
-function ToggleGroupControl({
-  property,
-  value,
-  onChange,
-}: ToggleGroupControlProps) {
-  if (!property.options || property.options.length === 0) {
-    return (
-      <div className="text-sm text-red-500">
-        Toggle group requires options array
-      </div>
-    );
-  }
-
-  // Normalize options to { value, label } format
-  const normalizedOptions = property.options.map((opt) =>
-    typeof opt === "string" ? { value: opt, label: opt } : opt,
-  );
-
-  return (
-    <div className="flex items-center gap-1">
-      <span className="text-xs text-zinc-500 dark:text-zinc-400 mr-1">
-        {property.label}:
-      </span>
-      {normalizedOptions.map((option) => (
-        <button
-          key={String(option.value)}
-          type="button"
-          onClick={() => onChange(option.value)}
-          className={`px-3 py-1.5 text-xs rounded transition-colors ${
-            value === option.value
-              ? "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300"
-              : "bg-zinc-100 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-600"
-          }`}
-        >
-          {option.label}
-        </button>
-      ))}
-    </div>
   );
 }
 
@@ -424,6 +470,27 @@ function MultiSelectControl({
           {property.helpText}
         </div>
       )}
+    </div>
+  );
+}
+
+interface HelpControlProps {
+  property: PropertySchema;
+}
+
+function HelpControl({ property }: HelpControlProps) {
+  if (!property.helpText) {
+    return null;
+  }
+
+  return (
+    <div className="w-full">
+      <div className="text-xs text-zinc-400 dark:text-zinc-500">
+        <span className="font-medium text-zinc-500 dark:text-zinc-400">
+          {property.label}:
+        </span>{" "}
+        {property.helpText}
+      </div>
     </div>
   );
 }

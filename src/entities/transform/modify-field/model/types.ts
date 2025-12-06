@@ -13,6 +13,7 @@ export type DateFormat =
   | "rfc3339"
   | "unix-seconds"
   | "unix-milliseconds"
+  | "apache-log"
   | "custom";
 
 export interface ModifyFieldProperties {
@@ -33,7 +34,8 @@ export interface ModifyFieldProperties {
   caseFormat?: CaseType;
 
   // Date Format
-  inputDateFormat?: string; // strftime format for parsing input
+  inputDateFormat?: DateFormat;
+  customInputDateFormat?: string; // strftime format when inputDateFormat is "custom"
   outputDateFormat?: DateFormat;
   customOutputDateFormat?: string; // strftime format when outputDateFormat is "custom"
 }

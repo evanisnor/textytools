@@ -12,7 +12,8 @@ export type PropertyType =
   | "select"
   | "toggle"
   | "toggle-group"
-  | "multi-select";
+  | "multi-select"
+  | "help"; // Read-only help text display
 
 /**
  * Schema for a single property/option
@@ -28,6 +29,7 @@ export interface PropertySchema {
   helpText?: string;
   showWhen?: Record<string, unknown>;
   showInLens?: boolean; // Show this property in Lens section instead of Configuration
+  width?: "auto" | "full" | "flex" | "flex-start"; // Width: "auto" (compact), "full" (entire row), "flex" (grow to fill available space), "flex-start" (start new flex row)
 }
 
 /**

@@ -88,6 +88,24 @@ export function TransformBlock({
     return transform.propertySchema.some((prop) => prop.showInLens === true);
   }, [transform.propertySchema]);
 
+  // Detect input MIME type for lens panel
+  const inputMimeType = useMemo(() => {
+    if (!previousOutput) {
+      return undefined;
+    }
+
+    const detectedFormat = detectFormat(previousOutput);
+    const formatToMimeType: Record<string, string> = {
+      json: "application/json",
+      csv: "text/csv",
+      yaml: "application/yaml",
+      xml: "application/xml",
+      toml: "application/toml",
+    };
+
+    return formatToMimeType[detectedFormat];
+  }, [previousOutput]);
+
   // Automatically set lens mode when lens should be shown
   useEffect(() => {
     if (
@@ -220,6 +238,7 @@ export function TransformBlock({
           schema={transform.propertySchema}
           values={step.properties}
           onChange={handlePropertyChange}
+          inputMimeType={inputMimeType}
         />
       )}
 

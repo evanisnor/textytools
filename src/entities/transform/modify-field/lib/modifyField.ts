@@ -23,17 +23,16 @@ export const modifyFieldPropertySchema: PropertySchema[] = [
     type: "text",
     defaultValue: "",
     placeholder: "$.users[*].name",
-    helpText: "JSONPath, XPath, or CSV column based on input format",
     showInLens: true,
   },
   {
     key: "operation",
     label: "Operation",
-    type: "select",
+    type: "toggle-group",
     options: [
       { value: "regex-replace", label: "Regex Replace" },
-      { value: "case-convert", label: "Case Convert" },
       { value: "date-format", label: "Date Format" },
+      { value: "case-convert", label: "Case Convert" },
     ],
     defaultValue: "regex-replace",
     showInLens: true,
@@ -46,6 +45,7 @@ export const modifyFieldPropertySchema: PropertySchema[] = [
     defaultValue: "",
     placeholder: "e.g., \\d{4}-\\d{2}-\\d{2}",
     showWhen: { operation: "regex-replace" },
+    width: "flex-start",
   },
   {
     key: "regexFlags",
@@ -54,6 +54,7 @@ export const modifyFieldPropertySchema: PropertySchema[] = [
     defaultValue: "g",
     placeholder: "g",
     showWhen: { operation: "regex-replace" },
+    width: "auto",
   },
   {
     key: "regexReplacement",
@@ -62,6 +63,7 @@ export const modifyFieldPropertySchema: PropertySchema[] = [
     defaultValue: "",
     placeholder: "e.g., $1",
     showWhen: { operation: "regex-replace" },
+    width: "flex-start",
   },
   // Case Convert options (reuse from text-case entity)
   {
@@ -76,12 +78,27 @@ export const modifyFieldPropertySchema: PropertySchema[] = [
   {
     key: "inputDateFormat",
     label: "Input Format",
-    type: "text",
-    defaultValue: "%d/%b/%Y:%H:%M:%S %z",
-    placeholder: "%d/%b/%Y:%H:%M:%S %z",
-    helpText:
-      "strftime format of the input date - Examples: %d/%b/%Y:%H:%M:%S %z (12/Jan/2025:14:23:54 +0000)",
+    type: "select",
+    options: [
+      { value: "iso8601", label: "ISO 8601 (YYYY-MM-DD)" },
+      { value: "rfc3339", label: "RFC 3339 (YYYY-MM-DDTHH:mm:ssZ)" },
+      { value: "unix-seconds", label: "Unix Timestamp (seconds)" },
+      { value: "unix-milliseconds", label: "Unix Timestamp (milliseconds)" },
+      { value: "apache-log", label: "Apache Log (12/Jan/2025:14:23:54 +0000)" },
+      { value: "custom", label: "Custom (strftime)" },
+    ],
+    defaultValue: "rfc3339",
     showWhen: { operation: "date-format" },
+    width: "flex-start",
+  },
+  {
+    key: "customInputDateFormat",
+    label: "Custom Input",
+    type: "text",
+    defaultValue: "%Y-%m-%d",
+    placeholder: "%Y-%m-%d",
+    showWhen: { operation: "date-format", inputDateFormat: "custom" },
+    width: "flex",
   },
   {
     key: "outputDateFormat",
@@ -94,18 +111,27 @@ export const modifyFieldPropertySchema: PropertySchema[] = [
       { value: "unix-milliseconds", label: "Unix Timestamp (milliseconds)" },
       { value: "custom", label: "Custom (strftime)" },
     ],
-    defaultValue: "iso8601",
+    defaultValue: "rfc3339",
     showWhen: { operation: "date-format" },
+    width: "flex-start",
   },
   {
     key: "customOutputDateFormat",
-    label: "Custom Output Format",
+    label: "Custom Output",
     type: "text",
     defaultValue: "%Y-%m-%d",
     placeholder: "%Y-%m-%d",
-    helpText:
-      "strftime format - Examples: %Y-%m-%d (2025-01-12), %d/%m/%Y (12/01/2025), %B %d, %Y (January 12, 2025)",
     showWhen: { operation: "date-format", outputDateFormat: "custom" },
+    width: "flex",
+  },
+  {
+    key: "dateFormatHelp",
+    label: "strftime tokens",
+    type: "help",
+    defaultValue: "",
+    helpText:
+      "%Y=year, %m=month(01-12), %d=day(01-31), %H=hour(00-23), %M=minute, %S=second, %b=month name(Jan), %B=full month, %z=timezone(+0000)",
+    showWhen: { operation: "date-format", inputDateFormat: "custom" },
   },
 ];
 
@@ -119,9 +145,11 @@ export const modifyFieldDefaultProperties: Record<string, unknown> = {
   regexFlags: "g",
   regexReplacement: "",
   caseFormat: "lower",
-  inputDateFormat: "%d/%b/%Y:%H:%M:%S %z",
-  outputDateFormat: "iso8601",
+  inputDateFormat: "rfc3339",
+  customInputDateFormat: "%Y-%m-%d",
+  outputDateFormat: "rfc3339",
   customOutputDateFormat: "%Y-%m-%d",
+  dateFormatHelp: "",
 };
 
 /**
@@ -269,6 +297,8 @@ function modifyFields(
     case "jsonpath": {
       try {
         let modifiedCount = 0;
+        const sampleValues: unknown[] = [];
+        let operationError: Error | undefined;
 
         // Use JSONPath callback to modify values in place
         JSONPath({
@@ -277,11 +307,34 @@ function modifyFields(
           resultType: "value",
           callback: (_payload, _type, fullPayload) => {
             const currentValue = fullPayload.parent[fullPayload.parentProperty];
-            const modifiedValue = applyOperation(currentValue, props);
-            fullPayload.parent[fullPayload.parentProperty] = modifiedValue;
-            modifiedCount++;
+
+            // Collect sample values (up to 5)
+            if (sampleValues.length < 5) {
+              sampleValues.push(currentValue);
+            }
+
+            // Only attempt modification if we haven't encountered an error yet
+            if (!operationError) {
+              try {
+                const modifiedValue = applyOperation(currentValue, props);
+                fullPayload.parent[fullPayload.parentProperty] = modifiedValue;
+                modifiedCount++;
+              } catch (err) {
+                operationError =
+                  err instanceof Error ? err : new Error(String(err));
+              }
+            }
           },
         });
+
+        // If we encountered an operation error, throw it with sample values
+        if (operationError) {
+          const sampleText =
+            sampleValues.length > 0
+              ? `\n\nSample values found (showing first ${sampleValues.length}):\n${sampleValues.map((v, i) => `  ${i + 1}. ${JSON.stringify(v)}`).join("\n")}`
+              : "";
+          throw new Error(`${operationError.message}${sampleText}`);
+        }
 
         return modifiedCount;
       } catch (err) {
@@ -337,6 +390,7 @@ function applyOperation(value: unknown, props: ModifyFieldProperties): unknown {
       return formatDate(
         stringValue,
         props.inputDateFormat || "",
+        props.customInputDateFormat,
         props.outputDateFormat,
         props.customOutputDateFormat,
       );
@@ -353,6 +407,7 @@ function applyOperation(value: unknown, props: ModifyFieldProperties): unknown {
 function formatDate(
   value: string,
   inputFormat: string,
+  customInputFormat: string | undefined,
   outputFormat: string,
   customOutputFormat?: string,
 ): string {
@@ -360,13 +415,53 @@ function formatDate(
     // Parse the input date using the input format
     let date: Date;
 
-    if (inputFormat) {
-      // Convert strftime to date-fns format
-      const dateFnsInputFormat = strftimeToDateFns(inputFormat);
-      date = parseDate(value, dateFnsInputFormat, new Date());
-    } else {
-      // Try to parse as ISO date if no input format specified
-      date = new Date(value);
+    switch (inputFormat) {
+      case "iso8601": {
+        // Parse ISO 8601 date (YYYY-MM-DD)
+        date = new Date(value);
+        break;
+      }
+
+      case "rfc3339": {
+        // Parse RFC 3339 / ISO 8601 full datetime
+        date = new Date(value);
+        break;
+      }
+
+      case "unix-seconds": {
+        // Parse Unix timestamp in seconds
+        date = new Date(Number(value) * 1000);
+        break;
+      }
+
+      case "unix-milliseconds": {
+        // Parse Unix timestamp in milliseconds
+        date = new Date(Number(value));
+        break;
+      }
+
+      case "apache-log": {
+        // Parse Apache log format: 12/Jan/2025:14:23:54 +0000
+        const dateFnsInputFormat = strftimeToDateFns("%d/%b/%Y:%H:%M:%S %z");
+        date = parseDate(value, dateFnsInputFormat, new Date());
+        break;
+      }
+
+      case "custom": {
+        if (!customInputFormat) {
+          date = new Date(value);
+        } else {
+          // Convert strftime to date-fns format
+          const dateFnsInputFormat = strftimeToDateFns(customInputFormat);
+          date = parseDate(value, dateFnsInputFormat, new Date());
+        }
+        break;
+      }
+
+      default: {
+        // Try to parse as ISO date if unknown format
+        date = new Date(value);
+      }
     }
 
     if (isNaN(date.getTime())) {
