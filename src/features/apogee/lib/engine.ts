@@ -81,8 +81,9 @@ export class ApogeeEngine {
         continue;
       }
 
-      // Success - cache output, stats, and continue
+      // Success - cache output, mimeType, stats, and continue
       step.output = transformResult.data;
+      step.mimeType = transformResult.mimeType;
       step.stats = transformResult.stats;
       currentData = transformResult.data;
     }
@@ -132,6 +133,7 @@ export class ApogeeEngine {
       step.output = transformResult.success
         ? transformResult.data
         : transformResult.error || "";
+      step.mimeType = transformResult.mimeType;
       step.stats = transformResult.stats;
       currentData = step.output;
     }

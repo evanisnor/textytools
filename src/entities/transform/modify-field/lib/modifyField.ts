@@ -10,7 +10,10 @@ import { detectFormat, parseToIntermediate } from "../../shared";
 import type { PropertySchema, TransformResult } from "../../shared/types";
 import type { ModifyFieldProperties } from "../model/types";
 
+import { jsonToCsv } from "@/entities/transform/csv-json/lib/json-to-csv";
 import { CASE_TYPE_OPTIONS, convertCase } from "@/entities/transform/text-case";
+import { jsonToXML } from "@/entities/xml/lib/format";
+import { formatYAML } from "@/entities/yaml/lib/format";
 
 /**
  * Property schema for Modify Field transform
@@ -242,8 +245,39 @@ export function executeModifyField(
     }
 
     // Serialize back to same format as input
-    const output = JSON.stringify(data, null, 2);
+    let output: string;
     const mimeType = formatToMimeType(format);
+
+    switch (format) {
+      case "json":
+        output = JSON.stringify(data, null, 2);
+        break;
+
+      case "csv": {
+        const csvResult = jsonToCsv(JSON.stringify(data), ",", true);
+        if (!csvResult.success) {
+          return {
+            success: false,
+            data: "",
+            error: `Failed to convert back to CSV: ${csvResult.error}`,
+            mimeType: "text/plain",
+          };
+        }
+        output = csvResult.output;
+        break;
+      }
+
+      case "yaml":
+        output = formatYAML(data);
+        break;
+
+      case "xml":
+        output = jsonToXML(data);
+        break;
+
+      default:
+        output = JSON.stringify(data, null, 2);
+    }
 
     return {
       success: true,

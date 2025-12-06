@@ -204,6 +204,7 @@ export interface TransformStep {
 
   // Phase 3: Cached Output
   output: string;
+  mimeType?: string; // MIME type of the output (e.g., "application/json", "text/csv")
   stats?: TransformStat[];
   createdAt: number;
 }

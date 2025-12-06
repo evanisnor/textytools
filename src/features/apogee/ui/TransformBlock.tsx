@@ -123,7 +123,7 @@ export function TransformBlock({
 
   // Determine output type for syntax highlighting
   const outputType = useMemo((): InputType | undefined => {
-    // Map the transform's producesOutput (MIME type) to InputType
+    // Map the MIME type to InputType
     const outputTypeMap: Record<string, InputType> = {
       "application/json": "json",
       "text/csv": "csv",
@@ -145,8 +145,10 @@ export function TransformBlock({
       text: "text",
     };
 
-    return outputTypeMap[transform.producesOutput] as InputType;
-  }, [transform.producesOutput]);
+    // Use step.mimeType if available (dynamic output type), otherwise fall back to transform.producesOutput (static)
+    const mimeType = step.mimeType || transform.producesOutput;
+    return outputTypeMap[mimeType] as InputType;
+  }, [step.mimeType, transform.producesOutput]);
 
   // Get syntax highlighting based on output type
   const syntaxHighlighter = useSyntaxHighlighter(outputType, true);
