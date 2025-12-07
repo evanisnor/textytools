@@ -16,11 +16,22 @@ import { TRANSFORM_REGISTRY } from "../lib/registry";
 
 import type { Document, TransformStep, TransformType } from "./types";
 
+import {
+  addDocument,
+  createDocument as createDocumentFactory,
+  findDocumentById,
+  loadDocuments,
+  removeDocumentById,
+  saveDocuments,
+  updateDocument,
+} from "@/entities/document";
+import { useApogeeNavigation } from "@/entities/navigation";
+import { createTransformStep } from "@/entities/transform/shared";
+
 // ============================================================================
 // Constants
 // ============================================================================
 
-const STORAGE_KEY = "apogee-documents";
 const AUTO_EXECUTE_DEBOUNCE_MS = 500;
 
 // ============================================================================
@@ -58,74 +69,13 @@ export interface DocumentManagerActions {
 export type DocumentManager = DocumentManagerState & DocumentManagerActions;
 
 // ============================================================================
-// Helper Functions
-// ============================================================================
-
-/**
- * Generate unique ID
- */
-function generateId(): string {
-  return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-}
-
-/**
- * Generate document name from current date/time
- * Format: "Jan 18, 2025 11:34pm"
- */
-function generateDocumentName(): string {
-  const now = new Date();
-
-  // Format: "Jan 18, 2025"
-  const dateOptions: Intl.DateTimeFormatOptions = {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  };
-  const datePart = now.toLocaleDateString("en-US", dateOptions);
-
-  // Format: "11:34pm"
-  const timeOptions: Intl.DateTimeFormatOptions = {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  };
-  const timePart = now.toLocaleTimeString("en-US", timeOptions).toLowerCase();
-
-  return `${datePart} ${timePart}`;
-}
-
-/**
- * Load documents from localStorage
- */
-function loadDocuments(): Document[] {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (!stored) return [];
-
-    const parsed = JSON.parse(stored);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch (error) {
-    console.error("Failed to load documents from localStorage:", error);
-    return [];
-  }
-}
-
-/**
- * Save documents to localStorage
- */
-function saveDocuments(documents: Document[]): void {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(documents));
-  } catch (error) {
-    console.error("Failed to save documents to localStorage:", error);
-  }
-}
-
-// ============================================================================
 // Hook Implementation
 // ============================================================================
 
 export function useDocumentManager(): DocumentManager {
+  // Navigation
+  const navigation = useApogeeNavigation();
+
   // State
   const [documents, setDocuments] = useState<Document[]>([]);
   const [currentDocument, setCurrentDocumentState] = useState<Document | null>(
@@ -136,18 +86,60 @@ export function useDocumentManager(): DocumentManager {
   // Debounce refs
   const executeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastModifiedStepRef = useRef<number>(0);
+  const isInitialLoadRef = useRef(true);
 
   // ============================================================================
   // Persistence
   // ============================================================================
 
-  // Load documents on mount
+  // Load documents on mount only
   useEffect(() => {
     const loadedDocs = loadDocuments();
     setDocuments(loadedDocs);
-
-    // Don't auto-select any document - let user choose or create new
   }, []);
+
+  // Handle URL-based navigation separately
+  useEffect(() => {
+    // Skip during initial mount - wait for documents to load
+    if (isInitialLoadRef.current && documents.length === 0) {
+      return;
+    }
+
+    // Mark as initialized after first run
+    if (isInitialLoadRef.current) {
+      isInitialLoadRef.current = false;
+    }
+
+    const urlDocId = navigation.documentId;
+
+    if (urlDocId) {
+      // Find document by ID from URL
+      const docToLoad = findDocumentById(documents, urlDocId);
+      if (docToLoad) {
+        // Only update if it's different from current
+        setCurrentDocumentState((current) => {
+          if (current?.id !== urlDocId) {
+            return docToLoad;
+          }
+          return current;
+        });
+      } else {
+        // Document ID in URL doesn't exist, redirect to base route
+        navigation.replaceWithHome();
+      }
+    } else if (
+      navigation.pathname === "/apogee" ||
+      navigation.pathname === "/apogee/"
+    ) {
+      // Clear current document when on base route
+      setCurrentDocumentState((current) => {
+        if (current !== null) {
+          return null;
+        }
+        return current;
+      });
+    }
+  }, [navigation, documents]);
 
   // Save documents whenever they change
   useEffect(() => {
@@ -162,52 +154,55 @@ export function useDocumentManager(): DocumentManager {
 
   const createDocument = useCallback(
     (inputData: string, inputType: Document["inputType"]) => {
-      const newDoc: Document = {
-        id: generateId(),
-        name: generateDocumentName(),
-        inputType,
-        inputData,
-        transforms: [],
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-      };
+      const newDoc = createDocumentFactory(inputData, inputType);
 
-      setDocuments((prev) => [...prev, newDoc]);
-      setCurrentDocumentState(newDoc);
+      setDocuments((prev) => addDocument(prev, newDoc));
+
+      // Navigate to the new document's route
+      // The URL sync effect will handle setting currentDocument
+      navigation.navigateToDocument(newDoc.id);
     },
-    [],
+    [navigation],
   );
 
-  const deleteDocument = useCallback((documentId: string) => {
-    setDocuments((prev) => {
-      const updated = prev.filter((doc) => doc.id !== documentId);
+  const deleteDocument = useCallback(
+    (documentId: string) => {
+      // Check if we're deleting the current document
+      const isCurrentDoc = currentDocument?.id === documentId;
 
-      // If we deleted the current document, switch to another
-      setCurrentDocumentState((current) => {
-        if (current?.id === documentId) {
-          return updated.length > 0 ? updated[0] : null;
+      setDocuments((prev) => {
+        const updated = removeDocumentById(prev, documentId);
+
+        // If we deleted the current document, navigate appropriately
+        if (isCurrentDoc) {
+          if (updated.length > 0) {
+            // Switch to the first available document
+            navigation.navigateToDocument(updated[0].id);
+          } else {
+            // No documents left, go to base route
+            navigation.navigateToHome();
+          }
         }
-        return current;
+
+        return updated;
       });
+    },
+    [navigation, currentDocument],
+  );
 
-      return updated;
-    });
-  }, []);
-
-  const setCurrentDocument = useCallback((documentId: string | null) => {
-    if (!documentId) {
-      setCurrentDocumentState(null);
-      return;
-    }
-
-    setDocuments((prev) => {
-      const doc = prev.find((d) => d.id === documentId);
-      if (doc) {
-        setCurrentDocumentState(doc);
+  const setCurrentDocument = useCallback(
+    (documentId: string | null) => {
+      // This function now ONLY handles navigation
+      // State updates happen in the URL sync effect
+      if (!documentId) {
+        navigation.navigateToHome();
+        return;
       }
-      return prev;
-    });
-  }, []);
+
+      navigation.navigateToDocument(documentId);
+    },
+    [navigation],
+  );
 
   const updateDocumentName = useCallback((name: string) => {
     setCurrentDocumentState((current) => {
@@ -220,9 +215,7 @@ export function useDocumentManager(): DocumentManager {
       };
 
       // Update in documents array
-      setDocuments((prev) =>
-        prev.map((doc) => (doc.id === current.id ? updated : doc)),
-      );
+      setDocuments((prev) => updateDocument(prev, updated));
 
       return updated;
     });
@@ -246,9 +239,7 @@ export function useDocumentManager(): DocumentManager {
 
         // Update state with modified document
         setCurrentDocumentState(mutableDoc);
-        setDocuments((prev) =>
-          prev.map((doc) => (doc.id === mutableDoc.id ? mutableDoc : doc)),
-        );
+        setDocuments((prev) => updateDocument(prev, mutableDoc));
       } catch (error) {
         console.error("Pipeline execution failed:", error);
       } finally {
@@ -292,9 +283,7 @@ export function useDocumentManager(): DocumentManager {
         };
 
         // Update in documents array
-        setDocuments((prev) =>
-          prev.map((doc) => (doc.id === current.id ? updated : doc)),
-        );
+        setDocuments((prev) => updateDocument(prev, updated));
 
         // Trigger pipeline re-execution
         lastModifiedStepRef.current = 0;
@@ -318,9 +307,7 @@ export function useDocumentManager(): DocumentManager {
         };
 
         // Update in documents array
-        setDocuments((prev) =>
-          prev.map((doc) => (doc.id === current.id ? updated : doc)),
-        );
+        setDocuments((prev) => updateDocument(prev, updated));
 
         // Trigger pipeline re-execution if needed
         lastModifiedStepRef.current = 0;
@@ -347,19 +334,12 @@ export function useDocumentManager(): DocumentManager {
           return current;
         }
 
-        const newStep: TransformStep = {
-          id: generateId(),
-          documentId: current.id,
-          order: current.transforms.length,
-          transformType: type,
-          inputSelection: {
-            mode: "all", // Default to pass-through (no lens extraction)
-            regexFlags: "g", // Default regex flags for when regex mode is selected
-          },
-          properties: { ...transform.defaultProperties },
-          output: "",
-          createdAt: Date.now(),
-        };
+        const newStep = createTransformStep(
+          current.id,
+          type,
+          current.transforms.length,
+          transform.defaultProperties,
+        );
 
         const updated = {
           ...current,
@@ -368,9 +348,7 @@ export function useDocumentManager(): DocumentManager {
         };
 
         // Update in documents array
-        setDocuments((prev) =>
-          prev.map((doc) => (doc.id === current.id ? updated : doc)),
-        );
+        setDocuments((prev) => updateDocument(prev, updated));
 
         // Execute from new step
         lastModifiedStepRef.current = updated.transforms.length - 1;
@@ -403,9 +381,7 @@ export function useDocumentManager(): DocumentManager {
         };
 
         // Update in documents array
-        setDocuments((prev) =>
-          prev.map((doc) => (doc.id === current.id ? updated : doc)),
-        );
+        setDocuments((prev) => updateDocument(prev, updated));
 
         // Execute from modified step
         lastModifiedStepRef.current = stepIndex;
@@ -436,9 +412,7 @@ export function useDocumentManager(): DocumentManager {
         };
 
         // Update in documents array
-        setDocuments((prev) =>
-          prev.map((doc) => (doc.id === current.id ? updated : doc)),
-        );
+        setDocuments((prev) => updateDocument(prev, updated));
 
         // Execute from modified step
         lastModifiedStepRef.current = stepIndex;
@@ -469,9 +443,7 @@ export function useDocumentManager(): DocumentManager {
         };
 
         // Update in documents array
-        setDocuments((prev) =>
-          prev.map((doc) => (doc.id === current.id ? updated : doc)),
-        );
+        setDocuments((prev) => updateDocument(prev, updated));
 
         // Execute from the step after the removed one
         if (updated.transforms.length > 0) {
@@ -516,9 +488,7 @@ export function useDocumentManager(): DocumentManager {
         };
 
         // Update in documents array
-        setDocuments((prev) =>
-          prev.map((doc) => (doc.id === current.id ? updated : doc)),
-        );
+        setDocuments((prev) => updateDocument(prev, updated));
 
         // Execute from the earlier of old/new positions
         lastModifiedStepRef.current = Math.min(oldIndex, newOrder);
@@ -554,9 +524,7 @@ export function useDocumentManager(): DocumentManager {
 
       // Update state with modified document
       setCurrentDocumentState(mutableDoc);
-      setDocuments((prev) =>
-        prev.map((doc) => (doc.id === mutableDoc.id ? mutableDoc : doc)),
-      );
+      setDocuments((prev) => updateDocument(prev, mutableDoc));
     } catch (error) {
       console.error("Pipeline execution failed:", error);
     } finally {

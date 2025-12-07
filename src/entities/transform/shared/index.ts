@@ -4,6 +4,21 @@
 
 // Type definitions
 export type {
+  ConvertTransform,
+  EncodeTransform,
+  DecodeTransform,
+  HashTransform,
+  ModifyTransform,
+  CompressTransform,
+  DecompressTransform,
+  AnalyzeTransform,
+  TestTransform,
+  TransformType,
+  TransformCategory,
+  LensMode,
+  ParseAsFormat,
+  InputSelection,
+  TransformStep,
   PropertyType,
   PropertySchema,
   TransformStat,
@@ -18,3 +33,6 @@ export type { DataFormat } from "./formatDetection";
 // Format conversion
 export { parseToIntermediate, convertToIntermediate } from "./formatConversion";
 export type { ParsedData } from "./formatConversion";
+
+// Factory functions
+export { generateId, createTransformStep } from "./factory";

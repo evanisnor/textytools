@@ -91,7 +91,9 @@ export function PipelineEditor({ documentManager }: PipelineEditorProps) {
       const newDefs = new Map<string, TransformDefinition>();
 
       for (const step of currentDocument.transforms) {
-        const def = await getTransformAsync(step.transformType);
+        const def = await getTransformAsync(
+          step.transformType as TransformType,
+        );
         if (def) {
           newDefs.set(step.transformType, def);
         }
