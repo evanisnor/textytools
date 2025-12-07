@@ -1,5 +1,7 @@
 import type { RegexMatch } from "../model/types";
 
+import { validateNoNestedQuantifiers } from "./validation";
+
 export interface MatchHighlighterResult {
   matches: RegexMatch[];
   error: string | null;
@@ -32,14 +34,12 @@ export function highlightMatches(
   }
 
   try {
-    // Check for catastrophic backtracking patterns before execution
-    // Detect nested quantifiers like .+)+ or .*)* which cause exponential backtracking
-    const nestedQuantifierPattern = /[+*][)}\]]{0,2}[+*?]/;
-    if (nestedQuantifierPattern.test(pattern)) {
+    // Validate pattern for catastrophic backtracking
+    const validation = validateNoNestedQuantifiers(pattern);
+    if (!validation.isValid) {
       return {
         matches: [],
-        error:
-          "Pattern contains nested quantifiers that may cause catastrophic backtracking. Simplify the pattern to avoid performance issues.",
+        error: `${validation.error}. Simplify the pattern to avoid performance issues.`,
         highlightRanges: [],
       };
     }

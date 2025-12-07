@@ -7,6 +7,14 @@
 
 import type { InputSelection, LensResult } from "../model/types";
 
+import {
+  executeSimpleMatch,
+  executeWithNamedGroups,
+  extractNamedGroups,
+  extractNamedGroupValues,
+  validatePattern,
+} from "@/entities/regex";
+
 /**
  * Preview result for regex patterns
  */
@@ -34,34 +42,16 @@ export function getRegexPreview(
   }
 
   try {
-    // Check for catastrophic backtracking patterns before execution
-    const nestedQuantifierPattern = /[+*][)}\]]{0,2}[+*?]/;
-    if (nestedQuantifierPattern.test(pattern)) {
+    // Validate regex pattern
+    const validation = validatePattern(pattern, flags);
+    if (!validation.isValid) {
       return {
         type: "error",
-        message:
-          "Pattern contains nested quantifiers that may cause catastrophic backtracking",
+        message: validation.error!,
       };
     }
 
-    // Validate regex pattern first
-    const regex = new RegExp(pattern, flags);
-
-    // Check for empty matches
-    if (regex.test("")) {
-      return {
-        type: "error",
-        message: "Pattern matches empty strings",
-      };
-    }
-
-    // Extract named groups
-    const namedGroupPattern = /\(\?<(\w+)>/g;
-    const namedGroups: string[] = [];
-    let match;
-    while ((match = namedGroupPattern.exec(pattern)) !== null) {
-      namedGroups.push(match[1]);
-    }
+    const namedGroups = extractNamedGroups(pattern);
 
     if (namedGroups.length > 0) {
       // Named groups extraction
@@ -73,10 +63,7 @@ export function getRegexPreview(
         return { type: "info", message: "No matches found" };
       }
 
-      const obj: Record<string, string> = {};
-      for (const groupName of namedGroups) {
-        obj[groupName] = execMatch.groups?.[groupName] || "";
-      }
+      const obj = extractNamedGroupValues(execMatch, namedGroups);
 
       return {
         type: "success",
@@ -84,7 +71,7 @@ export function getRegexPreview(
       };
     } else {
       // Simple extraction
-      const matches = input.match(regex);
+      const matches = executeSimpleMatch(pattern, flags, input);
       if (!matches || matches.length === 0) {
         return { type: "info", message: "No matches found" };
       }
@@ -134,65 +121,29 @@ export async function executeLensPass(
       }
 
       try {
-        // Check for catastrophic backtracking patterns before execution
-        const nestedQuantifierPattern = /[+*][)}\]]{0,2}[+*?]/;
-        if (nestedQuantifierPattern.test(selection.regexPattern)) {
-          return {
-            success: false,
-            data: "",
-            error:
-              "Pattern contains nested quantifiers that may cause catastrophic backtracking. Please simplify your pattern. Example: instead of (.+)+, use (.+)",
-          };
-        }
-
-        const regex = new RegExp(
+        // Validate regex pattern
+        const validation = validatePattern(
           selection.regexPattern,
           selection.regexFlags || "",
         );
-
-        // Check if pattern has named groups
-        const namedGroupPattern = /\(\?<(\w+)>/g;
-        const namedGroups: string[] = [];
-        let match;
-        while (
-          (match = namedGroupPattern.exec(selection.regexPattern)) !== null
-        ) {
-          namedGroups.push(match[1]);
-        }
-
-        // Test if pattern can match empty strings
-        if (regex.test("")) {
+        if (!validation.isValid) {
           return {
             success: false,
             data: "",
-            error:
-              "Pattern matches empty strings. Please use a pattern that matches actual content.",
+            error: `${validation.error}. Please simplify your pattern. Example: instead of (.+)+, use (.+)`,
           };
         }
 
+        const namedGroups = extractNamedGroups(selection.regexPattern);
+
         if (namedGroups.length > 0) {
           // Extract with named groups - create structured data
-          const results: Record<string, string>[] = [];
-          const globalRegex = new RegExp(
+          const results = executeWithNamedGroups(
             selection.regexPattern,
-            (selection.regexFlags || "").includes("g")
-              ? selection.regexFlags
-              : (selection.regexFlags || "") + "g",
+            selection.regexFlags || "",
+            input,
+            namedGroups,
           );
-
-          let execMatch;
-          while ((execMatch = globalRegex.exec(input)) !== null) {
-            const obj: Record<string, string> = {};
-            for (const groupName of namedGroups) {
-              obj[groupName] = execMatch.groups?.[groupName] || "";
-            }
-            results.push(obj);
-
-            // Prevent infinite loop on zero-length matches
-            if (execMatch[0].length === 0) {
-              globalRegex.lastIndex++;
-            }
-          }
 
           if (results.length === 0) {
             return {
@@ -208,7 +159,11 @@ export async function executeLensPass(
           metadata = { mode: "regex", matchCount: results.length };
         } else {
           // No named groups - return simple matches
-          const matches = input.match(regex);
+          const matches = executeSimpleMatch(
+            selection.regexPattern,
+            selection.regexFlags || "",
+            input,
+          );
 
           if (!matches || matches.length === 0) {
             return {
