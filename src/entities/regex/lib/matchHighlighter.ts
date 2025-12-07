@@ -32,6 +32,18 @@ export function highlightMatches(
   }
 
   try {
+    // Check for catastrophic backtracking patterns before execution
+    // Detect nested quantifiers like .+)+ or .*)* which cause exponential backtracking
+    const nestedQuantifierPattern = /[+*][)}\]]{0,2}[+*?]/;
+    if (nestedQuantifierPattern.test(pattern)) {
+      return {
+        matches: [],
+        error:
+          "Pattern contains nested quantifiers that may cause catastrophic backtracking. Simplify the pattern to avoid performance issues.",
+        highlightRanges: [],
+      };
+    }
+
     const regex = new RegExp(pattern, flags);
     const matchResults: RegexMatch[] = [];
     let match;

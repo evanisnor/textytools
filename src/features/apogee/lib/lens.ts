@@ -34,6 +34,16 @@ export function getRegexPreview(
   }
 
   try {
+    // Check for catastrophic backtracking patterns before execution
+    const nestedQuantifierPattern = /[+*][)}\]]{0,2}[+*?]/;
+    if (nestedQuantifierPattern.test(pattern)) {
+      return {
+        type: "error",
+        message:
+          "Pattern contains nested quantifiers that may cause catastrophic backtracking",
+      };
+    }
+
     // Validate regex pattern first
     const regex = new RegExp(pattern, flags);
 
@@ -55,12 +65,10 @@ export function getRegexPreview(
 
     if (namedGroups.length > 0) {
       // Named groups extraction
-      const globalRegex = new RegExp(
-        pattern,
-        flags.includes("g") ? flags : flags + "g",
-      );
+      // For preview, we only need the first match, so don't use global flag
+      const previewRegex = new RegExp(pattern, flags.replace(/g/g, ""));
 
-      const execMatch = globalRegex.exec(input);
+      const execMatch = previewRegex.exec(input);
       if (!execMatch) {
         return { type: "info", message: "No matches found" };
       }
@@ -126,6 +134,17 @@ export async function executeLensPass(
       }
 
       try {
+        // Check for catastrophic backtracking patterns before execution
+        const nestedQuantifierPattern = /[+*][)}\]]{0,2}[+*?]/;
+        if (nestedQuantifierPattern.test(selection.regexPattern)) {
+          return {
+            success: false,
+            data: "",
+            error:
+              "Pattern contains nested quantifiers that may cause catastrophic backtracking. Please simplify your pattern. Example: instead of (.+)+, use (.+)",
+          };
+        }
+
         const regex = new RegExp(
           selection.regexPattern,
           selection.regexFlags || "",
