@@ -9,6 +9,7 @@ import { JSONPath } from "jsonpath-plus";
 import { detectFormat, parseToIntermediate } from "../../shared";
 import type { PropertySchema, TransformResult } from "../../shared/types";
 import type { ModifyFieldProperties } from "../model/types";
+import { createStrftimeModalProperty } from "../ui/StrftimeModal";
 
 import { jsonToCsv } from "@/entities/transform/csv-json/lib/json-to-csv";
 import { CASE_TYPE_OPTIONS, convertCase } from "@/entities/transform/text-case";
@@ -127,15 +128,7 @@ export const modifyFieldPropertySchema: PropertySchema[] = [
     showWhen: { operation: "date-format", outputDateFormat: "custom" },
     width: "flex",
   },
-  {
-    key: "dateFormatHelp",
-    label: "strftime tokens",
-    type: "help",
-    defaultValue: "",
-    helpText:
-      "%Y=year, %m=month(01-12), %d=day(01-31), %H=hour(00-23), %M=minute, %S=second, %b=month name(Jan), %B=full month, %z=timezone(+0000)",
-    showWhen: { operation: "date-format", inputDateFormat: "custom" },
-  },
+  createStrftimeModalProperty(),
 ];
 
 /**
@@ -615,13 +608,25 @@ function strftimeToDateFns(strftimeFormat: string): string {
     .replace(/%Y/g, "yyyy") // 4-digit year
     .replace(/%y/g, "yy") // 2-digit year
     .replace(/%m/g, "MM") // Month (01-12)
-    .replace(/%d/g, "dd") // Day of month (01-31)
-    .replace(/%H/g, "HH") // Hour (00-23)
+    .replace(/%d/g, "dd") // Day of month (01-31), zero-padded
+    .replace(/%e/g, "d") // Day of month (1-31), space-padded
+    .replace(/%H/g, "HH") // Hour (00-23), zero-padded
+    .replace(/%k/g, "H") // Hour (0-23), space-padded
+    .replace(/%I/g, "hh") // Hour (01-12), zero-padded
+    .replace(/%l/g, "h") // Hour (1-12), space-padded
     .replace(/%M/g, "mm") // Minute (00-59)
     .replace(/%S/g, "ss") // Second (00-59)
+    .replace(/%p/g, "a") // AM/PM uppercase
+    .replace(/%P/g, "aaa") // AM/PM lowercase
     .replace(/%B/g, "MMMM") // Full month name
     .replace(/%b/g, "MMM") // Abbreviated month name
     .replace(/%A/g, "EEEE") // Full weekday name
     .replace(/%a/g, "EEE") // Abbreviated weekday name
+    .replace(/%w/g, "e") // Weekday as number (0-6, Sunday=0)
+    .replace(/%u/g, "i") // Weekday as number (1-7, Monday=1)
+    .replace(/%j/g, "D") // Day of year (001-366)
+    .replace(/%Z/g, "zzz") // Timezone name (EST, PST, etc.)
+    .replace(/%::z/g, "xxxxx") // Timezone offset with seconds (+00:00:00) - must come before %:z
+    .replace(/%:z/g, "xxx") // Timezone offset with colon (+00:00)
     .replace(/%z/g, "xx"); // Timezone offset (+0000)
 }

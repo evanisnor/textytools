@@ -13,7 +13,8 @@ export type PropertyType =
   | "toggle"
   | "toggle-group"
   | "multi-select"
-  | "help"; // Read-only help text display
+  | "help" // Read-only help text display
+  | "modal-link"; // Clickable link that opens a modal with documentation
 
 /**
  * Schema for a single property/option
@@ -27,6 +28,7 @@ export interface PropertySchema {
   defaultValue: unknown;
   validation?: (value: unknown) => string | null;
   helpText?: string;
+  modalContent?: React.ReactNode; // Content to display in modal (for modal-link type)
   showWhen?: Record<string, unknown>;
   showInLens?: boolean; // Show this property in Lens section instead of Configuration
   width?: "auto" | "full" | "flex" | "flex-start"; // Width: "auto" (compact), "full" (entire row), "flex" (grow to fill available space), "flex-start" (start new flex row)

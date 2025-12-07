@@ -120,7 +120,8 @@ export async function executeLensPass(
         return {
           success: false,
           data: "",
-          error: "Regex mode requires a pattern",
+          error:
+            "Your data is unstructured. Please provide a regex pattern to extract the relevant information. You can use named capture groups to extract structured data. Example:\n\n(?<name>\\w+): (?<email>\\S+@\\S+)",
         };
       }
 

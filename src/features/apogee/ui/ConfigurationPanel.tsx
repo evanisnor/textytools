@@ -1,10 +1,12 @@
 "use client";
 
-import { useCallback, useRef, useEffect } from "react";
+import { useCallback, useRef, useEffect, useState } from "react";
 
 import type { PropertySchema } from "../model/types";
 
 import { ToggleGroupControl } from "./controls/ToggleGroupControl";
+
+import { Modal } from "@/shared/ui/modal/Modal";
 
 interface ConfigurationPanelProps {
   schema: PropertySchema[];
@@ -232,6 +234,9 @@ function PropertyControl({
 
     case "help":
       return <HelpControl property={property} />;
+
+    case "modal-link":
+      return <ModalLinkControl property={property} />;
 
     default:
       return (
@@ -492,5 +497,35 @@ function HelpControl({ property }: HelpControlProps) {
         {property.helpText}
       </div>
     </div>
+  );
+}
+
+interface ModalLinkControlProps {
+  property: PropertySchema;
+}
+
+function ModalLinkControl({ property }: ModalLinkControlProps) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  if (!property.modalContent) {
+    return null;
+  }
+
+  return (
+    <>
+      <div className="w-full">
+        <button
+          type="button"
+          onClick={() => setIsModalOpen(true)}
+          className="text-xs text-blue-600 dark:text-blue-400 hover:underline focus:outline-none cursor-pointer"
+        >
+          {property.label}
+        </button>
+      </div>
+
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        {property.modalContent}
+      </Modal>
+    </>
   );
 }
