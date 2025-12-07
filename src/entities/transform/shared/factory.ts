@@ -4,13 +4,15 @@
  * Factory functions for creating transform steps
  */
 
+import { createId } from "@paralleldrive/cuid2";
+
 import type { TransformStep } from "./types";
 
 /**
- * Generate unique ID
+ * Generate unique ID using CUID2
  */
 export function generateId(): string {
-  return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+  return createId();
 }
 
 /**
