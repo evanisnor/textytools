@@ -15,11 +15,14 @@ export type ModifyOperation =
 
 export type DateFormat =
   | "iso8601"
+  | "iso8601-time"
+  | "iso8601-datetime"
   | "rfc3339"
   | "unix-seconds"
   | "unix-milliseconds"
   | "apache-log"
-  | "custom";
+  | "custom"
+  | "iso8601-custom";
 
 export interface ModifyFieldProperties {
   // Field selector (shown in Lens)
@@ -41,8 +44,10 @@ export interface ModifyFieldProperties {
   // Date Format
   inputDateFormat?: DateFormat;
   customInputDateFormat?: string; // strftime format when inputDateFormat is "custom"
+  iso8601CustomInputFormat?: string; // ISO8601 pattern when inputDateFormat is "iso8601-custom"
   outputDateFormat?: DateFormat;
   customOutputDateFormat?: string; // strftime format when outputDateFormat is "custom"
+  iso8601CustomOutputFormat?: string; // ISO8601 pattern when outputDateFormat is "iso8601-custom"
 
   // Sanitize (reuses existing SanitizationOptionId from text-sanitize entity)
   sanitizeOptions?: SanitizationOptionId[]; // Array of enabled sanitization option IDs

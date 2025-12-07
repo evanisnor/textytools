@@ -9,6 +9,7 @@ import { JSONPath } from "jsonpath-plus";
 import { detectFormat, parseToIntermediate } from "../../shared";
 import type { PropertySchema, TransformResult } from "../../shared/types";
 import type { ModifyFieldProperties } from "../model/types";
+import { createIso8601ModalProperty } from "../ui/Iso8601Modal";
 import { createStrftimeModalProperty } from "../ui/StrftimeModal";
 
 import { jsonToCsv } from "@/entities/transform/csv-json/lib/json-to-csv";
@@ -103,12 +104,18 @@ export const modifyFieldPropertySchema: PropertySchema[] = [
     label: "Input Format",
     type: "select",
     options: [
-      { value: "iso8601", label: "ISO 8601 (YYYY-MM-DD)" },
-      { value: "rfc3339", label: "RFC 3339 (YYYY-MM-DDTHH:mm:ssZ)" },
+      { value: "iso8601", label: "ISO 8601 Date (YYYY-MM-DD)" },
+      { value: "iso8601-time", label: "ISO 8601 Time (HH:mm:ss)" },
+      {
+        value: "iso8601-datetime",
+        label: "ISO 8601 DateTime (allows T or space, optional Z)",
+      },
+      { value: "rfc3339", label: "RFC 3339 (strict YYYY-MM-DDTHH:mm:ssZ)" },
       { value: "unix-seconds", label: "Unix Timestamp (seconds)" },
       { value: "unix-milliseconds", label: "Unix Timestamp (milliseconds)" },
       { value: "apache-log", label: "Apache Log (12/Jan/2025:14:23:54 +0000)" },
       { value: "custom", label: "Custom (strftime)" },
+      { value: "iso8601-custom", label: "Custom (ISO8601 pattern)" },
     ],
     defaultValue: "rfc3339",
     showWhen: { operation: "date-format" },
@@ -124,15 +131,27 @@ export const modifyFieldPropertySchema: PropertySchema[] = [
     width: "flex",
   },
   {
+    key: "iso8601CustomInputFormat",
+    label: "ISO8601 Pattern",
+    type: "text",
+    defaultValue: "YYYY-MM-DD",
+    placeholder: "YYYY-MM-DDTHH:mm:ssZ",
+    showWhen: { operation: "date-format", inputDateFormat: "iso8601-custom" },
+    width: "flex",
+  },
+  {
     key: "outputDateFormat",
     label: "Output Format",
     type: "select",
     options: [
-      { value: "iso8601", label: "ISO 8601 (YYYY-MM-DD)" },
-      { value: "rfc3339", label: "RFC 3339 (YYYY-MM-DDTHH:mm:ssZ)" },
+      { value: "iso8601", label: "ISO 8601 Date (YYYY-MM-DD)" },
+      { value: "iso8601-time", label: "ISO 8601 Time (HH:mm:ss)" },
+      { value: "iso8601-datetime", label: "ISO 8601 DateTime (UTC with Z)" },
+      { value: "rfc3339", label: "RFC 3339 (UTC with Z, strict)" },
       { value: "unix-seconds", label: "Unix Timestamp (seconds)" },
       { value: "unix-milliseconds", label: "Unix Timestamp (milliseconds)" },
       { value: "custom", label: "Custom (strftime)" },
+      { value: "iso8601-custom", label: "Custom (ISO8601 pattern)" },
     ],
     defaultValue: "rfc3339",
     showWhen: { operation: "date-format" },
@@ -147,7 +166,17 @@ export const modifyFieldPropertySchema: PropertySchema[] = [
     showWhen: { operation: "date-format", outputDateFormat: "custom" },
     width: "flex",
   },
+  {
+    key: "iso8601CustomOutputFormat",
+    label: "ISO8601 Pattern",
+    type: "text",
+    defaultValue: "YYYY-MM-DD",
+    placeholder: "YYYY-MM-DDTHH:mm:ssZ",
+    showWhen: { operation: "date-format", outputDateFormat: "iso8601-custom" },
+    width: "flex",
+  },
   createStrftimeModalProperty(),
+  createIso8601ModalProperty(),
 ];
 
 /**
@@ -163,9 +192,12 @@ export const modifyFieldDefaultProperties: Record<string, unknown> = {
   sanitizeOptions: [],
   inputDateFormat: "rfc3339",
   customInputDateFormat: "%Y-%m-%d",
+  iso8601CustomInputFormat: "YYYY-MM-DD",
   outputDateFormat: "rfc3339",
   customOutputDateFormat: "%Y-%m-%d",
+  iso8601CustomOutputFormat: "YYYY-MM-DD",
   dateFormatHelp: "",
+  iso8601PatternHelp: "",
 };
 
 /**
@@ -514,6 +546,8 @@ function applyOperation(value: unknown, props: ModifyFieldProperties): unknown {
         props.customInputDateFormat,
         props.outputDateFormat,
         props.customOutputDateFormat,
+        props.iso8601CustomInputFormat,
+        props.iso8601CustomOutputFormat,
       );
     }
 
@@ -550,7 +584,9 @@ function formatDate(
   inputFormat: string,
   customInputFormat: string | undefined,
   outputFormat: string,
-  customOutputFormat?: string,
+  customOutputFormat: string | undefined,
+  iso8601CustomInputFormat?: string,
+  iso8601CustomOutputFormat?: string,
 ): string {
   try {
     // Parse the input date using the input format
@@ -563,8 +599,26 @@ function formatDate(
         break;
       }
 
+      case "iso8601-time": {
+        // Parse ISO 8601 time (HH:mm:ss or HH:mm:ss.SSS)
+        // Since it's time-only, use today's date as the base
+        const today = new Date().toISOString().split("T")[0];
+        date = new Date(`${today}T${value}`);
+        break;
+      }
+
+      case "iso8601-datetime": {
+        // Parse ISO 8601 datetime - more permissive than RFC 3339
+        // Allows space instead of T: "2025-01-15 14:30:45" or "2025-01-15T14:30:45"
+        // Timezone optional: can be Z, +00:00, or omitted (treated as local)
+        const normalizedValue = value.replace(" ", "T"); // Normalize space to T
+        date = new Date(normalizedValue);
+        break;
+      }
+
       case "rfc3339": {
-        // Parse RFC 3339 / ISO 8601 full datetime
+        // Parse RFC 3339 - strict subset of ISO 8601
+        // Must use T separator and must include timezone (Z or offset)
         date = new Date(value);
         break;
       }
@@ -599,6 +653,17 @@ function formatDate(
         break;
       }
 
+      case "iso8601-custom": {
+        if (!iso8601CustomInputFormat) {
+          date = new Date(value);
+        } else {
+          // Convert ISO8601 pattern to date-fns format
+          const dateFnsInputFormat = iso8601ToDateFns(iso8601CustomInputFormat);
+          date = parseDate(value, dateFnsInputFormat, new Date());
+        }
+        break;
+      }
+
       default: {
         // Try to parse as ISO date if unknown format
         date = new Date(value);
@@ -613,6 +678,17 @@ function formatDate(
     switch (outputFormat) {
       case "iso8601":
         return date.toISOString().split("T")[0];
+
+      case "iso8601-time": {
+        // Extract time portion from ISO string (HH:mm:ss.SSSZ)
+        const isoString = date.toISOString();
+        const timePart = isoString.split("T")[1].split("Z")[0];
+        // Return time without milliseconds for cleaner output
+        return timePart.split(".")[0];
+      }
+
+      case "iso8601-datetime":
+        return date.toISOString();
 
       case "rfc3339":
         return date.toISOString();
@@ -629,6 +705,15 @@ function formatDate(
         }
         const dateFnsOutputFormat = strftimeToDateFns(customOutputFormat);
         return formatDateFns(date, dateFnsOutputFormat);
+
+      case "iso8601-custom":
+        if (!iso8601CustomOutputFormat) {
+          return value;
+        }
+        const dateFnsIso8601OutputFormat = iso8601ToDateFns(
+          iso8601CustomOutputFormat,
+        );
+        return formatDateFns(date, dateFnsIso8601OutputFormat);
 
       default:
         return value;
@@ -669,4 +754,28 @@ function strftimeToDateFns(strftimeFormat: string): string {
     .replace(/%::z/g, "xxxxx") // Timezone offset with seconds (+00:00:00) - must come before %:z
     .replace(/%:z/g, "xxx") // Timezone offset with colon (+00:00)
     .replace(/%z/g, "xx"); // Timezone offset (+0000)
+}
+
+/**
+ * Convert ISO8601 pattern to date-fns format
+ * Supports patterns like: YYYY-MM-DD, YYYY-MM-DDTHH:mm:ss, YYYY-MM-DDTHH:mm:ssZ
+ * Also supports non-standard AM/PM patterns: hh:mm:ss a, MM/DD/YYYY hh:mm:ss a
+ */
+function iso8601ToDateFns(iso8601Pattern: string): string {
+  return iso8601Pattern
+    .replace(/YYYY/g, "yyyy") // 4-digit year
+    .replace(/YY/g, "yy") // 2-digit year
+    .replace(/MM/g, "MM") // Month (01-12)
+    .replace(/DD/g, "dd") // Day of month (01-31)
+    .replace(/HH/g, "HH") // Hour (00-23), 24-hour format
+    .replace(/hh/g, "hh") // Hour (01-12), 12-hour format for AM/PM
+    .replace(/h/g, "h") // Hour (1-12), 12-hour format for AM/PM (single digit)
+    .replace(/K/g, "K") // Hour (0-11), 12-hour format for AM/PM
+    .replace(/mm/g, "mm") // Minute (00-59)
+    .replace(/ss/g, "ss") // Second (00-59)
+    .replace(/SSS/g, "SSS") // Milliseconds (000-999)
+    .replace(/\ba\b/g, "a") // AM/PM marker (uppercase)
+    .replace(/\bp\b/g, "a") // AM/PM marker (alternate notation, maps to 'a' in date-fns)
+    .replace(/Z/g, "'Z'") // Literal 'Z' for UTC timezone
+    .replace(/([+-]\d{2}:\d{2})/g, "xxx"); // Timezone offset with colon (+00:00)
 }
