@@ -21,7 +21,7 @@ export type PropertyType =
  */
 export interface PropertySchema {
   key: string;
-  label: string;
+  label?: string; // Optional label (e.g., for multi-select without header)
   type: PropertyType;
   placeholder?: string;
   options?: string[] | { value: string; label: string }[];

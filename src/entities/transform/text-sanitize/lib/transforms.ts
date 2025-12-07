@@ -147,8 +147,8 @@ export const textSanitizeTransform: TransformDefinition = {
     const allOptions: SanitizationOption[] = SANITIZATION_SCHEMA.map(
       (schema) => ({
         id: schema.key as SanitizationOptionId,
-        label: schema.label,
-        description: `${schema.label} operation`,
+        label: schema.label || schema.key,
+        description: `${schema.label || schema.key} operation`,
         enabled: Boolean(properties[schema.key]),
       }),
     );

@@ -272,12 +272,14 @@ function TextControl({ property, value, onChange }: TextControlProps) {
   return (
     <div className={`flex flex-col gap-0.5 ${containerClass}`}>
       <div className="flex items-center gap-1">
-        <label
-          htmlFor={property.key}
-          className="text-xs text-zinc-500 dark:text-zinc-400"
-        >
-          {property.label}:
-        </label>
+        {property.label && (
+          <label
+            htmlFor={property.key}
+            className="text-xs text-zinc-500 dark:text-zinc-400"
+          >
+            {property.label}:
+          </label>
+        )}
         <input
           id={property.key}
           type="text"
@@ -305,12 +307,14 @@ interface NumberControlProps {
 function NumberControl({ property, value, onChange }: NumberControlProps) {
   return (
     <div className="flex items-center gap-1">
-      <label
-        htmlFor={property.key}
-        className="text-xs text-zinc-500 dark:text-zinc-400"
-      >
-        {property.label}:
-      </label>
+      {property.label && (
+        <label
+          htmlFor={property.key}
+          className="text-xs text-zinc-500 dark:text-zinc-400"
+        >
+          {property.label}:
+        </label>
+      )}
       <input
         id={property.key}
         type="number"
@@ -352,12 +356,14 @@ function SelectControl({ property, value, onChange }: SelectControlProps) {
 
   return (
     <div className={`flex items-center gap-1 ${containerClass}`}>
-      <label
-        htmlFor={property.key}
-        className="text-xs text-zinc-500 dark:text-zinc-400"
-      >
-        {property.label}:
-      </label>
+      {property.label && (
+        <label
+          htmlFor={property.key}
+          className="text-xs text-zinc-500 dark:text-zinc-400"
+        >
+          {property.label}:
+        </label>
+      )}
       <select
         id={property.key}
         value={String(value ?? property.defaultValue)}
@@ -410,7 +416,13 @@ function ToggleControl({
           ? "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300"
           : "bg-zinc-100 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-600"
       }`}
-      title={value ? `Disable ${property.label}` : `Enable ${property.label}`}
+      title={
+        property.label
+          ? value
+            ? `Disable ${property.label}`
+            : `Enable ${property.label}`
+          : undefined
+      }
     >
       {property.label}
     </button>
@@ -451,10 +463,12 @@ function MultiSelectControl({
 
   return (
     <div className="flex flex-col gap-0.5 w-full">
-      <div className="flex items-center gap-1">
-        <span className="text-xs text-zinc-500 dark:text-zinc-400 mr-1">
-          {property.label}:
-        </span>
+      <div className="flex items-center gap-1 flex-wrap">
+        {property.label && (
+          <span className="text-xs text-zinc-500 dark:text-zinc-400 mr-1">
+            {property.label}:
+          </span>
+        )}
         {normalizedOptions.map((option) => (
           <button
             key={String(option.value)}
@@ -491,9 +505,13 @@ function HelpControl({ property }: HelpControlProps) {
   return (
     <div className="w-full">
       <div className="text-xs text-zinc-400 dark:text-zinc-500">
-        <span className="font-medium text-zinc-500 dark:text-zinc-400">
-          {property.label}:
-        </span>{" "}
+        {property.label && (
+          <>
+            <span className="font-medium text-zinc-500 dark:text-zinc-400">
+              {property.label}:
+            </span>{" "}
+          </>
+        )}
         {property.helpText}
       </div>
     </div>

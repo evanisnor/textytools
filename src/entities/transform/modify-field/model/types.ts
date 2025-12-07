@@ -3,10 +3,15 @@
  */
 
 import type { CaseType } from "@/entities/transform/text-case";
+import type { SanitizationOptionId } from "@/entities/transform/text-sanitize";
 
 export type FieldSelector = "jsonpath" | "xpath" | "csv-column";
 
-export type ModifyOperation = "regex-replace" | "case-convert" | "date-format";
+export type ModifyOperation =
+  | "regex-replace"
+  | "case-convert"
+  | "date-format"
+  | "sanitize";
 
 export type DateFormat =
   | "iso8601"
@@ -38,4 +43,7 @@ export interface ModifyFieldProperties {
   customInputDateFormat?: string; // strftime format when inputDateFormat is "custom"
   outputDateFormat?: DateFormat;
   customOutputDateFormat?: string; // strftime format when outputDateFormat is "custom"
+
+  // Sanitize (reuses existing SanitizationOptionId from text-sanitize entity)
+  sanitizeOptions?: SanitizationOptionId[]; // Array of enabled sanitization option IDs
 }

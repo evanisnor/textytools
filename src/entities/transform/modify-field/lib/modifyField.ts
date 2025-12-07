@@ -13,6 +13,11 @@ import { createStrftimeModalProperty } from "../ui/StrftimeModal";
 
 import { jsonToCsv } from "@/entities/transform/csv-json/lib/json-to-csv";
 import { CASE_TYPE_OPTIONS, convertCase } from "@/entities/transform/text-case";
+import {
+  sanitizeText,
+  type SanitizationOption,
+} from "@/entities/transform/text-sanitize";
+import { defaultOptions as defaultSanitizeOptions } from "@/entities/transform/text-sanitize/model/presets";
 import { jsonToXML } from "@/entities/xml/lib/format";
 import { formatYAML } from "@/entities/yaml/lib/format";
 
@@ -37,6 +42,7 @@ export const modifyFieldPropertySchema: PropertySchema[] = [
       { value: "regex-replace", label: "Regex Replace" },
       { value: "date-format", label: "Date Format" },
       { value: "case-convert", label: "Case Convert" },
+      { value: "sanitize", label: "Sanitize" },
     ],
     defaultValue: "regex-replace",
     showInLens: true,
@@ -77,6 +83,19 @@ export const modifyFieldPropertySchema: PropertySchema[] = [
     options: CASE_TYPE_OPTIONS,
     defaultValue: "lower",
     showWhen: { operation: "case-convert" },
+  },
+  // Sanitize options (reuse from text-sanitize entity)
+  // Note: Order of selection is preserved - operations applied in order selected
+  {
+    key: "sanitizeOptions",
+    type: "multi-select",
+    options: defaultSanitizeOptions.map((opt) => ({
+      value: opt.id,
+      label: opt.label,
+    })),
+    defaultValue: [],
+    helpText: "Select options in the order you want them applied",
+    showWhen: { operation: "sanitize" },
   },
   // Date Format options
   {
@@ -141,6 +160,7 @@ export const modifyFieldDefaultProperties: Record<string, unknown> = {
   regexFlags: "g",
   regexReplacement: "",
   caseFormat: "lower",
+  sanitizeOptions: [],
   inputDateFormat: "rfc3339",
   customInputDateFormat: "%Y-%m-%d",
   outputDateFormat: "rfc3339",
@@ -495,6 +515,26 @@ function applyOperation(value: unknown, props: ModifyFieldProperties): unknown {
         props.outputDateFormat,
         props.customOutputDateFormat,
       );
+    }
+
+    case "sanitize": {
+      if (!props.sanitizeOptions || props.sanitizeOptions.length === 0) {
+        return value;
+      }
+      // Convert the selected option IDs to SanitizationOption objects
+      // preserving the order of selection
+      const sanitizationOptions: SanitizationOption[] = props.sanitizeOptions
+        .map((optionId) => {
+          const option = defaultSanitizeOptions.find(
+            (opt) => opt.id === optionId,
+          );
+          if (!option) return null;
+          // Return enabled version of the option
+          return { ...option, enabled: true };
+        })
+        .filter((opt): opt is SanitizationOption => opt !== null);
+
+      return sanitizeText(stringValue, sanitizationOptions);
     }
 
     default:
