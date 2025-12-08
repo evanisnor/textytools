@@ -16,15 +16,7 @@ import { TRANSFORM_REGISTRY } from "../lib/registry";
 
 import type { Document, TransformStep, TransformType } from "./types";
 
-import {
-  addDocument,
-  createDocument as createDocumentFactory,
-  findDocumentById,
-  loadDocuments,
-  removeDocumentById,
-  saveDocuments,
-  updateDocument,
-} from "@/entities/document";
+import { useDocumentState } from "@/entities/document";
 import { useApogeeNavigation } from "@/entities/navigation";
 import { createTransformStep } from "@/entities/transform/shared";
 
@@ -80,11 +72,23 @@ export function useDocumentManager(): DocumentManager {
   // Navigation
   const navigation = useApogeeNavigation();
 
-  // State
-  const [documents, setDocuments] = useState<Document[]>([]);
-  const [currentDocument, setCurrentDocumentState] = useState<Document | null>(
-    null,
-  );
+  // Document state management (delegated to entity layer)
+  const documentState = useDocumentState();
+  const {
+    documents,
+    currentDocument,
+    setCurrentDocument: setCurrentDocumentInState,
+    updateDocumentInState,
+    updateDocumentName,
+    updateInputData,
+    updateInputType,
+    addTransformToDocument,
+    updateTransformInDocument,
+    removeTransformFromDocument,
+    reorderTransformInDocument,
+  } = documentState;
+
+  // Execution state
   const [isExecuting, setIsExecuting] = useState(false);
 
   // Debounce refs
@@ -93,16 +97,10 @@ export function useDocumentManager(): DocumentManager {
   const isInitialLoadRef = useRef(true);
 
   // ============================================================================
-  // Persistence
+  // URL Sync (Apogee-specific navigation logic)
   // ============================================================================
 
-  // Load documents on mount only
-  useEffect(() => {
-    const loadedDocs = loadDocuments();
-    setDocuments(loadedDocs);
-  }, []);
-
-  // Handle URL-based navigation separately
+  // Sync currentDocument with URL
   useEffect(() => {
     // Skip during initial mount - wait for documents to load
     if (isInitialLoadRef.current && documents.length === 0) {
@@ -117,16 +115,10 @@ export function useDocumentManager(): DocumentManager {
     const urlDocId = navigation.documentId;
 
     if (urlDocId) {
-      // Find document by ID from URL
-      const docToLoad = findDocumentById(documents, urlDocId);
-      if (docToLoad) {
-        // Only update if it's different from current
-        setCurrentDocumentState((current) => {
-          if (current?.id !== urlDocId) {
-            return docToLoad;
-          }
-          return current;
-        });
+      // Set current document based on URL
+      const docExists = documents.some((d) => d.id === urlDocId);
+      if (docExists) {
+        setCurrentDocumentInState(urlDocId);
       } else {
         // Document ID in URL doesn't exist, redirect to base route
         navigation.replaceWithHome();
@@ -136,24 +128,12 @@ export function useDocumentManager(): DocumentManager {
       navigation.pathname === "/apogee/"
     ) {
       // Clear current document when on base route
-      setCurrentDocumentState((current) => {
-        if (current !== null) {
-          return null;
-        }
-        return current;
-      });
+      setCurrentDocumentInState(null);
     }
-  }, [navigation, documents]);
-
-  // Save documents whenever they change
-  useEffect(() => {
-    if (documents.length > 0) {
-      saveDocuments(documents);
-    }
-  }, [documents]);
+  }, [navigation, documents, setCurrentDocumentInState]);
 
   // ============================================================================
-  // Document Operations
+  // Document Operations (delegated to entity layer)
   // ============================================================================
 
   const createDocument = useCallback(
@@ -174,53 +154,41 @@ export function useDocumentManager(): DocumentManager {
           ]
         : [];
 
-      const newDoc = createDocumentFactory(
+      // Delegate to entity layer and handle navigation intent
+      const intent = documentState.createDocument(
         inputData,
         inputType,
         initialTransforms,
       );
 
-      // Update document ID in transform steps
-      if (initialTransforms.length > 0) {
-        initialTransforms[0].documentId = newDoc.id;
-      }
-
-      setDocuments((prev) => addDocument(prev, newDoc));
-
-      // Navigate to the new document's route after state update completes
-      // Use queueMicrotask to defer navigation until after React finishes rendering
+      // Handle intent: navigate to new document
       queueMicrotask(() => {
-        navigation.navigateToDocument(newDoc.id);
+        navigation.navigateToDocument(intent.document.id);
       });
     },
-    [navigation],
+    [documentState, navigation],
   );
 
   const deleteDocument = useCallback(
     (documentId: string) => {
-      // Check if we're deleting the current document
       const isCurrentDoc = currentDocument?.id === documentId;
 
-      setDocuments((prev) => {
-        const updated = removeDocumentById(prev, documentId);
+      // Delegate to entity layer and handle navigation intent
+      const intent = documentState.deleteDocument(documentId);
+      if (!intent) return;
 
-        // If we deleted the current document, navigate appropriately after state update
-        if (isCurrentDoc) {
-          queueMicrotask(() => {
-            if (updated.length > 0) {
-              // Switch to the first available document
-              navigation.navigateToDocument(updated[0].id);
-            } else {
-              // No documents left, go to base route
-              navigation.navigateToHome();
-            }
-          });
-        }
-
-        return updated;
-      });
+      // Handle intent: navigate appropriately if we deleted current doc
+      if (isCurrentDoc) {
+        queueMicrotask(() => {
+          if (intent.remainingDocuments.length > 0) {
+            navigation.navigateToDocument(intent.remainingDocuments[0].id);
+          } else {
+            navigation.navigateToHome();
+          }
+        });
+      }
     },
-    [navigation, currentDocument],
+    [documentState, navigation, currentDocument],
   );
 
   const setCurrentDocument = useCallback(
@@ -236,23 +204,6 @@ export function useDocumentManager(): DocumentManager {
     },
     [navigation],
   );
-
-  const updateDocumentName = useCallback((name: string) => {
-    setCurrentDocumentState((current) => {
-      if (!current) return null;
-
-      const updated = {
-        ...current,
-        name,
-        updatedAt: Date.now(),
-      };
-
-      // Update in documents array
-      setDocuments((prev) => updateDocument(prev, updated));
-
-      return updated;
-    });
-  }, []);
 
   // ============================================================================
   // Execution Helpers (declared early for use in callbacks)
@@ -270,16 +221,15 @@ export function useDocumentManager(): DocumentManager {
         const mutableDoc = { ...document };
         await ApogeeEngine.executeFromStep(mutableDoc, fromStepIndex);
 
-        // Update state with modified document
-        setCurrentDocumentState(mutableDoc);
-        setDocuments((prev) => updateDocument(prev, mutableDoc));
+        // Update state with modified document via entity layer
+        updateDocumentInState(mutableDoc);
       } catch (error) {
         console.error("Pipeline execution failed:", error);
       } finally {
         setIsExecuting(false);
       }
     },
-    [],
+    [updateDocumentInState],
   );
 
   /**
@@ -301,236 +251,215 @@ export function useDocumentManager(): DocumentManager {
   );
 
   // ============================================================================
-  // Document Operations
+  // Document Operations (with Apogee-specific execution)
   // ============================================================================
 
-  const updateInputData = useCallback(
+  const wrappedUpdateInputData = useCallback(
     (data: string) => {
-      setCurrentDocumentState((current) => {
-        if (!current) return null;
+      if (!currentDocument) return;
 
-        const updated = {
-          ...current,
-          inputData: data,
-          updatedAt: Date.now(),
-        };
+      // Update via entity layer
+      updateInputData(data);
 
-        // Update in documents array
-        setDocuments((prev) => updateDocument(prev, updated));
-
-        // Trigger pipeline re-execution
-        lastModifiedStepRef.current = 0;
-        scheduleExecution(updated, 0);
-
-        return updated;
-      });
+      // Trigger pipeline re-execution (Apogee-specific)
+      const updated = {
+        ...currentDocument,
+        inputData: data,
+        updatedAt: Date.now(),
+      };
+      lastModifiedStepRef.current = 0;
+      scheduleExecution(updated, 0);
     },
-    [scheduleExecution],
+    [currentDocument, updateInputData, scheduleExecution],
   );
 
-  const updateInputType = useCallback(
+  const wrappedUpdateInputType = useCallback(
     (type: Document["inputType"]) => {
-      setCurrentDocumentState((current) => {
-        if (!current) return null;
+      if (!currentDocument) return;
 
-        const updated = {
-          ...current,
-          inputType: type,
-          updatedAt: Date.now(),
-        };
+      // Update via entity layer
+      updateInputType(type);
 
-        // Update in documents array
-        setDocuments((prev) => updateDocument(prev, updated));
-
-        // Trigger pipeline re-execution if needed
-        lastModifiedStepRef.current = 0;
-        scheduleExecution(updated, 0);
-
-        return updated;
-      });
+      // Trigger pipeline re-execution (Apogee-specific)
+      const updated = {
+        ...currentDocument,
+        inputType: type,
+        updatedAt: Date.now(),
+      };
+      lastModifiedStepRef.current = 0;
+      scheduleExecution(updated, 0);
     },
-    [scheduleExecution],
+    [currentDocument, updateInputType, scheduleExecution],
   );
 
   // ============================================================================
-  // Transform Operations
+  // Transform Operations (with Apogee-specific execution)
   // ============================================================================
 
   const addTransform = useCallback(
     (type: TransformType) => {
-      setCurrentDocumentState((current) => {
-        if (!current) return null;
+      if (!currentDocument) return;
 
-        const transform = TRANSFORM_REGISTRY[type];
-        if (!transform) {
-          console.error(`Transform ${type} not found in registry`);
-          return current;
-        }
+      const transform = TRANSFORM_REGISTRY[type];
+      if (!transform) {
+        console.error(`Transform ${type} not found in registry`);
+        return;
+      }
 
-        const newStep = createTransformStep(
-          current.id,
-          type,
-          current.transforms.length,
-          transform.defaultProperties,
-        );
+      const newStep = createTransformStep(
+        currentDocument.id,
+        type,
+        currentDocument.transforms.length,
+        transform.defaultProperties,
+      );
 
-        const updated = {
-          ...current,
-          transforms: [...current.transforms, newStep],
+      // Update via entity layer
+      addTransformToDocument(newStep);
+
+      // Execute from new step (Apogee-specific)
+      const updatedTransforms = [...currentDocument.transforms, newStep];
+      lastModifiedStepRef.current = updatedTransforms.length - 1;
+      scheduleExecution(
+        {
+          ...currentDocument,
+          transforms: updatedTransforms,
           updatedAt: Date.now(),
-        };
-
-        // Update in documents array
-        setDocuments((prev) => updateDocument(prev, updated));
-
-        // Execute from new step
-        lastModifiedStepRef.current = updated.transforms.length - 1;
-        scheduleExecution(updated, updated.transforms.length - 1);
-
-        return updated;
-      });
+        },
+        updatedTransforms.length - 1,
+      );
     },
-    [scheduleExecution],
+    [currentDocument, addTransformToDocument, scheduleExecution],
   );
 
   const updateTransformProperties = useCallback(
     (stepId: string, properties: Record<string, unknown>) => {
-      setCurrentDocumentState((current) => {
-        if (!current) return null;
+      if (!currentDocument) return;
 
-        const stepIndex = current.transforms.findIndex(
-          (step) => step.id === stepId,
-        );
-        if (stepIndex === -1) return current;
+      const stepIndex = currentDocument.transforms.findIndex(
+        (step) => step.id === stepId,
+      );
+      if (stepIndex === -1) return;
 
-        const updated = {
-          ...current,
-          transforms: current.transforms.map((step) =>
-            step.id === stepId
-              ? { ...step, properties: { ...step.properties, ...properties } }
-              : step,
-          ),
+      // Update via entity layer
+      updateTransformInDocument(stepId, (step) => ({
+        ...step,
+        properties: { ...step.properties, ...properties },
+      }));
+
+      // Execute from modified step (Apogee-specific)
+      lastModifiedStepRef.current = stepIndex;
+      const updatedTransforms = currentDocument.transforms.map((step) =>
+        step.id === stepId
+          ? { ...step, properties: { ...step.properties, ...properties } }
+          : step,
+      );
+      scheduleExecution(
+        {
+          ...currentDocument,
+          transforms: updatedTransforms,
           updatedAt: Date.now(),
-        };
-
-        // Update in documents array
-        setDocuments((prev) => updateDocument(prev, updated));
-
-        // Execute from modified step
-        lastModifiedStepRef.current = stepIndex;
-        scheduleExecution(updated, stepIndex);
-
-        return updated;
-      });
+        },
+        stepIndex,
+      );
     },
-    [scheduleExecution],
+    [currentDocument, updateTransformInDocument, scheduleExecution],
   );
 
   const updateTransformInputSelection = useCallback(
     (stepId: string, inputSelection: TransformStep["inputSelection"]) => {
-      setCurrentDocumentState((current) => {
-        if (!current) return null;
+      if (!currentDocument) return;
 
-        const stepIndex = current.transforms.findIndex(
-          (step) => step.id === stepId,
-        );
-        if (stepIndex === -1) return current;
+      const stepIndex = currentDocument.transforms.findIndex(
+        (step) => step.id === stepId,
+      );
+      if (stepIndex === -1) return;
 
-        const updated = {
-          ...current,
-          transforms: current.transforms.map((step) =>
-            step.id === stepId ? { ...step, inputSelection } : step,
-          ),
+      // Update via entity layer
+      updateTransformInDocument(stepId, (step) => ({
+        ...step,
+        inputSelection,
+      }));
+
+      // Execute from modified step (Apogee-specific)
+      lastModifiedStepRef.current = stepIndex;
+      const updatedTransforms = currentDocument.transforms.map((step) =>
+        step.id === stepId ? { ...step, inputSelection } : step,
+      );
+      scheduleExecution(
+        {
+          ...currentDocument,
+          transforms: updatedTransforms,
           updatedAt: Date.now(),
-        };
-
-        // Update in documents array
-        setDocuments((prev) => updateDocument(prev, updated));
-
-        // Execute from modified step
-        lastModifiedStepRef.current = stepIndex;
-        scheduleExecution(updated, stepIndex);
-
-        return updated;
-      });
+        },
+        stepIndex,
+      );
     },
-    [scheduleExecution],
+    [currentDocument, updateTransformInDocument, scheduleExecution],
   );
 
   const removeTransform = useCallback(
     (stepId: string) => {
-      setCurrentDocumentState((current) => {
-        if (!current) return null;
+      if (!currentDocument) return;
 
-        const stepIndex = current.transforms.findIndex(
-          (step) => step.id === stepId,
+      const stepIndex = currentDocument.transforms.findIndex(
+        (step) => step.id === stepId,
+      );
+      if (stepIndex === -1) return;
+
+      // Update via entity layer
+      removeTransformFromDocument(stepId);
+
+      // Execute from the step after the removed one (Apogee-specific)
+      const updatedTransforms = currentDocument.transforms
+        .filter((step) => step.id !== stepId)
+        .map((step, index) => ({ ...step, order: index }));
+
+      if (updatedTransforms.length > 0) {
+        lastModifiedStepRef.current = Math.min(
+          stepIndex,
+          updatedTransforms.length - 1,
         );
-        if (stepIndex === -1) return current;
-
-        const updated = {
-          ...current,
-          transforms: current.transforms
-            .filter((step) => step.id !== stepId)
-            .map((step, index) => ({ ...step, order: index })),
-          updatedAt: Date.now(),
-        };
-
-        // Update in documents array
-        setDocuments((prev) => updateDocument(prev, updated));
-
-        // Execute from the step after the removed one
-        if (updated.transforms.length > 0) {
-          lastModifiedStepRef.current = Math.min(
-            stepIndex,
-            updated.transforms.length - 1,
-          );
-          scheduleExecution(updated, lastModifiedStepRef.current);
-        }
-
-        return updated;
-      });
+        scheduleExecution(
+          {
+            ...currentDocument,
+            transforms: updatedTransforms,
+            updatedAt: Date.now(),
+          },
+          lastModifiedStepRef.current,
+        );
+      }
     },
-    [scheduleExecution],
+    [currentDocument, removeTransformFromDocument, scheduleExecution],
   );
 
   const reorderTransform = useCallback(
     (stepId: string, newOrder: number) => {
-      setCurrentDocumentState((current) => {
-        if (!current) return null;
+      if (!currentDocument) return;
 
-        const oldIndex = current.transforms.findIndex(
-          (step) => step.id === stepId,
-        );
-        if (oldIndex === -1) return current;
+      const oldIndex = currentDocument.transforms.findIndex(
+        (step) => step.id === stepId,
+      );
+      if (oldIndex === -1) return;
 
-        // Reorder transforms
-        const transforms = [...current.transforms];
-        const [movedStep] = transforms.splice(oldIndex, 1);
-        transforms.splice(newOrder, 0, movedStep);
+      // Update via entity layer
+      reorderTransformInDocument(stepId, newOrder);
 
-        // Update order property
-        const reordered = transforms.map((step, index) => ({
-          ...step,
-          order: index,
-        }));
+      // Execute from the earlier of old/new positions (Apogee-specific)
+      const transforms = [...currentDocument.transforms];
+      const [movedStep] = transforms.splice(oldIndex, 1);
+      transforms.splice(newOrder, 0, movedStep);
+      const reordered = transforms.map((step, index) => ({
+        ...step,
+        order: index,
+      }));
 
-        const updated = {
-          ...current,
-          transforms: reordered,
-          updatedAt: Date.now(),
-        };
-
-        // Update in documents array
-        setDocuments((prev) => updateDocument(prev, updated));
-
-        // Execute from the earlier of old/new positions
-        lastModifiedStepRef.current = Math.min(oldIndex, newOrder);
-        scheduleExecution(updated, lastModifiedStepRef.current);
-
-        return updated;
-      });
+      lastModifiedStepRef.current = Math.min(oldIndex, newOrder);
+      scheduleExecution(
+        { ...currentDocument, transforms: reordered, updatedAt: Date.now() },
+        lastModifiedStepRef.current,
+      );
     },
-    [scheduleExecution],
+    [currentDocument, reorderTransformInDocument, scheduleExecution],
   );
 
   // ============================================================================
@@ -555,15 +484,14 @@ export function useDocumentManager(): DocumentManager {
       const mutableDoc = { ...currentDocument };
       await ApogeeEngine.executePipeline(mutableDoc);
 
-      // Update state with modified document
-      setCurrentDocumentState(mutableDoc);
-      setDocuments((prev) => updateDocument(prev, mutableDoc));
+      // Update state with modified document via entity layer
+      updateDocumentInState(mutableDoc);
     } catch (error) {
       console.error("Pipeline execution failed:", error);
     } finally {
       setIsExecuting(false);
     }
-  }, [currentDocument]);
+  }, [currentDocument, updateDocumentInState]);
 
   // Cleanup debounce timeout on unmount
   useEffect(() => {
@@ -588,14 +516,14 @@ export function useDocumentManager(): DocumentManager {
     createDocument,
     deleteDocument,
     setCurrentDocument,
-    updateDocumentName,
-    updateInputData,
-    updateInputType,
-    addTransform,
-    updateTransformProperties,
-    updateTransformInputSelection,
-    removeTransform,
-    reorderTransform,
+    updateDocumentName, // From entity
+    updateInputData: wrappedUpdateInputData, // Wrapped with execution
+    updateInputType: wrappedUpdateInputType, // Wrapped with execution
+    addTransform, // Wrapped with execution
+    updateTransformProperties, // Wrapped with execution
+    updateTransformInputSelection, // Wrapped with execution
+    removeTransform, // Wrapped with execution
+    reorderTransform, // Wrapped with execution
     executeFromStep,
     executePipeline,
   };

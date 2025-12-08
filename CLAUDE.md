@@ -34,11 +34,13 @@ const result = convertFormat(input, inputOptions, outputOptions);
 
 ## React Hooks
 
-Never call setState synchronously within useEffect. Effects should only:
+### Never call setState synchronously within useEffect
+
+Effects should only:
 1. Sync with external systems (DOM, APIs)
 2. Subscribe to external updates (calling setState in callbacks only)
 
-**Bad:**
+**Bad - Synchronous setState in effect:**
 ```typescript
 useEffect(() => {
   if (value === "") {
@@ -49,7 +51,7 @@ useEffect(() => {
 }, [value]);
 ```
 
-**Good:**
+**Good - Use derived state or memoization:**
 ```typescript
 useEffect(() => {
   if (value === "") {
@@ -58,5 +60,41 @@ useEffect(() => {
   // async work only...
 }, [value]);
 ```
+
+**Bad - Loading initial data with setState in effect:**
+```typescript
+const [data, setData] = useState([]);
+
+useEffect(() => {
+  const loadedData = loadFromStorage();
+  setData(loadedData); // ❌ Synchronous setState
+}, []);
+```
+
+**Good - Use lazy initialization:**
+```typescript
+// Pass function to useState - it runs only once on mount
+const [data, setData] = useState(loadFromStorage);
+
+// Or with arrow function if you need parameters
+const [data, setData] = useState(() => loadFromStorage(key));
+```
+
+**Good - Async external system sync (like API calls):**
+```typescript
+useEffect(() => {
+  let cancelled = false;
+
+  fetchData().then((result) => {
+    if (!cancelled) {
+      setState(result); // ✓ Async callback is OK
+    }
+  });
+
+  return () => { cancelled = true; };
+}, [dependency]);
+```
+
+### Effect Dependencies
 
 Remove unnecessary dependencies from useEffect. Only include values that should trigger the effect.
