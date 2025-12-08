@@ -36,7 +36,6 @@ export function ApogeeShell({ documentManager }: ApogeeShellProps) {
     documents,
     createDocument,
     setCurrentDocument,
-    addTransform,
     deleteDocument,
   } = documentManager;
   const [inputText, setInputText] = useState("");
@@ -59,19 +58,12 @@ export function ApogeeShell({ documentManager }: ApogeeShellProps) {
   const handleTransformSelect = (type: TransformType) => {
     if (!inputText.trim()) return;
 
-    // Create document with input text and detected type
-    createDocument(inputText, effectiveInputType);
+    // Create document with input text, detected type, and initial transform
+    createDocument(inputText, effectiveInputType, type);
 
     // Clear input for next time
     setInputText("");
     setInputType("auto");
-
-    // Note: The document creation will trigger a re-render with currentDocument set,
-    // then PipelineEditor will be shown. We need to add the transform after the document is created.
-    // This is handled by the effect in the next render cycle.
-    setTimeout(() => {
-      addTransform(type);
-    }, 0);
   };
 
   const handleDeleteDocument = (docId: string, e: React.MouseEvent) => {

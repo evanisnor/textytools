@@ -45,7 +45,11 @@ export interface DocumentManagerState {
 }
 
 export interface DocumentManagerActions {
-  createDocument: (inputData: string, inputType: Document["inputType"]) => void;
+  createDocument: (
+    inputData: string,
+    inputType: Document["inputType"],
+    initialTransform?: TransformType,
+  ) => void;
   deleteDocument: (documentId: string) => void;
   setCurrentDocument: (documentId: string | null) => void;
   updateDocumentName: (name: string) => void;
@@ -153,14 +157,41 @@ export function useDocumentManager(): DocumentManager {
   // ============================================================================
 
   const createDocument = useCallback(
-    (inputData: string, inputType: Document["inputType"]) => {
-      const newDoc = createDocumentFactory(inputData, inputType);
+    (
+      inputData: string,
+      inputType: Document["inputType"],
+      initialTransform?: TransformType,
+    ) => {
+      // Create initial transform step if provided
+      const initialTransforms = initialTransform
+        ? [
+            createTransformStep(
+              "", // Document ID will be set below
+              initialTransform,
+              0,
+              TRANSFORM_REGISTRY[initialTransform]?.defaultProperties || {},
+            ),
+          ]
+        : [];
+
+      const newDoc = createDocumentFactory(
+        inputData,
+        inputType,
+        initialTransforms,
+      );
+
+      // Update document ID in transform steps
+      if (initialTransforms.length > 0) {
+        initialTransforms[0].documentId = newDoc.id;
+      }
 
       setDocuments((prev) => addDocument(prev, newDoc));
 
-      // Navigate to the new document's route
-      // The URL sync effect will handle setting currentDocument
-      navigation.navigateToDocument(newDoc.id);
+      // Navigate to the new document's route after state update completes
+      // Use queueMicrotask to defer navigation until after React finishes rendering
+      queueMicrotask(() => {
+        navigation.navigateToDocument(newDoc.id);
+      });
     },
     [navigation],
   );
@@ -173,15 +204,17 @@ export function useDocumentManager(): DocumentManager {
       setDocuments((prev) => {
         const updated = removeDocumentById(prev, documentId);
 
-        // If we deleted the current document, navigate appropriately
+        // If we deleted the current document, navigate appropriately after state update
         if (isCurrentDoc) {
-          if (updated.length > 0) {
-            // Switch to the first available document
-            navigation.navigateToDocument(updated[0].id);
-          } else {
-            // No documents left, go to base route
-            navigation.navigateToHome();
-          }
+          queueMicrotask(() => {
+            if (updated.length > 0) {
+              // Switch to the first available document
+              navigation.navigateToDocument(updated[0].id);
+            } else {
+              // No documents left, go to base route
+              navigation.navigateToHome();
+            }
+          });
         }
 
         return updated;

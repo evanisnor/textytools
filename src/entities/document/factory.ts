@@ -47,13 +47,14 @@ export function generateDocumentName(): string {
 export function createDocument(
   inputData: string,
   inputType: Document["inputType"],
+  initialTransforms: Document["transforms"] = [],
 ): Document {
   return {
     id: generateId(),
     name: generateDocumentName(),
     inputType,
     inputData,
-    transforms: [],
+    transforms: initialTransforms,
     createdAt: Date.now(),
     updatedAt: Date.now(),
   };
