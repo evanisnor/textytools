@@ -34,3 +34,7 @@ export { convertMatchesToCsv } from "./regex-match-csv";
 // Text case conversions
 export type { CaseType } from "./text-case";
 export { convertCase } from "./text-case";
+
+// Transform state management
+export { useTransformState } from "./useTransformState";
+export type { TransformStateManager } from "./useTransformState";

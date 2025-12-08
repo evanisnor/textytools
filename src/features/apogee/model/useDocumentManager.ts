@@ -18,6 +18,7 @@ import type { Document, TransformStep, TransformType } from "./types";
 
 import { useDocumentState } from "@/entities/document";
 import { useApogeeNavigation } from "@/entities/navigation";
+import { useTransformState } from "@/entities/transform";
 import { createTransformStep } from "@/entities/transform/shared";
 
 // ============================================================================
@@ -82,11 +83,18 @@ export function useDocumentManager(): DocumentManager {
     updateDocumentName,
     updateInputData,
     updateInputType,
-    addTransformToDocument,
-    updateTransformInDocument,
-    removeTransformFromDocument,
-    reorderTransformInDocument,
   } = documentState;
+
+  // Transform state management (delegated to entity layer)
+  const transformState = useTransformState();
+  const {
+    addTransform: addTransformToDocument,
+    updateTransformProperties: updateTransformPropertiesInDocument,
+    updateTransformInputSelection: updateTransformInputSelectionInDocument,
+    removeTransform: removeTransformFromDocument,
+    reorderTransform: reorderTransformInDocument,
+    findTransformIndex,
+  } = transformState;
 
   // Execution state
   const [isExecuting, setIsExecuting] = useState(false);
@@ -314,152 +322,136 @@ export function useDocumentManager(): DocumentManager {
       );
 
       // Update via entity layer
-      addTransformToDocument(newStep);
+      const updatedDoc = addTransformToDocument(currentDocument, newStep);
+      updateDocumentInState(updatedDoc);
 
       // Execute from new step (Apogee-specific)
-      const updatedTransforms = [...currentDocument.transforms, newStep];
-      lastModifiedStepRef.current = updatedTransforms.length - 1;
-      scheduleExecution(
-        {
-          ...currentDocument,
-          transforms: updatedTransforms,
-          updatedAt: Date.now(),
-        },
-        updatedTransforms.length - 1,
-      );
+      lastModifiedStepRef.current = updatedDoc.transforms.length - 1;
+      scheduleExecution(updatedDoc, updatedDoc.transforms.length - 1);
     },
-    [currentDocument, addTransformToDocument, scheduleExecution],
+    [
+      currentDocument,
+      addTransformToDocument,
+      updateDocumentInState,
+      scheduleExecution,
+    ],
   );
 
   const updateTransformProperties = useCallback(
     (stepId: string, properties: Record<string, unknown>) => {
       if (!currentDocument) return;
 
-      const stepIndex = currentDocument.transforms.findIndex(
-        (step) => step.id === stepId,
-      );
+      const stepIndex = findTransformIndex(currentDocument, stepId);
       if (stepIndex === -1) return;
 
       // Update via entity layer
-      updateTransformInDocument(stepId, (step) => ({
-        ...step,
-        properties: { ...step.properties, ...properties },
-      }));
+      const updatedDoc = updateTransformPropertiesInDocument(
+        currentDocument,
+        stepId,
+        properties,
+      );
+      updateDocumentInState(updatedDoc);
 
       // Execute from modified step (Apogee-specific)
       lastModifiedStepRef.current = stepIndex;
-      const updatedTransforms = currentDocument.transforms.map((step) =>
-        step.id === stepId
-          ? { ...step, properties: { ...step.properties, ...properties } }
-          : step,
-      );
-      scheduleExecution(
-        {
-          ...currentDocument,
-          transforms: updatedTransforms,
-          updatedAt: Date.now(),
-        },
-        stepIndex,
-      );
+      scheduleExecution(updatedDoc, stepIndex);
     },
-    [currentDocument, updateTransformInDocument, scheduleExecution],
+    [
+      currentDocument,
+      findTransformIndex,
+      updateTransformPropertiesInDocument,
+      updateDocumentInState,
+      scheduleExecution,
+    ],
   );
 
   const updateTransformInputSelection = useCallback(
     (stepId: string, inputSelection: TransformStep["inputSelection"]) => {
       if (!currentDocument) return;
 
-      const stepIndex = currentDocument.transforms.findIndex(
-        (step) => step.id === stepId,
-      );
+      const stepIndex = findTransformIndex(currentDocument, stepId);
       if (stepIndex === -1) return;
 
       // Update via entity layer
-      updateTransformInDocument(stepId, (step) => ({
-        ...step,
+      const updatedDoc = updateTransformInputSelectionInDocument(
+        currentDocument,
+        stepId,
         inputSelection,
-      }));
+      );
+      updateDocumentInState(updatedDoc);
 
       // Execute from modified step (Apogee-specific)
       lastModifiedStepRef.current = stepIndex;
-      const updatedTransforms = currentDocument.transforms.map((step) =>
-        step.id === stepId ? { ...step, inputSelection } : step,
-      );
-      scheduleExecution(
-        {
-          ...currentDocument,
-          transforms: updatedTransforms,
-          updatedAt: Date.now(),
-        },
-        stepIndex,
-      );
+      scheduleExecution(updatedDoc, stepIndex);
     },
-    [currentDocument, updateTransformInDocument, scheduleExecution],
+    [
+      currentDocument,
+      findTransformIndex,
+      updateTransformInputSelectionInDocument,
+      updateDocumentInState,
+      scheduleExecution,
+    ],
   );
 
   const removeTransform = useCallback(
     (stepId: string) => {
       if (!currentDocument) return;
 
-      const stepIndex = currentDocument.transforms.findIndex(
-        (step) => step.id === stepId,
-      );
+      const stepIndex = findTransformIndex(currentDocument, stepId);
       if (stepIndex === -1) return;
 
       // Update via entity layer
-      removeTransformFromDocument(stepId);
+      const updatedDoc = removeTransformFromDocument(currentDocument, stepId);
+      if (!updatedDoc) return;
+
+      updateDocumentInState(updatedDoc);
 
       // Execute from the step after the removed one (Apogee-specific)
-      const updatedTransforms = currentDocument.transforms
-        .filter((step) => step.id !== stepId)
-        .map((step, index) => ({ ...step, order: index }));
-
-      if (updatedTransforms.length > 0) {
+      if (updatedDoc.transforms.length > 0) {
         lastModifiedStepRef.current = Math.min(
           stepIndex,
-          updatedTransforms.length - 1,
+          updatedDoc.transforms.length - 1,
         );
-        scheduleExecution(
-          {
-            ...currentDocument,
-            transforms: updatedTransforms,
-            updatedAt: Date.now(),
-          },
-          lastModifiedStepRef.current,
-        );
+        scheduleExecution(updatedDoc, lastModifiedStepRef.current);
       }
     },
-    [currentDocument, removeTransformFromDocument, scheduleExecution],
+    [
+      currentDocument,
+      findTransformIndex,
+      removeTransformFromDocument,
+      updateDocumentInState,
+      scheduleExecution,
+    ],
   );
 
   const reorderTransform = useCallback(
     (stepId: string, newOrder: number) => {
       if (!currentDocument) return;
 
-      const oldIndex = currentDocument.transforms.findIndex(
-        (step) => step.id === stepId,
-      );
+      const oldIndex = findTransformIndex(currentDocument, stepId);
       if (oldIndex === -1) return;
 
       // Update via entity layer
-      reorderTransformInDocument(stepId, newOrder);
+      const updatedDoc = reorderTransformInDocument(
+        currentDocument,
+        stepId,
+        newOrder,
+      );
+      if (!updatedDoc) return;
+
+      updateDocumentInState(updatedDoc);
 
       // Execute from the earlier of old/new positions (Apogee-specific)
-      const transforms = [...currentDocument.transforms];
-      const [movedStep] = transforms.splice(oldIndex, 1);
-      transforms.splice(newOrder, 0, movedStep);
-      const reordered = transforms.map((step, index) => ({
-        ...step,
-        order: index,
-      }));
-
       lastModifiedStepRef.current = Math.min(oldIndex, newOrder);
-      scheduleExecution(
-        { ...currentDocument, transforms: reordered, updatedAt: Date.now() },
-        lastModifiedStepRef.current,
-      );
+      scheduleExecution(updatedDoc, lastModifiedStepRef.current);
     },
-    [currentDocument, reorderTransformInDocument, scheduleExecution],
+    [
+      currentDocument,
+      findTransformIndex,
+      reorderTransformInDocument,
+      updateDocumentInState,
+      scheduleExecution,
+    ],
   );
 
   // ============================================================================

@@ -56,15 +56,6 @@ export interface DocumentStateManager {
   updateDocumentName: (name: string) => void;
   updateInputData: (data: string) => void;
   updateInputType: (type: Document["inputType"]) => void;
-
-  // Transform management
-  addTransformToDocument: (transform: Document["transforms"][0]) => void;
-  updateTransformInDocument: (
-    stepId: string,
-    updater: (step: Document["transforms"][0]) => Document["transforms"][0],
-  ) => void;
-  removeTransformFromDocument: (stepId: string) => void;
-  reorderTransformInDocument: (stepId: string, newOrder: number) => void;
 }
 
 // ============================================================================
@@ -215,93 +206,6 @@ export function useDocumentState(): DocumentStateManager {
   );
 
   // ============================================================================
-  // Transform Management
-  // ============================================================================
-
-  const addTransformToDocument = useCallback(
-    (transform: Document["transforms"][0]) => {
-      if (!currentDocument) return;
-
-      const updated = {
-        ...currentDocument,
-        transforms: [...currentDocument.transforms, transform],
-        updatedAt: Date.now(),
-      };
-
-      updateDocumentInState(updated);
-    },
-    [currentDocument, updateDocumentInState],
-  );
-
-  const updateTransformInDocument = useCallback(
-    (
-      stepId: string,
-      updater: (step: Document["transforms"][0]) => Document["transforms"][0],
-    ) => {
-      if (!currentDocument) return;
-
-      const updated = {
-        ...currentDocument,
-        transforms: currentDocument.transforms.map((step) =>
-          step.id === stepId ? updater(step) : step,
-        ),
-        updatedAt: Date.now(),
-      };
-
-      updateDocumentInState(updated);
-    },
-    [currentDocument, updateDocumentInState],
-  );
-
-  const removeTransformFromDocument = useCallback(
-    (stepId: string) => {
-      if (!currentDocument) return;
-
-      const updated = {
-        ...currentDocument,
-        transforms: currentDocument.transforms
-          .filter((step) => step.id !== stepId)
-          .map((step, index) => ({ ...step, order: index })),
-        updatedAt: Date.now(),
-      };
-
-      updateDocumentInState(updated);
-    },
-    [currentDocument, updateDocumentInState],
-  );
-
-  const reorderTransformInDocument = useCallback(
-    (stepId: string, newOrder: number) => {
-      if (!currentDocument) return;
-
-      const oldIndex = currentDocument.transforms.findIndex(
-        (step) => step.id === stepId,
-      );
-      if (oldIndex === -1) return;
-
-      // Reorder transforms
-      const transforms = [...currentDocument.transforms];
-      const [movedStep] = transforms.splice(oldIndex, 1);
-      transforms.splice(newOrder, 0, movedStep);
-
-      // Update order property
-      const reordered = transforms.map((step, index) => ({
-        ...step,
-        order: index,
-      }));
-
-      const updated = {
-        ...currentDocument,
-        transforms: reordered,
-        updatedAt: Date.now(),
-      };
-
-      updateDocumentInState(updated);
-    },
-    [currentDocument, updateDocumentInState],
-  );
-
-  // ============================================================================
   // Return API
   // ============================================================================
 
@@ -320,11 +224,5 @@ export function useDocumentState(): DocumentStateManager {
     updateDocumentName,
     updateInputData,
     updateInputType,
-
-    // Transform management
-    addTransformToDocument,
-    updateTransformInDocument,
-    removeTransformFromDocument,
-    reorderTransformInDocument,
   };
 }

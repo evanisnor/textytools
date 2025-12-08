@@ -98,3 +98,47 @@ useEffect(() => {
 ### Effect Dependencies
 
 Remove unnecessary dependencies from useEffect. Only include values that should trigger the effect.
+
+## Next.js Server-Side Rendering
+
+### Avoid Hydration Mismatches
+
+Server and client must render identical HTML. Common causes of hydration errors:
+
+**Bad - Operations that differ between server and client:**
+```typescript
+// Inline sorting/filtering during render causes non-deterministic output
+function DocumentList({ documents }) {
+  return (
+    <div>
+      {documents
+        .slice()
+        .sort((a, b) => b.createdAt - a.createdAt) // ❌ Unstable between renders
+        .map((doc) => <Item key={doc.id} {...doc} />)}
+    </div>
+  );
+}
+```
+
+**Good - Memoize derived data:**
+```typescript
+function DocumentList({ documents }) {
+  // ✓ Stable, memoized sorting
+  const sortedDocuments = useMemo(
+    () => documents.slice().sort((a, b) => b.createdAt - a.createdAt),
+    [documents],
+  );
+
+  return (
+    <div>
+      {sortedDocuments.map((doc) => <Item key={doc.id} {...doc} />)}
+    </div>
+  );
+}
+```
+
+**Other hydration mismatch causes:**
+- `Date.now()` or `Math.random()` called during render
+- Browser-specific APIs: `window`, `localStorage`, `navigator`
+- Date/time formatting without timezone handling
+- Conditional rendering based on `typeof window !== 'undefined'`

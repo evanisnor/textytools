@@ -8,7 +8,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import type {
   TransformType,
@@ -46,6 +46,12 @@ export function ApogeeShell({ documentManager }: ApogeeShellProps) {
 
   // Calculate format-specific statistics based on input type
   const inputStats = useFormatStats(inputText, inputType);
+
+  // Sort documents by creation date (memoized to prevent hydration issues)
+  const sortedDocuments = useMemo(
+    () => documents.slice().sort((a, b) => b.createdAt - a.createdAt),
+    [documents],
+  );
 
   // Auto-detect format from current input (derived state)
   const effectiveInputType: InputType =
@@ -149,57 +155,54 @@ export function ApogeeShell({ documentManager }: ApogeeShellProps) {
               </p>
             ) : (
               <div className="space-y-2">
-                {documents
-                  .slice()
-                  .sort((a, b) => b.createdAt - a.createdAt)
-                  .map((doc) => (
-                    <div
-                      key={doc.id}
-                      onMouseEnter={() => setHoveredDocId(doc.id)}
-                      onMouseLeave={() => setHoveredDocId(null)}
-                      className="relative"
+                {sortedDocuments.map((doc) => (
+                  <div
+                    key={doc.id}
+                    onMouseEnter={() => setHoveredDocId(doc.id)}
+                    onMouseLeave={() => setHoveredDocId(null)}
+                    className="relative"
+                  >
+                    <button
+                      onClick={() => setCurrentDocument(doc.id)}
+                      className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer ${
+                        currentDocument?.id === doc.id
+                          ? "bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100"
+                          : "hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                      }`}
                     >
-                      <button
-                        onClick={() => setCurrentDocument(doc.id)}
-                        className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer ${
-                          currentDocument?.id === doc.id
-                            ? "bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100"
-                            : "hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                        }`}
-                      >
-                        <div className="font-medium truncate pr-6">
-                          {doc.name || "Untitled"}
-                        </div>
-                        <div className="text-xs text-zinc-500 dark:text-zinc-400">
-                          {doc.transforms.length} step
-                          {doc.transforms.length !== 1 ? "s" : ""}
-                        </div>
-                      </button>
+                      <div className="font-medium truncate pr-6">
+                        {doc.name || "Untitled"}
+                      </div>
+                      <div className="text-xs text-zinc-500 dark:text-zinc-400">
+                        {doc.transforms.length} step
+                        {doc.transforms.length !== 1 ? "s" : ""}
+                      </div>
+                    </button>
 
-                      {/* Delete Button - Show on hover */}
-                      {hoveredDocId === doc.id && (
-                        <button
-                          onClick={(e) => handleDeleteDocument(doc.id, e)}
-                          className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-red-100 dark:hover:bg-red-900 text-zinc-400 hover:text-red-600 dark:hover:text-red-400 transition-colors cursor-pointer"
-                          title="Delete document"
+                    {/* Delete Button - Show on hover */}
+                    {hoveredDocId === doc.id && (
+                      <button
+                        onClick={(e) => handleDeleteDocument(doc.id, e)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-red-100 dark:hover:bg-red-900 text-zinc-400 hover:text-red-600 dark:hover:text-red-400 transition-colors cursor-pointer"
+                        title="Delete document"
+                      >
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
                         >
-                          <svg
-                            className="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                            />
-                          </svg>
-                        </button>
-                      )}
-                    </div>
-                  ))}
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                          />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                ))}
               </div>
             )}
           </div>
