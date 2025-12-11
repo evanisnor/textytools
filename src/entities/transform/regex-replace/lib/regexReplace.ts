@@ -24,12 +24,14 @@ export const regexReplaceDefinition: TransformDefinition = {
       label: "Replacement",
       type: "text",
       defaultValue: "",
+      width: "flex-start",
     },
     {
       key: "flags",
       label: "Flags",
       type: "text",
       defaultValue: "g",
+      width: "flex",
     },
   ],
   defaultProperties: {

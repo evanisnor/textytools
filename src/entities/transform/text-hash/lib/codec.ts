@@ -3,6 +3,8 @@
  * Routes hash requests to the appropriate hash function
  */
 
+import { sha3_224, sha3_256, sha3_384, sha3_512 } from "js-sha3";
+
 import type { HashType } from "../model/types";
 
 import { toMd5 } from "./md5";
@@ -33,6 +35,14 @@ export async function hashText(
             return await toSha384(line);
           case "sha512":
             return await toSha512(line);
+          case "sha3-224":
+            return sha3_224(line);
+          case "sha3-256":
+            return sha3_256(line);
+          case "sha3-384":
+            return sha3_384(line);
+          case "sha3-512":
+            return sha3_512(line);
           default:
             return line;
         }
@@ -52,6 +62,14 @@ export async function hashText(
       return await toSha384(text);
     case "sha512":
       return await toSha512(text);
+    case "sha3-224":
+      return sha3_224(text);
+    case "sha3-256":
+      return sha3_256(text);
+    case "sha3-384":
+      return sha3_384(text);
+    case "sha3-512":
+      return sha3_512(text);
     default:
       return text;
   }

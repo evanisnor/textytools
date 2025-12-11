@@ -46,17 +46,7 @@ import {
   unicodeEncodeDefinition,
   unicodeDecodeDefinition,
 } from "@/entities/transform/text-encoding";
-import {
-  md5HashDefinition,
-  sha1HashDefinition,
-  sha256HashDefinition,
-  sha384HashDefinition,
-  sha512HashDefinition,
-  sha3_224HashDefinition,
-  sha3_256HashDefinition,
-  sha3_384HashDefinition,
-  sha3_512HashDefinition,
-} from "@/entities/transform/text-hash";
+import { textHashTransform } from "@/entities/transform/text-hash";
 import { textSanitizeTransform } from "@/entities/transform/text-sanitize";
 import { tomlConvertDefinition } from "@/entities/transform/toml-convert";
 import { xmlConvertDefinition } from "@/entities/transform/xml-convert";
@@ -102,16 +92,8 @@ export const TRANSFORM_REGISTRY: Record<string, TransformDefinition> = {
   "jwt-decode": jwtDecodeDefinition as TransformDefinition,
   "unicode-decode": unicodeDecodeDefinition as TransformDefinition,
 
-  // Hash transforms
-  "md5-hash": md5HashDefinition as TransformDefinition,
-  "sha1-hash": sha1HashDefinition as TransformDefinition,
-  "sha256-hash": sha256HashDefinition as TransformDefinition,
-  "sha384-hash": sha384HashDefinition as TransformDefinition,
-  "sha512-hash": sha512HashDefinition as TransformDefinition,
-  "sha3-224-hash": sha3_224HashDefinition as TransformDefinition,
-  "sha3-256-hash": sha3_256HashDefinition as TransformDefinition,
-  "sha3-384-hash": sha3_384HashDefinition as TransformDefinition,
-  "sha3-512-hash": sha3_512HashDefinition as TransformDefinition,
+  // Hash transform
+  "text-hash": textHashTransform as TransformDefinition,
 
   // Modify transforms
   "text-sanitize": textSanitizeTransform as TransformDefinition,

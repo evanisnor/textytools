@@ -25,12 +25,14 @@ export const extractLinesDefinition: TransformDefinition = {
         { value: "notContains", label: "Does Not Contain" },
       ],
       defaultValue: "contains",
+      width: "flex-start",
     },
     {
       key: "pattern",
       label: "Pattern",
       type: "text",
       defaultValue: "",
+      width: "flex",
     },
     {
       key: "caseSensitive",

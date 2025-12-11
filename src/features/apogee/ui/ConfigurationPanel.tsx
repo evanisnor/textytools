@@ -117,12 +117,17 @@ export function ConfigurationPanel({
       (width === "flex" || width === "auto") &&
       currentRow.length > 0
     ) {
-      // Add to current row if it was started by flex-start or flex
+      // Add to current row if compatible
       const firstInRow = currentRow[0];
-      if (firstInRow.width === "flex-start" || firstInRow.width === "flex") {
+      const firstWidth = firstInRow.width ?? "auto";
+      if (
+        firstWidth === "flex-start" ||
+        firstWidth === "flex" ||
+        (firstWidth === "auto" && width === "auto")
+      ) {
         currentRow.push(property);
       } else {
-        // Start a new row if current row doesn't support flex
+        // Start a new row if current row doesn't support this item
         rows.push(currentRow);
         currentRow = [property];
       }
@@ -143,14 +148,14 @@ export function ConfigurationPanel({
   return (
     <div className="flex flex-col gap-2 px-4 py-3">
       {rows.map((row, rowIndex) => {
-        const isFlexRow =
-          row.length > 1 &&
-          row.some((p) => p.width === "flex-start" || p.width === "flex");
+        // Determine if row should wrap
+        const hasAutoItems = row.some((p) => (p.width ?? "auto") === "auto");
+        const shouldWrap = hasAutoItems || row.length === 1;
 
         return (
           <div
             key={rowIndex}
-            className={isFlexRow ? "flex gap-2" : "flex flex-wrap gap-2"}
+            className={shouldWrap ? "flex flex-wrap gap-2" : "flex gap-2"}
           >
             {row.map((property) => (
               <PropertyControl
