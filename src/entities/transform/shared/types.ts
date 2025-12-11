@@ -47,22 +47,12 @@ export type ModifyTransform =
 /**
  * Compress: Size reduction algorithms
  */
-export type CompressTransform =
-  | "gzip-compress"
-  | "bzip2-compress"
-  | "lzma2-compress"
-  | "xz-compress";
+export type CompressTransform = "compress";
 
 /**
  * Decompress: Restore compressed data
  */
-export type DecompressTransform =
-  | "gzip-decompress"
-  | "bzip2-decompress"
-  | "brotli-decompress"
-  | "zstd-decompress"
-  | "lzma2-decompress"
-  | "xz-decompress";
+export type DecompressTransform = "decompress";
 
 /**
  * Analyze: Visualization and insights

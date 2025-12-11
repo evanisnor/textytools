@@ -11,12 +11,12 @@ import type {
   TransformCategory,
 } from "../model/types";
 
+import {
+  compressTransform,
+  decompressTransform,
+} from "@/entities/transform/compression";
 import { csvConvertDefinition } from "@/entities/transform/csv-convert";
 import { extractLinesDefinition } from "@/entities/transform/extract-lines";
-import {
-  gzipCompressDefinition,
-  gzipDecompressDefinition,
-} from "@/entities/transform/gzip-compress";
 import { jsonConvertDefinition } from "@/entities/transform/json-convert";
 import { jwtDecodeDefinition } from "@/entities/transform/jwt";
 import { modifyFieldDefinition } from "@/entities/transform/modify-field";
@@ -63,11 +63,11 @@ export const TRANSFORM_REGISTRY: Record<string, TransformDefinition> = {
   "extract-lines": extractLinesDefinition as TransformDefinition,
   "modify-field": modifyFieldDefinition as TransformDefinition,
 
-  // Compress transforms
-  "gzip-compress": gzipCompressDefinition as TransformDefinition,
+  // Compress transform
+  compress: compressTransform as TransformDefinition,
 
-  // Decompress transforms
-  "gzip-decompress": gzipDecompressDefinition as TransformDefinition,
+  // Decompress transform
+  decompress: decompressTransform as TransformDefinition,
 };
 
 // Lazy-loaded transforms (use dynamic imports to avoid bundling Node.js dependencies client-side)
