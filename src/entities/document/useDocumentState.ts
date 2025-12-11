@@ -63,22 +63,34 @@ export interface DocumentStateManager {
 // ============================================================================
 
 export function useDocumentState(): DocumentStateManager {
-  // State - Initialize with data from localStorage
-  const [documents, setDocuments] = useState<Document[]>(loadDocuments);
+  // State - Initialize with empty array to match server render
+  const [documents, setDocuments] = useState<Document[]>([]);
   const [currentDocument, setCurrentDocumentState] = useState<Document | null>(
     null,
   );
+  const [isHydrated, setIsHydrated] = useState(false);
 
   // ============================================================================
   // Persistence
   // ============================================================================
 
-  // Save documents whenever they change
+  // Sync with localStorage (external system)
   useEffect(() => {
-    if (documents.length > 0) {
+    // Load from localStorage asynchronously to avoid synchronous setState in effect
+    Promise.resolve(loadDocuments()).then((loaded) => {
+      if (loaded.length > 0) {
+        setDocuments(loaded);
+      }
+      setIsHydrated(true);
+    });
+  }, []);
+
+  // Save to localStorage when documents change (skip initial mount)
+  useEffect(() => {
+    if (isHydrated) {
       saveDocuments(documents);
     }
-  }, [documents]);
+  }, [documents, isHydrated]);
 
   // ============================================================================
   // Current Document Management
