@@ -21,34 +21,12 @@ export type ConvertTransform =
 /**
  * Encode: Represent data in transport formats
  */
-export type EncodeTransform =
-  | "base64-encode"
-  | "base58-encode"
-  | "base91-encode"
-  | "ascii85-encode"
-  | "z85-encode"
-  | "url-encode"
-  | "html-entity-encode"
-  | "hex-encode"
-  | "quoted-printable-encode"
-  | "rot13-encode"
-  | "morse-encode"
-  | "unicode-encode";
+export type EncodeTransform = "text-encode";
 
 /**
  * Decode: Inspect and revert encodings
  */
-export type DecodeTransform =
-  | "jwt-decode"
-  | "base64-decode"
-  | "base58-decode"
-  | "base91-decode"
-  | "ascii85-decode"
-  | "z85-decode"
-  | "hex-decode"
-  | "quoted-printable-decode"
-  | "morse-decode"
-  | "unicode-decode";
+export type DecodeTransform = "text-decode" | "jwt-decode";
 
 /**
  * Hash: Generate cryptographic signatures

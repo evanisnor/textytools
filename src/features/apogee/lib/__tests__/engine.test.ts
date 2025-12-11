@@ -106,9 +106,9 @@ describe("ApogeeEngine", () => {
     it("should continue pipeline after transform failure", async () => {
       const doc = createTestDocument();
 
-      // Register a failing transform
+      // Register a failing transform (using dummy-transform type for testing)
       const failingTransform: TransformDefinition = {
-        type: "base64-encode",
+        type: "dummy-transform",
         name: "Failing Transform",
         description: "Always fails",
         category: "encode",
@@ -124,6 +124,7 @@ describe("ApogeeEngine", () => {
         }),
       };
 
+      // Temporarily replace the dummy transform with the failing one
       registerTransform(failingTransform);
 
       doc.transforms.push(
@@ -131,7 +132,7 @@ describe("ApogeeEngine", () => {
           id: "step-1",
           documentId: doc.id,
           order: 0,
-          transformType: "base64-encode",
+          transformType: "dummy-transform",
           inputSelection: { mode: "all" },
           properties: {},
           output: "",

@@ -4,12 +4,265 @@
  */
 
 import type {
+  PropertySchema,
   TransformDefinition,
   TransformResult,
   TransformStat,
 } from "../../shared/types";
+import type { EncodingType } from "../model/types";
 
 import { encodeText, decodeText } from "./codec";
+
+// ============================================================================
+// Encoding Type Configuration
+// ============================================================================
+
+interface EncodingConfig {
+  value: EncodingType;
+  label: string;
+  description: string;
+}
+
+const ENCODING_TYPES: EncodingConfig[] = [
+  { value: "base64", label: "Base64", description: "Standard Base64 encoding" },
+  { value: "base58", label: "Base58", description: "Bitcoin-style encoding" },
+  { value: "base91", label: "Base91", description: "High-efficiency encoding" },
+  { value: "ascii85", label: "ASCII85", description: "Adobe ASCII85 encoding" },
+  { value: "z85", label: "Z85", description: "ZeroMQ Base85 encoding" },
+  { value: "hex", label: "Hexadecimal", description: "Hex encoding" },
+  { value: "url", label: "URL Encode", description: "URL-safe encoding" },
+  {
+    value: "html",
+    label: "HTML Entities",
+    description: "HTML entity encoding",
+  },
+  {
+    value: "unicode",
+    label: "Unicode Escape",
+    description: "Unicode escape sequences",
+  },
+  {
+    value: "quotedPrintable",
+    label: "Quoted-Printable",
+    description: "Email encoding",
+  },
+  { value: "rot13", label: "ROT13", description: "Simple letter substitution" },
+  {
+    value: "morse",
+    label: "Morse Code",
+    description: "International Morse code",
+  },
+];
+
+const ENCODING_TYPE_OPTIONS = ENCODING_TYPES.map((enc) => ({
+  value: enc.value,
+  label: enc.label,
+}));
+
+// ============================================================================
+// Consolidated Encode Transform
+// ============================================================================
+
+const ENCODE_SCHEMA: PropertySchema[] = [
+  {
+    key: "encoding",
+    label: "Encoding Type",
+    type: "select",
+    options: ENCODING_TYPE_OPTIONS,
+    defaultValue: "base64",
+  },
+  {
+    key: "lineByLine",
+    label: "Line-by-Line",
+    type: "toggle",
+    defaultValue: false,
+  },
+];
+
+export const textEncodeTransform: TransformDefinition = {
+  type: "text-encode",
+  name: "Text Encode",
+  description: "Encode text using various encoding schemes",
+  category: "encode",
+  acceptsInput: ["*"],
+  producesOutput: "text/plain",
+  supportsLineByLine: true,
+  propertySchema: ENCODE_SCHEMA,
+  defaultProperties: {
+    encoding: "base64",
+    lineByLine: false,
+  },
+
+  execute: (
+    input: string,
+    properties: Record<string, unknown>,
+  ): TransformResult => {
+    if (!input) {
+      return {
+        success: false,
+        data: "",
+        error: "Input is empty",
+        mimeType: "text/plain",
+      };
+    }
+
+    const encoding = (properties.encoding as EncodingType) || "base64";
+    const lineByLine = properties.lineByLine === true;
+
+    try {
+      let output: string;
+      let linesProcessed = 0;
+
+      if (lineByLine) {
+        const lines = input.split("\n");
+        output = lines
+          .map((line) => {
+            if (line.length > 0) {
+              linesProcessed++;
+            }
+            return encodeText(line, encoding);
+          })
+          .join("\n");
+      } else {
+        output = encodeText(input, encoding);
+      }
+
+      const inputSize = new Blob([input]).size;
+      const outputSize = new Blob([output]).size;
+      const expansionRatio = ((outputSize / inputSize - 1) * 100).toFixed(1);
+
+      const stats: TransformStat[] = [
+        { label: "Input Size", value: `${inputSize} bytes` },
+        { label: "Output Size", value: `${outputSize} bytes` },
+        { label: "Expansion", value: `+${expansionRatio}%` },
+      ];
+
+      if (lineByLine) {
+        stats.push({ label: "Lines Processed", value: linesProcessed });
+      }
+
+      return {
+        success: true,
+        data: output,
+        mimeType: "text/plain",
+        stats,
+      };
+    } catch (err) {
+      return {
+        success: false,
+        data: "",
+        error: `Encoding failed: ${err instanceof Error ? err.message : "Unknown error"}`,
+        mimeType: "text/plain",
+      };
+    }
+  },
+};
+
+// ============================================================================
+// Consolidated Decode Transform
+// ============================================================================
+
+const DECODE_SCHEMA: PropertySchema[] = [
+  {
+    key: "encoding",
+    label: "Encoding Type",
+    type: "select",
+    options: ENCODING_TYPE_OPTIONS,
+    defaultValue: "base64",
+  },
+  {
+    key: "lineByLine",
+    label: "Line-by-Line",
+    type: "toggle",
+    defaultValue: false,
+  },
+];
+
+export const textDecodeTransform: TransformDefinition = {
+  type: "text-decode",
+  name: "Text Decode",
+  description: "Decode text from various encoding schemes",
+  category: "decode",
+  acceptsInput: ["text/plain"],
+  producesOutput: "text/plain",
+  supportsLineByLine: true,
+  propertySchema: DECODE_SCHEMA,
+  defaultProperties: {
+    encoding: "base64",
+    lineByLine: false,
+  },
+
+  execute: (
+    input: string,
+    properties: Record<string, unknown>,
+  ): TransformResult => {
+    if (!input) {
+      return {
+        success: false,
+        data: "",
+        error: "Input is empty",
+        mimeType: "text/plain",
+      };
+    }
+
+    const encoding = (properties.encoding as EncodingType) || "base64";
+    const lineByLine = properties.lineByLine === true;
+
+    try {
+      let output: string;
+      let linesProcessed = 0;
+
+      if (lineByLine) {
+        const lines = input.split("\n");
+        output = lines
+          .map((line) => {
+            if (line.length > 0) {
+              linesProcessed++;
+            }
+            return decodeText(line, encoding);
+          })
+          .join("\n");
+      } else {
+        output = decodeText(input, encoding);
+      }
+
+      const inputSize = new Blob([input]).size;
+      const outputSize = new Blob([output]).size;
+      const compressionRatio = ((1 - outputSize / inputSize) * 100).toFixed(1);
+
+      const stats: TransformStat[] = [
+        { label: "Input Size", value: `${inputSize} bytes` },
+        { label: "Output Size", value: `${outputSize} bytes` },
+        { label: "Compression", value: `${compressionRatio}%` },
+      ];
+
+      if (lineByLine) {
+        stats.push({ label: "Lines Processed", value: linesProcessed });
+      }
+
+      return {
+        success: true,
+        data: output,
+        mimeType: "text/plain",
+        stats,
+      };
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Unknown error";
+      const encodingConfig = ENCODING_TYPES.find((e) => e.value === encoding);
+      const encodingLabel = encodingConfig?.label || encoding;
+      return {
+        success: false,
+        data: "",
+        error: `${encodingLabel} decoding failed: ${errorMessage}. Ensure the input is valid ${encodingLabel}-encoded text.`,
+        mimeType: "text/plain",
+      };
+    }
+  },
+};
+
+// ============================================================================
+// Legacy Individual Transforms (kept for backwards compatibility)
+// ============================================================================
 
 /**
  * Base64 Encode Transform
