@@ -6,7 +6,7 @@
 
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 
 import { getTransformAsync } from "../lib/registry";
 import type { TransformDefinition, TransformType } from "../model/types";
@@ -115,6 +115,33 @@ export function PipelineEditor({ documentManager }: PipelineEditorProps) {
     documentManager.addTransform(type);
   };
 
+  // Calculate current MIME type from last transform in pipeline
+  const currentMimeType = useMemo(() => {
+    if (!currentDocument || currentDocument.transforms.length === 0) {
+      // No transforms - use input type
+      const inputTypeMap: Record<string, string> = {
+        text: "text/plain",
+        json: "application/json",
+        csv: "text/csv",
+        yaml: "application/yaml",
+        xml: "application/xml",
+        toml: "application/toml",
+        jwt: "application/jwt",
+      };
+      return inputTypeMap[currentDocument?.inputType || "text"] || "*";
+    }
+
+    // Get last transform's output MIME type
+    const lastTransform =
+      currentDocument.transforms[currentDocument.transforms.length - 1];
+    const lastTransformDef = transformDefinitions.get(
+      lastTransform.transformType,
+    );
+
+    // Use step's mimeType if available (dynamic), otherwise use transform's producesOutput
+    return lastTransform.mimeType || lastTransformDef?.producesOutput || "*";
+  }, [currentDocument, transformDefinitions]);
+
   // Scroll to new transform when added
   useEffect(() => {
     if (!currentDocument) return;
@@ -208,7 +235,10 @@ export function PipelineEditor({ documentManager }: PipelineEditorProps) {
       })}
 
       {/* Transform Palette - Always visible inline */}
-      <TransformPalette onSelect={handleAddTransform} />
+      <TransformPalette
+        onSelect={handleAddTransform}
+        currentMimeType={currentMimeType}
+      />
     </div>
   );
 }

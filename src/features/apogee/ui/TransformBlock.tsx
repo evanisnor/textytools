@@ -59,7 +59,7 @@ export function TransformBlock({
 }: TransformBlockProps) {
   const [configExpanded, setConfigExpanded] = useState(true);
   const [outputExpanded, setOutputExpanded] = useState(true);
-  const [wrap, setWrap] = useState(false);
+  const [wrap, setWrap] = useState(transform.defaultWordWrap ?? false);
   const [copied, setCopied] = useState(false);
 
   const stepPropertiesRef = useRef(step.properties);

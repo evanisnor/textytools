@@ -97,6 +97,7 @@ export const compressTransform: TransformDefinition = {
     outputFormat: "base64",
     level: "6",
   },
+  defaultWordWrap: true,
   execute: (
     input: string,
     properties: Record<string, unknown>,
@@ -126,13 +127,11 @@ export const compressTransform: TransformDefinition = {
 
     try {
       let compressed: Uint8Array;
-      let algorithmLabel = "Gzip";
 
       // Route to appropriate compression algorithm
       switch (algorithm) {
         case "gzip":
           compressed = pako.gzip(input, { level });
-          algorithmLabel = "Gzip";
           break;
         default:
           return {
@@ -163,7 +162,6 @@ export const compressTransform: TransformDefinition = {
         data: output,
         mimeType: "application/gzip",
         stats: [
-          { label: "Algorithm", value: algorithmLabel },
           { label: "Compression Level", value: `${level}` },
           { label: "Original Size", value: `${originalSize} bytes` },
           { label: "Compressed Size", value: `${compressedSize} bytes` },
@@ -172,7 +170,6 @@ export const compressTransform: TransformDefinition = {
             value: `${savings}%`,
             alert: parseFloat(savings) > 0 ? "info" : undefined,
           },
-          { label: "Output Format", value: outputFormat },
         ],
       };
     } catch (err) {
@@ -227,6 +224,7 @@ export const decompressTransform: TransformDefinition = {
     algorithm: "gzip",
     inputFormat: "base64",
   },
+  defaultWordWrap: false,
   execute: (
     input: string,
     properties: Record<string, unknown>,

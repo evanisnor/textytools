@@ -232,4 +232,5 @@ export interface TransformDefinition {
   supportsInputSelection?: boolean; // Default: true
   supportsLineByLine?: boolean; // Default: false
   supportsStreaming?: boolean; // Default: false (future)
+  defaultWordWrap?: boolean; // Default word wrap for output display (default: false)
 }

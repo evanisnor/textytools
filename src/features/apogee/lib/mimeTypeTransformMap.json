@@ -1,0 +1,128 @@
+{
+  "text/plain": [
+    "json-convert",
+    "csv-convert",
+    "yaml-convert",
+    "xml-convert",
+    "toml-convert",
+    "text-encode",
+    "text-hash",
+    "text-sanitize",
+    "case-convert",
+    "regex-replace",
+    "sort-lines",
+    "extract-lines",
+    "compress"
+  ],
+  "application/json": [
+    "json-convert",
+    "csv-convert",
+    "yaml-convert",
+    "xml-convert",
+    "toml-convert",
+    "text-encode",
+    "text-hash",
+    "modify-field",
+    "compress"
+  ],
+  "text/csv": [
+    "json-convert",
+    "csv-convert",
+    "yaml-convert",
+    "xml-convert",
+    "toml-convert",
+    "text-encode",
+    "text-hash",
+    "modify-field",
+    "compress"
+  ],
+  "application/yaml": [
+    "json-convert",
+    "csv-convert",
+    "yaml-convert",
+    "xml-convert",
+    "toml-convert",
+    "text-encode",
+    "text-hash",
+    "modify-field",
+    "compress"
+  ],
+  "text/yaml": [
+    "json-convert",
+    "csv-convert",
+    "yaml-convert",
+    "xml-convert",
+    "toml-convert",
+    "text-encode",
+    "text-hash",
+    "modify-field",
+    "compress"
+  ],
+  "application/xml": [
+    "json-convert",
+    "csv-convert",
+    "yaml-convert",
+    "xml-convert",
+    "toml-convert",
+    "text-encode",
+    "text-hash",
+    "modify-field",
+    "compress"
+  ],
+  "text/xml": [
+    "json-convert",
+    "csv-convert",
+    "yaml-convert",
+    "xml-convert",
+    "toml-convert",
+    "text-encode",
+    "text-hash",
+    "modify-field",
+    "compress"
+  ],
+  "application/toml": [
+    "json-convert",
+    "csv-convert",
+    "yaml-convert",
+    "xml-convert",
+    "toml-convert",
+    "text-encode",
+    "text-hash",
+    "compress"
+  ],
+  "text/toml": [
+    "json-convert",
+    "csv-convert",
+    "yaml-convert",
+    "xml-convert",
+    "toml-convert",
+    "text-encode",
+    "text-hash",
+    "compress"
+  ],
+  "application/jwt": [
+    "jwt-decode"
+  ],
+  "application/gzip": [
+    "decompress"
+  ],
+  "*": [
+    "json-convert",
+    "csv-convert",
+    "yaml-convert",
+    "xml-convert",
+    "toml-convert",
+    "text-encode",
+    "text-decode",
+    "jwt-decode",
+    "text-hash",
+    "text-sanitize",
+    "case-convert",
+    "regex-replace",
+    "sort-lines",
+    "extract-lines",
+    "modify-field",
+    "compress",
+    "decompress"
+  ]
+}
