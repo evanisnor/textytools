@@ -8,18 +8,13 @@ branches through its Git integration.
 
 | Purpose | Git ref | Deployment |
 |---|---|---|
-| Feature validation | DNS-safe feature branch | `https://<branch-name>.staging.textytools.dev` |
+| Feature validation | DNS-safe feature branch | Vercel-generated Preview URL |
 | Integrated staging | `staging` | `https://staging.textytools.dev` |
 | Production | `main` | `https://textytools.dev` |
 
 `main` is production and `staging` is its only permitted upstream integration branch.
 Never commit or push directly to `main`. Every production change, including urgent fixes,
 must first exist on `staging` and be validated there.
-
-Branch-specific custom staging aliases are the required URL convention. Until the alias
-automation tracked by Linear issue `TEXT-4` is complete, use the stable Vercel-generated
-branch Preview URL reported on the commit or pull request. This temporary fallback does not
-change the merge or promotion process.
 
 ## Linear and branch names
 
