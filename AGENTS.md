@@ -101,6 +101,17 @@ Report any check that was not run and why. Do not claim verification based only 
 
 ## Git, commits, and deployment
 
+- Follow `DEVELOPMENT.md` for the required worktree, staging, and production workflow.
+  Feature work happens in worktrees and a feature worktree may remain active across
+  multiple staging deployments. Merge each ready series of commits into `staging` with
+  its history intact, validate staging, then fast-forward `main` from `staging` for
+  production. Never commit or push directly to `main`; never squash, rebase, or
+  cherry-pick changes during integration or promotion.
+- Never force-push any branch. Published history is commit-forward: correct prior work
+  with a new commit or revert commit, never by amending, resetting, rebasing, or replacing
+  published commits.
+- A small, self-contained, single-commit fix may be committed directly to `staging` after
+  proportional validation. This exception never applies to `main`.
 - Use Linear as the system of record for planning, issues, tasks, assignments, and work
   status. Textytools work belongs to the `textytools` Linear team and uses the `TEXT`
   issue identifier. Follow the operating practice in the private
@@ -109,17 +120,18 @@ Report any check that was not run and why. Do not claim verification based only 
 - Perform GitHub interactions with the authenticated `gh` CLI against the `tidalsoft`
   organization.
 - Preserve unrelated user changes in a dirty worktree. Stage only files belonging to the requested task.
-- Isolate unfinished implementation in a scoped worktree or branch. Use a staging
-  environment or feature flag when it reduces integration or release risk.
+- Isolate feature implementation in a scoped worktree and DNS-safe branch. Pushing the
+  branch publishes its branch Preview; pushing `staging` publishes the integrated staging
+  environment at `staging.textytools.dev`.
 - Never commit unverified implementation changes. Commit coherent, verified checkpoints
   when they provide a useful review or recovery boundary; do not commit merely because a
   cycle or agent turn ended.
 - Use concise imperative commit messages that describe the outcome.
-- Do not amend, rewrite, reset, or discard existing history or user changes unless explicitly requested.
-- Merge or publish only when the change is stable enough to ship. Do not push unfinished
-  implementation to `main` to satisfy a handoff convention. Push commits to `origin` when
-  deployment, collaboration, backup, or remote delivery requires it. The preferred
-  production deployment path is `origin/main` through the Vercel Git integration.
+- Do not amend, rewrite, reset, or discard existing history or user changes.
+- Merge or publish only when the change is stable enough for the target environment. Push
+  commits to `origin` when deployment, collaboration, backup, or remote delivery requires
+  it. Production deployment occurs only by fast-forwarding `main` from validated
+  `staging` and pushing `origin/main` through the Vercel Git integration.
 - Do not use `vercel deploy` as the normal deployment path. Use a direct CLI deployment only when the user explicitly requests it, or when Git-based deployment is unavailable and the user approves the alternative.
 - Keep secrets in Vercel environment variables. Environment-variable updates do not require committing generated local Vercel files.
 
