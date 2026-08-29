@@ -109,10 +109,17 @@ Report any check that was not run and why. Do not claim verification based only 
 - Perform GitHub interactions with the authenticated `gh` CLI against the `tidalsoft`
   organization.
 - Preserve unrelated user changes in a dirty worktree. Stage only files belonging to the requested task.
-- Never commit unverified implementation changes. Once requested work is complete and its relevant checks pass, make a scoped commit; do not leave completed, verified work only in the working tree.
+- Isolate unfinished implementation in a scoped worktree or branch. Use a staging
+  environment or feature flag when it reduces integration or release risk.
+- Never commit unverified implementation changes. Commit coherent, verified checkpoints
+  when they provide a useful review or recovery boundary; do not commit merely because a
+  cycle or agent turn ended.
 - Use concise imperative commit messages that describe the outcome.
 - Do not amend, rewrite, reset, or discard existing history or user changes unless explicitly requested.
-- Push commits to `origin` when deployment or remote delivery is requested. The preferred production deployment path is `origin/main` through the Vercel Git integration.
+- Merge or publish only when the change is stable enough to ship. Do not push unfinished
+  implementation to `main` to satisfy a handoff convention. Push commits to `origin` when
+  deployment, collaboration, backup, or remote delivery requires it. The preferred
+  production deployment path is `origin/main` through the Vercel Git integration.
 - Do not use `vercel deploy` as the normal deployment path. Use a direct CLI deployment only when the user explicitly requests it, or when Git-based deployment is unavailable and the user approves the alternative.
 - Keep secrets in Vercel environment variables. Environment-variable updates do not require committing generated local Vercel files.
 
