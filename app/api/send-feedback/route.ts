@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
       process.env.FEEDBACK_RECIPIENT_EMAIL || "contact@textytools.dev";
     const fromEmail =
       process.env.RESEND_FROM_EMAIL ||
-      "textytools.dev <noreply@textytools.dev>";
+      "textytools.dev <contact@textytools.dev>";
 
     const { error: resendError } = await resend.emails.send({
       from: fromEmail,

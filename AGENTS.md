@@ -94,7 +94,7 @@ Report any check that was not run and why. Do not claim verification based only 
 ## Environment variables and external services
 
 - Never commit `.env*`, API keys, access tokens, or values copied from Vercel. The repository ignores environment files.
-- Feedback email uses Resend. Production requires `RESEND_API_KEY`; `RESEND_FROM_EMAIL` defaults to `textytools.dev <noreply@textytools.dev>` and `FEEDBACK_RECIPIENT_EMAIL` defaults to `contact@textytools.dev`.
+- Feedback email uses Resend. Production requires `RESEND_API_KEY`; `RESEND_FROM_EMAIL` defaults to `textytools.dev <contact@textytools.dev>` and `FEEDBACK_RECIPIENT_EMAIL` defaults to `contact@textytools.dev`.
 - Keep the Resend API key send-only. The sending domain must be verified in Resend DNS before testing delivery.
 - Public analytics configuration uses `NEXT_PUBLIC_GOOGLE_TAG_ID`. Follow the migration notes in `README.md` before changing legacy analytics variables.
 - Validate external-service failures from server logs and return safe errors to clients; never expose provider responses containing sensitive information.
