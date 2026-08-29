@@ -585,6 +585,8 @@ An installed Textytools application is a future distribution hypothesis: package
 
 Tauri is a credible candidate because it supports platform stores and signed installers across macOS, Windows, Linux, iOS, and Android. See the [Tauri distribution overview](https://v2.tauri.app/distribute/), [Apple App Store guidance](https://v2.tauri.app/distribute/app-store/), and [Microsoft Store guidance](https://v2.tauri.app/distribute/microsoft-store/).
 
+A Tauri shell can also support a local SQLite database through Tauri’s official SQL capability. This would give the installed product a stronger persistence foundation than the browser workspace for documents, revisions, presets, provenance, and local search. See the [Tauri SQL documentation](https://v2.tauri.app/plugin/sql/).
+
 This branch is not a committed phase and should not begin merely because the web interface can be packaged. The installed application must solve professional workflow problems that remain meaningfully constrained in the Phase 6 web experience.
 
 ### Why an installed application could create value
@@ -595,10 +597,31 @@ This branch is not a committed phase and should not begin merely because the web
 - Support deliberate work with local files and folders while preserving local processing.
 - Integrate with familiar operating-system actions such as Open With, file associations, recent files, native menus, and global shortcuts where appropriate.
 - Handle larger or longer-running local work with clearer expectations.
+- Provide a durable, searchable local document library with richer history and recovery than browser storage can reliably promise.
 - Provide a trusted installation and update path for a local TextyToolsMCP if that product hypothesis is validated.
 - Reach users and organizations that prefer managed application distribution over utility websites.
 
 The installed application should strengthen the privacy position: installation must not imply accounts, telemetry beyond the stated product policy, or cloud retention.
+
+### Durable local workspace
+
+SQLite-backed persistence could make the installed application the strongest expression of local ownership without introducing cloud storage.
+
+The product opportunity includes:
+
+- A durable library of named documents across every specialist tool.
+- Longer and more useful revision history with predictable retention controls.
+- Fast local search across document names, metadata, formats, presets, and—only when users explicitly allow it—document content.
+- Reliable relationships among source documents, conversions, extracted datasets, comparisons, and derived results.
+- Reusable log patterns, cleanup sequences, extraction setups, and format preferences.
+- Recovery from interrupted work and failed changes.
+- Local usage and storage insights that do not transmit document activity.
+- Portable backup, export, import, and restore of the user’s workspace.
+- A shared local source of truth for the installed workspace and an optional local TextyToolsMCP, if users explicitly enable that relationship.
+
+This capability changes the persistence promise. The installed product would no longer be merely a convenient wrapper around browser-local state; it would become a durable local document application. Onboarding, privacy language, deletion, backup, and recovery must reflect that distinction.
+
+Durable does not mean permanent. Users must be able to choose what becomes a saved document, control revision retention, exclude sensitive content from indexing, export their work, and erase the complete local workspace.
 
 ### Future personas and use cases
 
@@ -611,8 +634,10 @@ Alex needs to:
 1. Open a file directly in its specialist Textytools experience.
 2. Validate, inspect, convert, or compare it without first copying it into a browser.
 3. Work with several related files while preserving their names and locations.
-4. Save or export deliberately without accidentally replacing the source.
-5. Continue working when offline or behind network restrictions.
+4. Search prior local documents, conversions, and revisions without uploading them.
+5. Save or export deliberately without accidentally replacing the source.
+6. Back up or move the workspace without depending on an account.
+7. Continue working when offline or behind network restrictions.
 
 An installed application creates value if it reduces file-handling friction while retaining the safety and clarity established by the web product.
 
@@ -655,6 +680,7 @@ The installed application is worth validating only when:
 - Research identifies recurring friction that installation or operating-system integration can remove.
 - The proposed app offers material value beyond bookmarking or installing the progressive web experience.
 - Local-file permissions and save behavior can be explained without surprising users.
+- The durable local-workspace promise is understandable, including saving, indexing, retention, backup, migration, and complete deletion.
 - The product can maintain consistent transformation behavior across web and installed experiences.
 - Store policies do not require weakening core workflows or privacy promises.
 - The support burden of multiple platforms is proportionate to demonstrated demand.
@@ -664,10 +690,11 @@ The installed application is worth validating only when:
 1. Measure demand for an installed application among returning professional users.
 2. Identify the specific jobs blocked or made cumbersome by the browser experience.
 3. Prototype the smallest desktop experience that addresses local-file, offline, or operating-system workflow friction.
-4. Compare task completion and user confidence with the Phase 6 web experience.
-5. Validate one desktop platform and distribution channel before expanding the matrix.
-6. Evaluate store discovery, direct-download demand, update behavior, review overhead, and support cost.
-7. Decide whether installed distribution deserves a committed phase and which channels have earned support.
+4. Test whether a durable local document library, history, search, and backup create repeat value beyond browser persistence.
+5. Compare task completion and user confidence with the Phase 6 web experience.
+6. Validate one desktop platform and distribution channel before expanding the matrix.
+7. Evaluate store discovery, direct-download demand, update behavior, review overhead, and support cost.
+8. Decide whether installed distribution deserves a committed phase and which channels have earned support.
 
 ### Boundaries
 
@@ -675,6 +702,9 @@ The installed application is worth validating only when:
 - It should not require cloud storage, an account, or continuous connectivity.
 - It should not receive unrestricted filesystem access when the user selected only a file or folder.
 - It should not silently watch, modify, upload, or index local files.
+- It should not index document content without explicit user understanding and control.
+- It should not make the local database a proprietary trap; users need portable export and recovery options.
+- It should not expose the local document library to TextyToolsMCP merely because both products are installed.
 - It should not become a general-purpose editor, file manager, or integrated development environment.
 - Desktop availability should not make the web product a second-class or abandoned experience.
 - Mobile applications should not be pursued solely to complete a platform checklist.
@@ -686,6 +716,9 @@ The installed application is worth validating only when:
 - Signing, review, sandboxing, entitlement, and update requirements add ongoing operational work.
 - Platform differences may create inconsistent features or support expectations.
 - Direct filesystem access raises the consequence of transformation and overwrite mistakes.
+- Database corruption, failed migrations, or application removal could threaten a larger body of locally saved work.
+- Rich local search could retain sensitive content longer or make it easier to surface unexpectedly.
+- Divergent browser and installed storage models could confuse users about where a document exists.
 - A desktop application may split a small user base without improving retention.
 - Store reviews and release lead times may slow urgent fixes.
 - Mobile layouts may compromise professional workflows that require dense comparison and editing.
@@ -695,6 +728,8 @@ The installed application is worth validating only when:
 
 - Returning professionals demonstrate recurring browser constraints that installation can solve.
 - The installed experience measurably improves at least one priority workflow.
+- Users return to the durable local library, recover prior work, and understand its storage boundaries.
+- Workspace backup, restore, migration, and complete deletion are reliable enough for professional trust.
 - Users value offline certainty, local-file integration, store trust, or managed distribution enough to install and return.
 - The application remains useful without accounts or cloud storage.
 - One platform can be supported reliably before additional channels are added.
