@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
 
+import { isAnalyticsEnabled } from "@/shared/lib/analyticsConfig";
 import { SITE_URL, TOOL_CATALOG } from "@/shared/lib/toolCatalog";
 
 import "./globals.css";
@@ -131,8 +132,9 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const googleTagId =
-    process.env.NEXT_PUBLIC_GOOGLE_TAG_ID || process.env.NEXT_PUBLIC_GOOGLE_ID;
+  const googleTagId = isAnalyticsEnabled()
+    ? process.env.NEXT_PUBLIC_GOOGLE_TAG_ID || process.env.NEXT_PUBLIC_GOOGLE_ID
+    : undefined;
 
   return (
     <html lang="en">

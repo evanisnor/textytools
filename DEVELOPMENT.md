@@ -35,7 +35,9 @@ Example: `text-42-improve-json-errors`.
 
 ## Feature development in a worktree
 
-Feature work happens in an isolated Git worktree created from the latest remote `staging`:
+Before beginning implementation, assign the Linear issue to the person doing the work and
+move it to **In Progress**. Then create an isolated Git worktree from the latest remote
+`staging`:
 
 ```bash
 git fetch origin
@@ -110,7 +112,8 @@ branch-specific validation is needed.
 
 A small fix that can be completed, reviewed, and validated as one commit may be made directly
 on `staging` from the primary checkout. It still requires a `TEXT` issue, proportional checks,
-and staging validation:
+and staging validation. Assign the issue and move it to **In Progress** before beginning
+implementation:
 
 ```bash
 git fetch origin
@@ -162,6 +165,7 @@ Git and Linear must then be reconciled promptly so they again describe productio
 ## Required invariants
 
 - Feature work is isolated in worktrees.
+- Linear issues are assigned and moved to **In Progress** before implementation begins.
 - Feature branch names are DNS-safe and associated with a `TEXT` issue.
 - A feature worktree may remain active across multiple staging deployments.
 - Each staging deployment preserves and promotes a coherent series of feature commits.

@@ -20,10 +20,17 @@ git config core.hooksPath .githooks
 Set `NEXT_PUBLIC_GOOGLE_TAG_ID` to the Google tag ID installed for the site
 (for example, `GT-WV3GVH8P`). Textytools deliberately uses the `gtag/js`
 installation path and does not mount a Google Tag Manager (`gtm.js`) container.
+Configure the production property in Vercel's Production environment only.
+Vercel Preview deployments, including `staging.textytools.dev`, do not load or
+emit analytics even though their builds use `NODE_ENV=production`.
+
+To test a separate non-production property, configure its tag ID and set
+`NEXT_PUBLIC_ENABLE_ANALYTICS=true` only in the intended Preview environment.
 
 For older deployments, `NEXT_PUBLIC_GOOGLE_ID` remains a temporary fallback.
-Do not configure both variables; migrate the value to
-`NEXT_PUBLIC_GOOGLE_TAG_ID` and remove the old variable after deployment.
+Do not configure both variables; migrate the Production value to
+`NEXT_PUBLIC_GOOGLE_TAG_ID`, then remove the old variable from both Production
+and Preview scopes after deployment.
 
 The application emits these acquisition events in addition to GA4's automatic
 events:
