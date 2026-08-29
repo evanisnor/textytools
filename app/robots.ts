@@ -9,5 +9,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
     },
     sitemap: "https://textytools.dev/sitemap.xml",
+    host: "https://textytools.dev",
   };
 }

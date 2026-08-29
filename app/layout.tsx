@@ -1,9 +1,9 @@
-import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
 
-import { isRegexTesterEnabled } from "@/shared/lib/featureFlags";
+import { SITE_URL, TOOL_CATALOG } from "@/shared/lib/toolCatalog";
 
 import "./globals.css";
 
@@ -18,7 +18,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "textytools.dev - Free browser tools for developers",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "textytools.dev - Free browser tools for developers",
+    template: "%s | textytools.dev",
+  },
   description:
     "Fast, browser-based productivity tools for developers. Text manipulation, JSON formatting, case conversion, encoding, JWT decoding, and more.",
   keywords: [
@@ -65,9 +69,18 @@ export const metadata: Metadata = {
     description:
       "Fast, browser-based productivity tools for developers. Text manipulation, JSON formatting, case conversion, encoding, and more.",
     type: "website",
+    url: "/",
+    siteName: "textytools.dev",
   },
+  twitter: {
+    card: "summary",
+    title: "textytools.dev - Free browser tools for developers",
+    description:
+      "Fast, browser-based productivity tools for developers. Text manipulation, JSON formatting, case conversion, encoding, JWT decoding, and more.",
+  },
+  manifest: "/manifest.webmanifest",
   alternates: {
-    canonical: "https://textytools.dev",
+    canonical: "/",
   },
 };
 
@@ -84,67 +97,15 @@ function Footer() {
               aria-label="Tool catalog"
               className="grid grid-cols-2 gap-2 text-sm text-zinc-600 dark:text-zinc-400"
             >
-              <div className="flex flex-col gap-2">
+              {TOOL_CATALOG.map((tool) => (
                 <Link
-                  href="/text-counter"
+                  key={tool.slug}
+                  href={`/${tool.slug}`}
                   className="hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors cursor-pointer"
                 >
-                  Text Counter
+                  {tool.name}
                 </Link>
-                <Link
-                  href="/diff-viewer"
-                  className="hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors cursor-pointer"
-                >
-                  Diff Viewer
-                </Link>
-                <Link
-                  href="/case-converter"
-                  className="hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors cursor-pointer"
-                >
-                  Case Converter
-                </Link>
-                <Link
-                  href="/text-sanitizer"
-                  className="hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors cursor-pointer"
-                >
-                  Text Sanitizer
-                </Link>
-                {isRegexTesterEnabled() && (
-                  <Link
-                    href="/regex-tester"
-                    className="hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors cursor-pointer"
-                  >
-                    Regex Tester
-                  </Link>
-                )}
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <Link
-                  href="/json-wizard"
-                  className="hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors cursor-pointer"
-                >
-                  JSON Wizard
-                </Link>
-                <Link
-                  href="/csv-json-converter"
-                  className="hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors cursor-pointer"
-                >
-                  CSV / JSON Converter
-                </Link>
-                <Link
-                  href="/text-encoder"
-                  className="hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors cursor-pointer"
-                >
-                  Text Encoder
-                </Link>
-                <Link
-                  href="/jwt-decoder"
-                  className="hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors cursor-pointer"
-                >
-                  JWT Decoder
-                </Link>
-              </div>
+              ))}
             </div>
           </div>
 
@@ -170,6 +131,9 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const googleTagId =
+    process.env.NEXT_PUBLIC_GOOGLE_TAG_ID || process.env.NEXT_PUBLIC_GOOGLE_ID;
+
   return (
     <html lang="en">
       <body
@@ -177,8 +141,7 @@ export default function RootLayout({
       >
         <div className="flex-1">{children}</div>
         <Footer />
-        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GOOGLE_ID || ""} />
-        <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID || ""} />
+        {googleTagId && <GoogleAnalytics gaId={googleTagId} />}
       </body>
     </html>
   );

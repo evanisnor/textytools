@@ -1,32 +1,8 @@
-import type { Metadata } from "next";
+import { createToolMetadata } from "@/shared/lib/toolMetadata";
+import { ToolRouteLayout } from "@/shared/ui/tool-structured-data/ToolRouteLayout";
 
-export const metadata: Metadata = {
-  title: "Diff Viewer - Compare text side-by-side with highlights",
-  description:
-    "Compare two text blocks with side-by-side diff highlighting, search, and navigation. Helpful for code, documents, and prose diffing.",
-  keywords: [
-    "diff viewer",
-    "compare text",
-    "text diff",
-    "side-by-side diff",
-    "diff tool",
-    "compare files",
-    "code diff",
-    "text comparison",
-    "diff highlight",
-    "online diff tool",
-    "textytools",
-  ],
-  openGraph: {
-    title: "Diff Viewer - Compare text side-by-side with highlights",
-    description:
-      "Compare two text blocks with side-by-side diff highlighting, search, and navigation.",
-  },
-  alternates: {
-    canonical: "https://textytools.dev/diff-viewer",
-  },
-};
+export const metadata = createToolMetadata("diff-viewer");
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return children;
+  return <ToolRouteLayout slug="diff-viewer">{children}</ToolRouteLayout>;
 }

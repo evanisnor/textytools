@@ -1,11 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 
 import { FeedbackModal } from "./FeedbackModal";
 
-import { trackFeedbackOpen } from "@/shared/lib/analytics";
+import {
+  trackFeedbackOpen,
+  trackToolActivation,
+  trackToolView,
+} from "@/shared/lib/analytics";
 
 interface ToolFrameProps {
   title: string;
@@ -28,6 +32,18 @@ export function ToolFrame({
 }: ToolFrameProps) {
   const maxWidthClass = `max-w-${maxWidth}`;
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
+  const hasActivated = useRef(false);
+
+  useEffect(() => {
+    trackToolView({ tool: toolName });
+  }, [toolName]);
+
+  const handleActivation = () => {
+    if (hasActivated.current) return;
+
+    hasActivated.current = true;
+    trackToolActivation({ tool: toolName });
+  };
 
   const handleFeedbackClick = () => {
     setIsFeedbackModalOpen(true);
@@ -35,7 +51,10 @@ export function ToolFrame({
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 py-12 px-6">
+    <div
+      className="min-h-screen bg-zinc-50 dark:bg-zinc-950 py-12 px-6"
+      onInputCapture={handleActivation}
+    >
       <div className={`${maxWidthClass} mx-auto`}>
         {/* Back button and Feedback button */}
         <div className="mb-8 flex items-center justify-between">

@@ -28,16 +28,44 @@ const analyticsEnabled =
 function sendEvent(name: string, params: Record<string, unknown>) {
   if (typeof window === "undefined") return;
 
-  const gtag = (window as unknown as { gtag?: (...args: unknown[]) => void })
-    .gtag;
-  if (typeof gtag === "function") {
-    try {
-      gtag("event", name, params);
-    } catch (err) {
-      // don't let analytics failures break the app
-      console.warn("gtag('event') failed", err);
-    }
+  try {
+    const analyticsWindow = window as typeof window & {
+      dataLayer?: unknown[][];
+      gtag?: (...args: unknown[]) => void;
+    };
+
+    analyticsWindow.dataLayer = analyticsWindow.dataLayer || [];
+    const gtag =
+      analyticsWindow.gtag ||
+      function (...args: unknown[]) {
+        analyticsWindow.dataLayer?.push(args);
+      };
+
+    gtag("event", name, {
+      page_location: window.location.href,
+      page_path: window.location.pathname,
+      ...params,
+    });
+  } catch (err) {
+    // Analytics must never interfere with the tool itself.
+    console.warn("Unable to queue analytics event", err);
   }
+}
+
+/** Track a tool landing page view independently of its changing page title. */
+export function trackToolView(params: BaseEventParams) {
+  if (!analyticsEnabled) return;
+
+  const { tool, ...customParams } = params;
+  sendEvent("tool_view", { tool_name: tool, ...customParams });
+}
+
+/** Track the first meaningful input interaction in a tool session. */
+export function trackToolActivation(params: BaseEventParams) {
+  if (!analyticsEnabled) return;
+
+  const { tool, ...customParams } = params;
+  sendEvent("tool_activation", { tool_name: tool, ...customParams });
 }
 
 /**
