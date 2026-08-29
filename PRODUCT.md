@@ -497,6 +497,88 @@ Candidates are not commitments. Each must demonstrate:
 - A meaningful portion discover or continue into a related tool.
 - Catalog growth does not reduce comprehension of the homepage or product promise.
 
+#### Exit criteria
+
+- The catalog represents a coherent set of professional text and data jobs rather than an unstructured list of utilities.
+- Tool groupings and common workflow relationships are supported by observed use.
+- The accumulated tools, documents, history, presets, and cross-tool actions are substantial enough to expose the limits of the original information architecture.
+
+### Phase 6: Redesign Textytools as a professional progressive web application
+
+#### Objective
+
+Replace the utility-site experience with a coherent, progressive workspace that feels familiar and productive to professionals who work with text and data throughout the day.
+
+This is an information-architecture and interaction redesign, not a visual refresh. It follows the depth and workflow phases so the new experience is organized around demonstrated value rather than hypothetical platform features.
+
+#### Product experience
+
+The redesigned product should support two modes without forcing users to choose between them:
+
+- A visitor arriving at a specific tool can immediately complete a one-off task with minimal interface overhead.
+- A returning user can move efficiently among tools, open documents, recent work, presets, conversions, and history from a consistent workspace.
+
+The experience should become progressively richer as users perform more complex or recurring work. Professional capability should be available without making first use feel like onboarding into enterprise software.
+
+#### Scope
+
+- Replace the flat catalog with an information architecture organized around user jobs such as inspect, clean, extract, convert, compare, encode, and analyze.
+- Give every specialist tool a consistent place within the broader workspace while preserving its focused identity and direct destination.
+- Introduce a persistent workspace model for navigating among tools, open documents, recent work, saved presets, and related actions.
+- Support efficient switching among active pieces of work without losing context or requiring repeated copying and setup.
+- Make search and command-oriented navigation useful for professionals who know what they want to do.
+- Establish consistent professional conventions for opening, saving, duplicating, renaming, exporting, comparing, undoing, and closing work.
+- Let users personalize working density, layout, editor behavior, and frequently used tools without creating a setup requirement.
+- Make advanced controls progressively discoverable and preserve generous space for the content being worked on.
+- Provide clear global awareness of unsaved work, saved local work, storage status, processing state, errors, and offline availability.
+- Make keyboard operation, focus management, readable contrast, zoom, reduced motion, and assistive-technology support foundational to the redesigned experience.
+- Deliver an effective experience across desktop, tablet, and mobile while recognizing that complex comparison and transformation work may be most productive on larger screens.
+- Support installation and useful offline work where it strengthens the browser-local promise, while keeping ordinary web access fully capable.
+- Preserve direct links, search discovery, tool documentation, and the fast landing experience throughout the transition.
+
+#### Familiar professional patterns to evaluate
+
+- A navigable tool and document sidebar.
+- Tabs or another clear model for multiple active documents.
+- A command palette and universal search.
+- Recent and pinned tools, documents, and presets.
+- Contextual action bars close to the active content.
+- Resizable or focusable input, output, preview, and inspector areas.
+- Visible breadcrumbs or provenance for derived documents and conversions.
+- Recoverable sessions and clear unsaved-change indicators.
+
+These are candidate interaction patterns, not requirements in isolation. Each must make the priority persona workflows faster or clearer in usability testing.
+
+#### Explicitly deferred
+
+- User accounts as a prerequisite for the redesigned experience.
+- Cloud synchronization, sharing, and team workspaces.
+- A native desktop or mobile application.
+- An integrated development environment or general-purpose file manager.
+- Social feeds, activity dashboards, gamification, and other engagement mechanics unrelated to completed work.
+- Removing direct access to individual tools in favor of a mandatory workspace entry point.
+
+#### Success signals
+
+- New visitors reach the first useful result at least as quickly as before the redesign.
+- Returning users find tools, documents, presets, and recent work faster.
+- Multi-step workflows require fewer navigation, copying, and reconfiguration actions.
+- Professionals successfully use keyboard and command-oriented navigation for recurring work.
+- More users complete workflows spanning multiple tools without an increase in confusion or abandonment.
+- Direct tool traffic and documentation discovery remain healthy after the information architecture changes.
+- Users understand what is temporary, unsaved, saved locally, derived, or available offline.
+- Accessibility evaluation shows that richer workspace interactions do not exclude keyboard or assistive-technology users.
+
+#### Exit criteria
+
+- The primary persona journeys can be completed end to end in the redesigned workspace.
+- One-off visitors are not required to learn workspace concepts before using a tool.
+- Navigation remains understandable as the catalog grows and tools gain deeper controls.
+- Open work, saved work, history, presets, and cross-tool conversions have distinct and consistent places in the experience.
+- Existing direct destinations and saved local work transition without unexpected loss.
+- Offline and installation behavior is useful, optional, and clearly communicated.
+- The redesign demonstrates measurable workflow improvement beyond aesthetic preference.
+
 ## Measurement framework
 
 Measurement should reflect completed work, not raw activity.
@@ -560,6 +642,10 @@ Prefer deepening an existing tool when the user intent and working context are s
 ### Productivity theater
 
 Do not use document counts, activity streaks, dashboards, or decorative analytics as substitutes for helping users finish work.
+
+### Redesigning the shell instead of the work
+
+The Phase 6 redesign must not substitute navigation polish for tool quality. New workspace patterns should be adopted only when they improve demonstrated persona workflows, preserve direct tool use, and reduce measurable friction.
 
 ## Non-goals
 
