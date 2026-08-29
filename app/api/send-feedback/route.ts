@@ -1,5 +1,5 @@
-import Mailgun from "mailgun.js";
 import { NextRequest, NextResponse } from "next/server";
+import { Resend } from "resend";
 
 export const runtime = "nodejs";
 
@@ -21,54 +21,41 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid email" }, { status: 400 });
     }
 
-    // Check for required Mailgun configuration
-    const mailgunApiKey = process.env.MAILGUN_API_KEY;
-    const mailgunDomain = process.env.MAILGUN_DOMAIN;
+    // Check for required Resend configuration
+    const resendApiKey = process.env.RESEND_API_KEY;
 
-    if (!mailgunApiKey || !mailgunDomain) {
-      console.error("MAILGUN_API_KEY or MAILGUN_DOMAIN is not configured");
+    if (!resendApiKey) {
+      console.error("RESEND_API_KEY is not configured");
       return NextResponse.json(
         { error: "Email service not configured" },
         { status: 500 },
       );
     }
 
-    // Initialize Mailgun client
-    const mailgun = new Mailgun(FormData);
-    const mg = mailgun.client({
-      username: "api",
-      key: mailgunApiKey,
-      useFetch: true,
-    });
-
-    // Get the authorized recipient email for sandbox/free accounts
+    const resend = new Resend(resendApiKey);
     const recipientEmail =
-      process.env.MAILGUN_RECIPIENT_EMAIL || "contact@textytools.dev";
+      process.env.FEEDBACK_RECIPIENT_EMAIL || "contact@textytools.dev";
+    const fromEmail =
+      process.env.RESEND_FROM_EMAIL ||
+      "textytools.dev <noreply@textytools.dev>";
 
-    // Send email via Mailgun
-    try {
-      await mg.messages.create(mailgunDomain, {
-        from: `textytools.dev <noreply@${mailgunDomain}>`,
-        to: [recipientEmail],
-        "h:Reply-To": `${name} <${email}>`,
-        subject: `Feedback from ${name}`,
-        text: `
+    const { error: resendError } = await resend.emails.send({
+      from: fromEmail,
+      to: recipientEmail,
+      replyTo: `${name} <${email}>`,
+      subject: `Feedback from ${name}`,
+      text: `
 Name: ${name}
 Email: ${email}
 
 Message:
 ${message}
       `.trim(),
-      });
-    } catch (mailgunError) {
-      console.error("Mailgun API error:", {
-        error: mailgunError,
-        message:
-          mailgunError instanceof Error
-            ? mailgunError.message
-            : "Unknown error",
-      });
-      throw mailgunError;
+    });
+
+    if (resendError) {
+      console.error("Resend API error:", resendError);
+      throw new Error(resendError.message);
     }
 
     return NextResponse.json({ success: true });
