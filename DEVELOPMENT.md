@@ -60,6 +60,29 @@ The feature worktree remains open for the life of the feature. It may produce se
 staging deployments as successive coherent groups of commits become ready for integrated
 validation.
 
+## Commit messages
+
+Commit messages must identify the issue and describe the delivered change in a structure
+that remains useful without the surrounding development session:
+
+```text
+Prevent Preview deployments from loading production analytics (TEXT-42)
+
+Changes:
+- Gate analytics using the Vercel deployment environment.
+- Cover Production, Preview, and explicit opt-in behavior.
+
+Validation:
+- npm run typecheck
+- npm run lint
+- npm test -- --runInBand
+```
+
+Use a concise imperative subject. Include `Changes` and `Validation` sections in the body;
+add a `Risks` or `Follow-up` section when relevant. Do not list checks that were not run.
+Merge commit subjects remain `Merge TEXT-42 into staging`, with the promoted outcome and
+staging validation recorded in Linear as described below.
+
 ## Deploy to staging
 
 “Deploy to staging” means merging the currently ready commits from the feature branch into
@@ -114,8 +137,8 @@ implementation:
 git fetch origin
 git switch staging
 git pull --ff-only origin staging
-# make and validate the small fix
-git commit -m "Describe the fix (TEXT-42)"
+# make and validate the small fix, then use the structured message above
+git commit
 git push origin staging
 ```
 
