@@ -102,7 +102,10 @@ Report any check that was not run and why. Do not claim verification based only 
 ## Git, commits, and deployment
 
 - Use Linear as the system of record for planning, issues, tasks, assignments, and work
-  status. Keep relevant Linear work linked to GitHub delivery artifacts.
+  status. Textytools work belongs to the `textytools` Linear team and uses the `TEXT`
+  issue identifier. Follow the operating practice in the private
+  `tidalsoft/internal-docs` repository at `workspace/LINEAR.md`, and keep relevant Linear
+  work linked to GitHub delivery artifacts.
 - Perform GitHub interactions with the authenticated `gh` CLI against the `tidalsoft`
   organization.
 - Preserve unrelated user changes in a dirty worktree. Stage only files belonging to the requested task.
