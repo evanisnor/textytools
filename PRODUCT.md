@@ -8,49 +8,155 @@ It should help people move from raw input to a trustworthy, reusable result with
 
 The product is not defined by the number of utilities it offers. It wins when each tool resolves a meaningful job quickly, explains its result clearly, and makes the user's next step obvious.
 
-## The product promise
+## Product position
 
-Textytools should consistently feel:
+Textytools competes with one-off utility sites, editor extensions, command-line tools, spreadsheets, and improvised scripts. Its advantage is not that it can perform transformations those products cannot. Its advantage is that a user can inspect sensitive content, understand what will happen, transform it, verify the result, and continue working without setup or upload.
 
-- Immediate: useful before configuration and responsive while the user works.
-- Private: content stays in the browser, with storage behavior made explicit.
-- Trustworthy: results, assumptions, limitations, and destructive actions are understandable.
-- Focused: every tool has a clear primary job and avoids becoming a general-purpose application.
-- Connected: users can continue useful work without copying between unrelated tools.
-- Durable: users can return to important work on the same device when they choose to save it.
+The product serves one-off tasks immediately while adding optional value for recurring tasks through presets, saved documents, and history.
 
-## Target users
+## Personas and valuable use cases
 
-### Primary: developers and technical practitioners
+Personas describe recurring needs rather than demographic segments. One person may use Textytools as several personas during the same workday.
 
-They regularly inspect, validate, clean, compare, encode, and convert text or structured data. They value speed, precision, keyboard-friendly workflows, and confidence that sensitive content is not being transmitted.
+### Maya, the backend developer debugging an integration
 
-Typical jobs include:
+Maya receives an API payload, webhook, token, or configuration file that another system rejected. The content may contain customer data or credentials, so she does not want to upload it to an unknown service.
 
-- Understand the structure or limits of unfamiliar text and data.
-- Diagnose why a payload, pattern, token, or conversion is not behaving as expected.
-- Transform content into the exact format required by another system.
-- Compare versions and verify that only intended changes occurred.
-- Resume a recurring task without reconstructing its setup.
+She needs to:
 
-### Secondary: writers, students, analysts, and operations users
+1. Identify the content type and the first validation failure.
+2. Inspect nested values, encoded fields, timestamps, and tokens.
+3. Correct or reshape the payload without losing the original.
+4. Compare the corrected result with the source.
+5. Copy or download the exact output expected by the destination system.
 
-They need approachable ways to count, clean, compare, extract, or reformat content without learning specialist software.
+Textytools creates value when JSON Wizard, JWT Decoder, Text Encoder, date conversion, and Diff Viewer work as a coherent debugging path. The result is not merely “valid JSON”; it is a payload Maya understands and can confidently submit.
 
-Textytools should remain understandable to these users, but product decisions should not weaken precision for the primary audience.
+### Jordan, the analyst turning messy text into rows
 
-## Core user journey
+Jordan receives survey responses, copied reports, email exports, lists, or operational notes. The source is semi-structured: it contains recurring labels and patterns but is not valid CSV or JSON.
 
-The intended product loop is:
+Jordan needs to:
 
-1. Arrive with a specific problem.
-2. Paste, type, or open content and receive an immediate useful result.
-3. Understand how the result was produced and whether it can be trusted.
-4. Refine the result with controls relevant to the job.
-5. Copy, download, save, compare, or continue in another tool.
-6. Return later to recent or deliberately saved work when useful.
+1. Clean inconsistent whitespace, punctuation, line breaks, and repeated boilerplate.
+2. Identify recurring records and fields.
+3. Extract named values into columns.
+4. See which records failed or produced ambiguous fields.
+5. Correct the extraction rules without starting over.
+6. Export the result as CSV or JSON and continue validating it.
 
-The first useful result must not depend on account creation, onboarding, or understanding the wider product.
+This is a first-class unstructured-to-structured use case. Textytools should support extraction based on patterns, delimiters, labeled values, and line structure; preview the resulting table; distinguish successful, partial, and failed records; and send the result into CSV / JSON Converter or JSON Wizard. The original text must remain available for comparison.
+
+The outcome is a reviewable dataset, not an opaque bulk conversion.
+
+### Rafael, the support or operations engineer investigating logs
+
+Rafael pastes logs from several systems while responding to an incident. Lines contain timestamps, request IDs, status codes, messages, and occasional stack traces.
+
+He needs to:
+
+1. Remove irrelevant lines and normalize recurring noise.
+2. Find and highlight incidents matching one or more patterns.
+3. Extract fields such as timestamp, service, request ID, status, and message.
+4. Group or sort results to reveal frequency and sequence.
+5. Export evidence or compare logs from before and after a change.
+6. Save the extraction setup for the next incident without saving sensitive log content unintentionally.
+
+Textytools creates value by joining Text Sanitizer, Regex Tester, structured extraction, counting, and Diff Viewer into a repeatable investigation workflow.
+
+### Priya, the AI application developer managing context
+
+Priya is preparing prompts, retrieved documents, or examples for several model families. She needs more than a generic word counter.
+
+She needs to:
+
+1. Compare exact token counts where local tokenizers are available.
+2. Understand when a count is only an estimate.
+3. See which sections consume the most context.
+4. Work toward a target context limit.
+5. Compare the original prompt with a shortened version.
+6. Revisit recurring prompt drafts and their prior counts.
+
+Textytools creates value when Text Counter explains tokenization, exposes model differences, and connects naturally to sanitizing, comparing, and saving prompt drafts without claiming unsupported precision.
+
+### Elena, the technical writer cleaning and adapting content
+
+Elena moves content among documents, content systems, spreadsheets, and developer tools. Copied text often contains malformed whitespace, smart punctuation, duplicate lines, inconsistent headings, or identifiers in the wrong case.
+
+She needs to:
+
+1. Inspect counts and content limits.
+2. Apply a repeatable sequence of cleanup actions.
+3. Preview destructive changes.
+4. Adapt headings, identifiers, or lists to the target format.
+5. Verify the final version against the original.
+6. Reuse a cleanup preset for recurring publishing work.
+
+Textytools creates value by making cleanup sequences explainable, reversible, and reusable rather than offering a collection of unrelated checkboxes.
+
+### Sam, the security-conscious developer inspecting encoded content
+
+Sam encounters a JWT, hash, Base64 value, URL-encoded parameter, or suspicious invisible character while debugging authentication or transport behavior.
+
+He needs to:
+
+1. Identify the likely representation.
+2. Decode or inspect it without transmitting it.
+3. Understand the distinction between decoding, verification, hashing, and encryption.
+4. Validate claims or integrity when local verification is possible.
+5. Inspect the revealed JSON or bytes in the appropriate tool.
+6. Redact sensitive values before copying a diagnostic result.
+
+Textytools creates value by reducing security mistakes and presenting a safe next action, not simply displaying decoded text.
+
+## Priority use cases
+
+### Turn unstructured text into structured data
+
+This is a product-level workflow, not a minor Regex Tester export feature.
+
+Supported inputs should include copied reports, repeated text records, labeled fields, logs, lists, and delimiter-like text that is not yet valid CSV. Users should be able to move through four distinct stages:
+
+1. Prepare: normalize or remove noise without destroying the source.
+2. Define: identify record boundaries and name the fields to extract.
+3. Review: inspect a tabular preview and isolate partial or failed records.
+4. Deliver: export CSV or JSON, or continue refining the structured result.
+
+Product improvements required to support the use case:
+
+- Regex Tester adds extraction-oriented results, named fields, record-level failures, replacement preview, and reusable patterns.
+- Text Sanitizer adds ordered cleanup sequences, previews, and locally saved presets.
+- A dedicated Data Extractor becomes warranted when guided field extraction and record review outgrow the primary job of Regex Tester.
+- CSV / JSON Converter adds a reviewable table, column controls, and explicit type decisions.
+- JSON Wizard adds querying, reshaping, and validation of extracted results.
+- Diff Viewer compares cleaned or extracted work with the original.
+- Cross-tool actions preserve the source, field names, and relevant choices.
+
+Success means a non-programmer can produce a usable table from recurring text patterns, while a technical user retains enough control to diagnose every rejected record.
+
+### Diagnose and repair structured data
+
+Users should be able to locate an error, understand it, make or preview a correction, validate the result, and compare it with the source. JSON is the initial focus, followed by CSV and additional data formats where demand warrants.
+
+### Extract evidence from logs and text
+
+Users should be able to filter lines, test patterns, navigate matches, extract named fields, review unmatched content, and export evidence without losing the surrounding source.
+
+### Prepare content for model context limits
+
+Users should be able to count accurately where possible, set a target, identify expensive sections, refine the text, and verify the reduction. Estimates must remain visibly distinct from exact counts.
+
+### Clean recurring text safely
+
+Users should be able to build a named cleanup sequence, preview its cumulative effect, compare before and after, and reuse it on new content. The sequence is reusable; sensitive content is not saved unless the user deliberately saves it.
+
+### Inspect and convert encoded developer data
+
+Users should be able to identify likely encodings, inspect bytes or claims, perform supported conversions, understand irreversible operations, and continue in the correct structured-data tool.
+
+### Compare meaningful changes
+
+Users should be able to compare prose, code, logs, and structured data while controlling common sources of noise such as whitespace, line endings, case, or key ordering.
 
 ## Strategic choices
 
@@ -114,76 +220,21 @@ Generic or repetitive copy will not create trust or durable discoverability. Doc
 
 Search traffic may bring users to a single utility, but a larger feature catalog alone will not create retention. Repeat value comes from saved preferences, reusable presets, connected workflows, and reliable return to prior work—without slowing down first use.
 
-## Product pillars
+## Concrete product commitments
 
-### 1. Specialized tools
-
-Each tool should excel at a recognizable job rather than accumulate loosely related functions.
-
-Priority depth areas are:
-
-- Text Counter: text analysis and model-context awareness.
-- JSON Wizard: inspection, validation, querying, and controlled reshaping.
-- Regex Tester: matching, extraction, replacement, explanation, and safe experimentation.
-- CSV / JSON Converter: transparent conversion and practical tabular cleanup.
-- Diff Viewer: precise text comparison with meaningful ways to ignore noise.
-- JWT Decoder: security-conscious inspection that distinguishes decoding from verification.
-- Text Sanitizer: repeatable, understandable cleaning sequences.
-- Text Encoder: clear separation of encoding, decoding, hashing, and byte inspection.
-- Case Converter: reliable identifier and natural-language case conversion.
-
-### 2. Understandable results
-
-Every tool should help users answer both “what happened?” and “can I trust it?”
-
-This includes:
-
-- Clear empty, valid, invalid, and partial-result states.
-- Visible assumptions and inferred settings.
-- Explanations for destructive or lossy operations.
-- Useful statistics and diagnostics rather than decorative metrics.
-- Examples that can be loaded without replacing unsaved work unexpectedly.
-
-### 3. Workflow continuity
-
-Users should be able to take a result into the next relevant task while preserving its meaning and origin.
-
-Continuity includes:
-
-- Contextual next actions.
-- Consistent copy and download behavior.
-- The ability to compare a transformed result with its source.
-- Clear provenance when one piece of work is derived from another.
-- Return to recent or saved work on the same device.
-
-### 4. Useful documentation
-
-Every public tool should include task-specific guidance beneath the working area.
-
-Documentation should cover:
-
-- What the tool does and does not do.
-- A short path to first success.
-- Definitions for important controls and outputs.
-- Representative examples.
-- Edge cases and limitations.
-- Privacy behavior.
-- Relevant related tools and standards.
-
-Documentation quality is part of the feature definition, not a marketing task deferred until later.
-
-### 5. Local ownership
-
-Users should control which work persists and for how long. The product should support one-off use, draft recovery, and deliberate saving without treating them as the same behavior.
-
-Local ownership eventually includes:
-
-- Named documents.
-- Recent work by tool.
-- Global access to saved work.
-- Meaningful revisions rather than a snapshot for every keystroke.
-- Export, import, and deletion controls.
-- Clear storage limits and retention expectations.
+- Every public tool will define its primary job, supported use cases, inputs, outputs, failure states, and next actions.
+- Every public tool will provide task-specific documentation, examples, limitations, and privacy behavior on the page.
+- Text Counter will expand beyond a legacy model count into model-context comparison, target limits, and deeper text analysis.
+- Regex Tester will support matching, extraction, replacement, explanation, and review of records that fail extraction.
+- Text Sanitizer will support ordered, previewable, reusable cleanup sequences.
+- JSON Wizard will support finding, validating, querying, reshaping, and comparing JSON—not formatting alone.
+- CSV / JSON Converter will expose tabular previews, column decisions, type decisions, and malformed records before export.
+- Diff Viewer will compare at useful levels of detail and let users control irrelevant differences.
+- JWT Decoder will distinguish inspection from verification and guide users toward safe handling of claims and secrets.
+- Text Encoder will clearly separate reversible encodings, one-way hashes, ciphers, and byte inspection.
+- Case Converter will address identifier conventions, word-boundary ambiguity, and batch conversion.
+- High-value outputs will offer a small number of contextual next actions that preserve the source and result.
+- Users will be able to use every tool once without saving content, and later choose to save recurring work locally.
 
 ## Product principles for scope decisions
 
@@ -219,8 +270,10 @@ Make the most valuable existing tools substantially more capable while preservin
 
 - Reposition Text Counter as a text and model-context analyzer, with exact and estimated counts labeled honestly.
 - Deepen JSON Wizard around inspection, validation, querying, and controlled transformation.
-- Deepen Regex Tester around extraction, replacement, explanation, and safe experimentation.
-- Improve CSV / JSON Converter by making detection, type decisions, and conversion loss visible.
+- Deepen Regex Tester around extraction, named fields, replacement, explanation, and review of unmatched records.
+- Improve CSV / JSON Converter with a tabular preview that makes detection, column choices, type decisions, malformed records, and conversion loss visible.
+- Let users complete an initial unstructured-to-structured workflow: clean recurring text, extract named fields, review exceptions, and export CSV or JSON.
+- Add ordered cleanup and before-and-after review to Text Sanitizer.
 - Add tool-specific documentation to every public tool, beginning with the four priority tools.
 - Establish consistent language for privacy, accuracy, destructive actions, and inferred behavior.
 
@@ -238,10 +291,12 @@ Make the most valuable existing tools substantially more capable while preservin
 - Priority tools generate deeper use without increasing early abandonment.
 - Feedback shows that users understand important limitations and inferred behavior.
 - Documentation attracts relevant entry traffic and supports feature use rather than merely page views.
+- Users successfully turn representative logs, labeled records, and repeated text blocks into reviewable structured output.
 
 #### Exit criteria
 
 - Priority tools have a clear fast path and discoverable advanced path.
+- The unstructured-to-structured workflow handles successful, partial, and failed records without hiding exceptions.
 - Every public tool explains its purpose, behavior, privacy, and limitations.
 - Accuracy language is consistent across the product.
 - No priority feature relies on server-side processing of tool content.
@@ -259,12 +314,13 @@ Reduce copying, re-pasting, and loss of context between related tasks.
 - Allow transformed results to be compared with their source.
 - Standardize copy, download, reset, and continuation behavior.
 - Expand depth in Diff Viewer, Text Sanitizer, and JWT Decoder where it strengthens connected workflows.
+- Decide whether guided structured extraction has earned a dedicated Data Extractor based on use of the initial extraction workflow and observed failure points.
 - Introduce a small number of format-focused tools only when they complete obvious gaps in existing workflows.
 
 Priority workflow families are:
 
 - Inspect JSON, reshape it, convert it, and compare the result.
-- Match text, extract structured results, and continue in a data tool.
+- Prepare messy text, define records and fields, review extraction failures, and continue in a data tool.
 - Clean text, analyze it, convert its case, and verify the change.
 - Decode or inspect encoded data, then validate the revealed format.
 
@@ -281,6 +337,7 @@ Priority workflow families are:
 - Connected sessions include more completed tasks, not merely more page views.
 - Fewer users repeat paste-and-configure steps across tools.
 - Destination tools receive content in a state users can understand and undo.
+- Users reuse successful extraction and cleanup setups on new content.
 
 #### Exit criteria
 
