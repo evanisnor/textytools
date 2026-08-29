@@ -26,11 +26,13 @@ She needs to:
 
 1. Identify the content type and the first validation failure.
 2. Inspect nested values, encoded fields, timestamps, and tokens.
-3. Correct or reshape the payload without losing the original.
-4. Compare the corrected result with the source.
-5. Copy or download the exact output expected by the destination system.
+3. Convert among JSON, YAML, and TOML when systems or repositories require different formats.
+4. Understand which values, comments, or format-specific constructs cannot survive the conversion unchanged.
+5. Correct or reshape the payload without losing the original.
+6. Compare the corrected result with the source.
+7. Copy or download the exact output expected by the destination system.
 
-Textytools creates value when JSON Wizard, JWT Decoder, Text Encoder, date conversion, and Diff Viewer work as a coherent debugging path. The result is not merely “valid JSON”; it is a payload Maya understands and can confidently submit.
+Textytools creates value when structured-data validation and conversion, JWT Decoder, Text Encoder, date conversion, and Diff Viewer work as a coherent debugging path. The result is not merely valid syntax; it is a configuration or payload Maya understands and can confidently submit.
 
 ### Jordan, the analyst turning messy text into rows
 
@@ -136,7 +138,23 @@ Success means a non-programmer can produce a usable table from recurring text pa
 
 ### Diagnose and repair structured data
 
-Users should be able to locate an error, understand it, make or preview a correction, validate the result, and compare it with the source. JSON is the initial focus, followed by CSV and additional data formats where demand warrants.
+Users should be able to locate an error, understand it, make or preview a correction, validate the result, and compare it with the source. JSON is the initial foundation; YAML and TOML join the same workflow in Phase 2.
+
+### Convert among structured-data formats
+
+Users should be able to move among JSON, YAML, and TOML without visiting separate pairwise converters. The workflow should let them:
+
+1. Paste or open data in any supported format.
+2. Confirm or correct the detected source format.
+3. Validate the source before conversion.
+4. Select a destination format and preview the result.
+5. Review warnings about comments, duplicate keys, ambiguous scalar values, dates, numeric precision, ordering, and structures the destination cannot represent faithfully.
+6. Compare the meaning and shape of the result with the source.
+7. Copy, download, or continue editing in the destination format.
+
+JSON, YAML, and TOML share enough developer use cases to form one structured-data workflow, but they are not interchangeable representations. Textytools should never promise a lossless round trip when a source feature has no destination equivalent.
+
+CSV remains connected but distinct because converting nested data to rows requires explicit choices about columns, arrays, and types. XML remains a later candidate because attributes, namespaces, and mixed content introduce a different conversion model and a greater risk of misleading output.
 
 ### Extract evidence from logs and text
 
@@ -228,6 +246,7 @@ Search traffic may bring users to a single utility, but a larger feature catalog
 - Regex Tester will support matching, extraction, replacement, explanation, and review of records that fail extraction.
 - Text Sanitizer will support ordered, previewable, reusable cleanup sequences.
 - JSON Wizard will support finding, validating, querying, reshaping, and comparing JSON—not formatting alone.
+- Structured-data tools will extend this inspection model to YAML and TOML and support conversion among all three formats with fidelity warnings.
 - CSV / JSON Converter will expose tabular previews, column decisions, type decisions, and malformed records before export.
 - Diff Viewer will compare at useful levels of detail and let users control irrelevant differences.
 - JWT Decoder will distinguish inspection from verification and guide users toward safe handling of claims and secrets.
@@ -301,7 +320,7 @@ Make the most valuable existing tools substantially more capable while preservin
 - Accuracy language is consistent across the product.
 - No priority feature relies on server-side processing of tool content.
 
-### Phase 2: Connect common workflows
+### Phase 2: Connect tools and structured-data formats
 
 #### Objective
 
@@ -313,13 +332,17 @@ Reduce copying, re-pasting, and loss of context between related tasks.
 - Preserve source context when work continues in another tool.
 - Allow transformed results to be compared with their source.
 - Standardize copy, download, reset, and continuation behavior.
+- Expand structured-data support from JSON to YAML and TOML validation, formatting, inspection, and conversion.
+- Offer conversion among JSON, YAML, and TOML as one coherent workflow rather than a collection of pairwise utilities.
+- Warn before conversion when the destination cannot faithfully represent source content or meaning.
+- Let users compare source and converted data and identify changes in structure or interpretation.
 - Expand depth in Diff Viewer, Text Sanitizer, and JWT Decoder where it strengthens connected workflows.
 - Decide whether guided structured extraction has earned a dedicated Data Extractor based on use of the initial extraction workflow and observed failure points.
 - Introduce a small number of format-focused tools only when they complete obvious gaps in existing workflows.
 
 Priority workflow families are:
 
-- Inspect JSON, reshape it, convert it, and compare the result.
+- Inspect JSON, YAML, or TOML; validate and reshape it; convert it; and compare the result.
 - Prepare messy text, define records and fields, review extraction failures, and continue in a data tool.
 - Clean text, analyze it, convert its case, and verify the change.
 - Decode or inspect encoded data, then validate the revealed format.
@@ -330,6 +353,7 @@ Priority workflow families are:
 - Arbitrary tool chaining as a primary interface.
 - A destination menu showing every possible tool.
 - Durable storage of every transfer by default.
+- XML conversion until its distinct representation and fidelity rules receive dedicated product treatment.
 
 #### Success signals
 
@@ -338,10 +362,13 @@ Priority workflow families are:
 - Fewer users repeat paste-and-configure steps across tools.
 - Destination tools receive content in a state users can understand and undo.
 - Users reuse successful extraction and cleanup setups on new content.
+- Users complete JSON, YAML, and TOML conversions while understanding any warnings or loss of fidelity.
 
 #### Exit criteria
 
 - The highest-value workflow families have clear, contextual continuation paths.
+- JSON, YAML, and TOML have consistent validation, inspection, and conversion journeys.
+- Format conversion reports meaningful differences instead of treating syntactic success as proof of equivalence.
 - Cross-tool actions preserve provenance and never silently discard destination work.
 - Integration choices remain limited enough to be understandable.
 
@@ -426,7 +453,7 @@ Serve additional high-intent jobs that reinforce the existing text and data work
 
 #### Candidate areas
 
-- YAML, XML, and TOML validation and conversion.
+- XML validation and conversion, with explicit handling of attributes, namespaces, and mixed content.
 - JSONPath exploration.
 - Unicode and invisible-character inspection.
 - Line-oriented cleanup and set operations.
