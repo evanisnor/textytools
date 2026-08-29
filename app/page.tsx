@@ -23,7 +23,7 @@ export default function Home() {
     },
     creator: {
       "@type": "Organization",
-      name: "Texty Software",
+      name: "Tidalsoft",
     },
     hasPart: TOOL_CATALOG.map((tool) => ({
       "@type": "WebApplication",

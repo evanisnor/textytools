@@ -62,8 +62,8 @@ export const metadata: Metadata = {
     "developer utilities",
     "textytools",
   ],
-  authors: [{ name: "Texty Software" }],
-  creator: "Texty Software",
+  authors: [{ name: "Tidalsoft" }],
+  creator: "Tidalsoft",
   openGraph: {
     title: "textytools.dev - Free browser tools for developers",
     description:
@@ -117,7 +117,7 @@ function Footer() {
               Privacy Policy
             </Link>
             <p className="text-sm text-zinc-600 dark:text-zinc-400">
-              © {new Date().getFullYear()} Texty Software
+              © {new Date().getFullYear()} Tidalsoft
             </p>
           </div>
         </div>
