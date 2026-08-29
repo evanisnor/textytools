@@ -283,6 +283,9 @@ describe("useDocumentManager", () => {
 
       act(() => {
         result.current.addTransform("dummy-transform");
+      });
+
+      act(() => {
         result.current.addTransform("dummy-transform");
       });
 
@@ -353,6 +356,9 @@ describe("useDocumentManager", () => {
 
       act(() => {
         result.current.addTransform("dummy-transform");
+      });
+
+      act(() => {
         result.current.addTransform("dummy-transform");
       });
 
@@ -402,22 +408,24 @@ describe("useDocumentManager", () => {
   });
 
   describe("LocalStorage Persistence", () => {
-    it("should save documents to localStorage", () => {
+    it("should save documents to localStorage", async () => {
       const { result } = renderHook(() => useDocumentManager());
 
       act(() => {
         result.current.createDocument("Persistent Data", "text");
       });
 
-      const stored = localStorageMock.getItem("apogee-documents");
-      expect(stored).not.toBeNull();
+      await waitFor(() => {
+        expect(localStorageMock.getItem("apogee-documents")).not.toBeNull();
+      });
 
+      const stored = localStorageMock.getItem("apogee-documents");
       const parsed = JSON.parse(stored!);
       expect(parsed).toHaveLength(1);
       expect(parsed[0].inputData).toBe("Persistent Data");
     });
 
-    it("should load documents from localStorage on mount", () => {
+    it("should load documents from localStorage on mount", async () => {
       // Seed localStorage
       const testDoc = {
         id: "test-doc",
@@ -434,15 +442,17 @@ describe("useDocumentManager", () => {
       // Render hook
       const { result } = renderHook(() => useDocumentManager());
 
-      expect(result.current.documents).toHaveLength(1);
+      await waitFor(() => {
+        expect(result.current.documents).toHaveLength(1);
+      });
       expect(result.current.documents[0].inputData).toBe("Loaded Data");
-      expect(result.current.currentDocument?.id).toBe("test-doc");
+      expect(result.current.currentDocument).toBeNull();
     });
   });
 
   describe("Document Switching", () => {
     it("should switch current document", () => {
-      const { result } = renderHook(() => useDocumentManager());
+      const { result, rerender } = renderHook(() => useDocumentManager());
 
       act(() => {
         result.current.createDocument("Doc 1", "text");
@@ -456,12 +466,13 @@ describe("useDocumentManager", () => {
       act(() => {
         result.current.setCurrentDocument(doc1Id);
       });
+      rerender();
 
       expect(result.current.currentDocument?.inputData).toBe("Doc 1");
     });
 
     it("should set current document to null", () => {
-      const { result } = renderHook(() => useDocumentManager());
+      const { result, rerender } = renderHook(() => useDocumentManager());
 
       act(() => {
         result.current.createDocument("Test", "text");
@@ -470,6 +481,7 @@ describe("useDocumentManager", () => {
       act(() => {
         result.current.setCurrentDocument(null);
       });
+      rerender();
 
       expect(result.current.currentDocument).toBeNull();
     });

@@ -14,7 +14,7 @@ export const DUMMY_TRANSFORM: TransformDefinition = {
   type: "dummy-transform",
   name: "Dummy Transform",
   description: "A placeholder transform for testing the execution engine",
-  category: "convert",
+  category: "manipulate",
   acceptsInput: ["text", "json"],
   producesOutput: "text",
   propertySchema: [

@@ -77,6 +77,8 @@ jobs:
         run: npm run lint
       - name: Type check
         run: npm run typecheck
+      - name: Test
+        run: npm test -- --runInBand
       - name: Build with Next.js
         env:
           NEXT_PUBLIC_GOOGLE_TAG_ID: ${{ vars.GOOGLE_TAG_ID }}

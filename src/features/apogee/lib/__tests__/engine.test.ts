@@ -4,7 +4,7 @@
 
 import type { TransformDefinition } from "../../model/types";
 import { ApogeeEngine } from "../engine";
-import { registerTransform } from "../registry";
+import { registerTransform, unregisterTransform } from "../registry";
 
 import {
   createTestDocument,
@@ -21,6 +21,7 @@ describe("ApogeeEngine", () => {
   // Clean up after each test
   afterEach(() => {
     unregisterDummyTransform();
+    unregisterTransform("nonexistent-transform");
   });
 
   describe("executePipeline", () => {
@@ -106,9 +107,10 @@ describe("ApogeeEngine", () => {
     it("should continue pipeline after transform failure", async () => {
       const doc = createTestDocument();
 
-      // Register a failing transform (using dummy-transform type for testing)
+      // Register a distinct failing transform so the next step can still use
+      // the successful dummy transform.
       const failingTransform: TransformDefinition = {
-        type: "dummy-transform",
+        type: "nonexistent-transform",
         name: "Failing Transform",
         description: "Always fails",
         category: "encode",
@@ -124,7 +126,6 @@ describe("ApogeeEngine", () => {
         }),
       };
 
-      // Temporarily replace the dummy transform with the failing one
       registerTransform(failingTransform);
 
       doc.transforms.push(
@@ -132,7 +133,7 @@ describe("ApogeeEngine", () => {
           id: "step-1",
           documentId: doc.id,
           order: 0,
-          transformType: "dummy-transform",
+          transformType: "nonexistent-transform",
           inputSelection: { mode: "all" },
           properties: {},
           output: "",
