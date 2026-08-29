@@ -101,6 +101,10 @@ Report any check that was not run and why. Do not claim verification based only 
 
 ## Git, commits, and deployment
 
+- Use Linear as the system of record for planning, issues, tasks, assignments, and work
+  status. Keep relevant Linear work linked to GitHub delivery artifacts.
+- Perform GitHub interactions with the authenticated `gh` CLI against the `tidalsoft`
+  organization.
 - Preserve unrelated user changes in a dirty worktree. Stage only files belonging to the requested task.
 - Never commit unverified implementation changes. Once requested work is complete and its relevant checks pass, make a scoped commit; do not leave completed, verified work only in the working tree.
 - Use concise imperative commit messages that describe the outcome.
