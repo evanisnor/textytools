@@ -170,9 +170,7 @@ export function useDocumentManager(): DocumentManager {
       );
 
       // Handle intent: navigate to new document
-      queueMicrotask(() => {
-        navigation.navigateToDocument(intent.document.id);
-      });
+      navigation.navigateToDocument(intent.document.id);
     },
     [documentState, navigation],
   );
@@ -187,13 +185,11 @@ export function useDocumentManager(): DocumentManager {
 
       // Handle intent: navigate appropriately if we deleted current doc
       if (isCurrentDoc) {
-        queueMicrotask(() => {
-          if (intent.remainingDocuments.length > 0) {
-            navigation.navigateToDocument(intent.remainingDocuments[0].id);
-          } else {
-            navigation.navigateToHome();
-          }
-        });
+        if (intent.remainingDocuments.length > 0) {
+          navigation.navigateToDocument(intent.remainingDocuments[0].id);
+        } else {
+          navigation.navigateToHome();
+        }
       }
     },
     [documentState, navigation, currentDocument],

@@ -76,13 +76,13 @@ export function useDocumentState(): DocumentStateManager {
 
   // Sync with localStorage (external system)
   useEffect(() => {
-    // Load from localStorage asynchronously to avoid synchronous setState in effect
-    Promise.resolve(loadDocuments()).then((loaded) => {
-      if (loaded.length > 0) {
-        setDocuments(loaded);
-      }
-      setIsHydrated(true);
-    });
+    const loaded = loadDocuments();
+    if (loaded.length > 0) {
+      // Hydrating persisted state is an intentional external-system sync.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setDocuments(loaded);
+    }
+    setIsHydrated(true);
   }, []);
 
   // Save to localStorage when documents change (skip initial mount)
