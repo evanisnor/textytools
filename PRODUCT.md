@@ -58,13 +58,16 @@ Rafael pastes logs from several systems while responding to an incident. Lines c
 He needs to:
 
 1. Remove irrelevant lines and normalize recurring noise.
-2. Find and highlight incidents matching one or more patterns.
-3. Extract fields such as timestamp, service, request ID, status, and message.
-4. Group or sort results to reveal frequency and sequence.
-5. Export evidence or compare logs from before and after a change.
-6. Save the extraction setup for the next incident without saving sensitive log content unintentionally.
+2. Start from a known log format instead of writing every extraction pattern from scratch.
+3. Find and highlight incidents matching one or more patterns.
+4. Extract fields such as timestamp, service, request ID, status, and message.
+5. See which lines do not match the selected format and why.
+6. Adapt the built-in pattern when a service uses a local variation.
+7. Group or sort results to reveal frequency and sequence.
+8. Export evidence or compare logs from before and after a change.
+9. Save the extraction setup for the next incident without saving sensitive log content unintentionally.
 
-Textytools creates value by joining Text Sanitizer, Regex Tester, structured extraction, counting, and Diff Viewer into a repeatable investigation workflow.
+Textytools creates value by joining built-in log patterns, Text Sanitizer, Regex Tester, structured extraction, counting, and Diff Viewer into a repeatable investigation workflow.
 
 ### Priya, the AI application developer managing context
 
@@ -140,25 +143,41 @@ Success means a non-programmer can produce a usable table from recurring text pa
 
 Users should be able to locate an error, understand it, make or preview a correction, validate the result, and compare it with the source. JSON is the initial foundation; YAML and TOML join the same workflow in Phase 2.
 
-### Convert among structured-data formats
+### Work deeply in JSON, YAML, and TOML, then convert between them
 
-Users should be able to move among JSON, YAML, and TOML without visiting separate pairwise converters. The workflow should let them:
+JSON Wizard, YAML Wizard, and TOML Wizard should be separate, independently discoverable tools. Each should reflect the concepts and common jobs of its own format rather than exposing only generic structured-data actions.
+
+- JSON Wizard focuses on objects and arrays, querying, reshaping, schema-oriented validation, and API payloads.
+- YAML Wizard focuses on configuration authoring, multi-document content, anchors and aliases, tags, scalar styles, and indentation-sensitive errors.
+- TOML Wizard focuses on configuration authoring, tables, arrays of tables, dotted keys, and date and time values.
+
+The tools should be deeply integrated so users can:
 
 1. Paste or open data in any supported format.
-2. Confirm or correct the detected source format.
-3. Validate the source before conversion.
-4. Select a destination format and preview the result.
+2. Validate and inspect it using a specialist tool for that format.
+3. Choose “Convert to JSON,” “Convert to YAML,” or “Convert to TOML.”
+4. Preview the result in the destination specialist tool.
 5. Review warnings about comments, duplicate keys, ambiguous scalar values, dates, numeric precision, ordering, and structures the destination cannot represent faithfully.
 6. Compare the meaning and shape of the result with the source.
 7. Copy, download, or continue editing in the destination format.
 
-JSON, YAML, and TOML share enough developer use cases to form one structured-data workflow, but they are not interchangeable representations. Textytools should never promise a lossless round trip when a source feature has no destination equivalent.
+Separate destinations improve search discovery, documentation, and format-specific depth. Deep integration prevents that separation from recreating the friction of unrelated utility sites. Textytools should never promise a lossless round trip when a source feature has no destination equivalent.
 
 CSV remains connected but distinct because converting nested data to rows requires explicit choices about columns, arrays, and types. XML remains a later candidate because attributes, namespaces, and mixed content introduce a different conversion model and a greater risk of misleading output.
 
 ### Extract evidence from logs and text
 
-Users should be able to filter lines, test patterns, navigate matches, extract named fields, review unmatched content, and export evidence without losing the surrounding source.
+Users should be able to filter lines, start from common log formats, test and adapt patterns, navigate matches, extract named fields, review unmatched content, and export evidence without losing the surrounding source.
+
+The initial built-in log pattern library should cover:
+
+- Syslog in common RFC 3164 and RFC 5424 layouts.
+- Apache and Nginx common and combined access logs.
+- Common timestamp, severity, logger or service, and message layouts.
+- Logfmt-style key-value records.
+- Common application log prefixes with request, trace, or correlation identifiers.
+
+Built-ins must expose their named fields, assumptions, and unmatched lines. They are editable starting points, not claims that every vendor variation is identical. JSON Lines should be detected and sent to structured-data inspection rather than treated as regex-shaped text.
 
 ### Prepare content for model context limits
 
@@ -244,9 +263,10 @@ Search traffic may bring users to a single utility, but a larger feature catalog
 - Every public tool will provide task-specific documentation, examples, limitations, and privacy behavior on the page.
 - Text Counter will expand beyond a legacy model count into model-context comparison, target limits, and deeper text analysis.
 - Regex Tester will support matching, extraction, replacement, explanation, and review of records that fail extraction.
+- Regex Tester will include editable built-in patterns for common logging formats with named-field extraction and unmatched-line review.
 - Text Sanitizer will support ordered, previewable, reusable cleanup sequences.
 - JSON Wizard will support finding, validating, querying, reshaping, and comparing JSON—not formatting alone.
-- Structured-data tools will extend this inspection model to YAML and TOML and support conversion among all three formats with fidelity warnings.
+- YAML Wizard and TOML Wizard will become separate specialist tools, deeply connected to JSON Wizard through conversion and comparison actions with fidelity warnings.
 - CSV / JSON Converter will expose tabular previews, column decisions, type decisions, and malformed records before export.
 - Diff Viewer will compare at useful levels of detail and let users control irrelevant differences.
 - JWT Decoder will distinguish inspection from verification and guide users toward safe handling of claims and secrets.
@@ -289,7 +309,7 @@ Make the most valuable existing tools substantially more capable while preservin
 
 - Reposition Text Counter as a text and model-context analyzer, with exact and estimated counts labeled honestly.
 - Deepen JSON Wizard around inspection, validation, querying, and controlled transformation.
-- Deepen Regex Tester around extraction, named fields, replacement, explanation, and review of unmatched records.
+- Deepen Regex Tester around extraction, named fields, replacement, explanation, review of unmatched records, and editable built-in patterns for common log formats.
 - Improve CSV / JSON Converter with a tabular preview that makes detection, column choices, type decisions, malformed records, and conversion loss visible.
 - Let users complete an initial unstructured-to-structured workflow: clean recurring text, extract named fields, review exceptions, and export CSV or JSON.
 - Add ordered cleanup and before-and-after review to Text Sanitizer.
@@ -311,11 +331,13 @@ Make the most valuable existing tools substantially more capable while preservin
 - Feedback shows that users understand important limitations and inferred behavior.
 - Documentation attracts relevant entry traffic and supports feature use rather than merely page views.
 - Users successfully turn representative logs, labeled records, and repeated text blocks into reviewable structured output.
+- Users can extract named fields from supported common log formats without first authoring a pattern from scratch.
 
 #### Exit criteria
 
 - Priority tools have a clear fast path and discoverable advanced path.
 - The unstructured-to-structured workflow handles successful, partial, and failed records without hiding exceptions.
+- Built-in log patterns expose their assumptions and make local variations editable.
 - Every public tool explains its purpose, behavior, privacy, and limitations.
 - Accuracy language is consistent across the product.
 - No priority feature relies on server-side processing of tool content.
@@ -332,8 +354,8 @@ Reduce copying, re-pasting, and loss of context between related tasks.
 - Preserve source context when work continues in another tool.
 - Allow transformed results to be compared with their source.
 - Standardize copy, download, reset, and continuation behavior.
-- Expand structured-data support from JSON to YAML and TOML validation, formatting, inspection, and conversion.
-- Offer conversion among JSON, YAML, and TOML as one coherent workflow rather than a collection of pairwise utilities.
+- Launch separate YAML Wizard and TOML Wizard experiences with format-specific validation, formatting, inspection, documentation, and examples.
+- Connect JSON Wizard, YAML Wizard, and TOML Wizard through contextual conversion actions rather than a collection of pairwise converter pages.
 - Warn before conversion when the destination cannot faithfully represent source content or meaning.
 - Let users compare source and converted data and identify changes in structure or interpretation.
 - Expand depth in Diff Viewer, Text Sanitizer, and JWT Decoder where it strengthens connected workflows.
@@ -342,7 +364,7 @@ Reduce copying, re-pasting, and loss of context between related tasks.
 
 Priority workflow families are:
 
-- Inspect JSON, YAML, or TOML; validate and reshape it; convert it; and compare the result.
+- Inspect JSON, YAML, or TOML in its specialist tool; convert it into another format; and compare the result.
 - Prepare messy text, define records and fields, review extraction failures, and continue in a data tool.
 - Clean text, analyze it, convert its case, and verify the change.
 - Decode or inspect encoded data, then validate the revealed format.
@@ -367,7 +389,7 @@ Priority workflow families are:
 #### Exit criteria
 
 - The highest-value workflow families have clear, contextual continuation paths.
-- JSON, YAML, and TOML have consistent validation, inspection, and conversion journeys.
+- JSON, YAML, and TOML each have a deep specialist experience and a consistent conversion journey between tools.
 - Format conversion reports meaningful differences instead of treating syntactic success as proof of equivalence.
 - Cross-tool actions preserve provenance and never silently discard destination work.
 - Integration choices remain limited enough to be understandable.
