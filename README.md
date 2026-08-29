@@ -4,6 +4,9 @@ A collection of lightweight, browser-based productivity tools for programmers an
 
 https://textytools.dev
 
+Development and deployment follow the worktree → staging → production process in
+[`DEVELOPMENT.md`](DEVELOPMENT.md).
+
 ## Setup
 
 After cloning the repository, configure git hooks:
