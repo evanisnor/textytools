@@ -55,6 +55,10 @@ Pushing a feature branch does not deploy integrated staging or production. Valid
 branch Preview before integrating it. Record material validation results and blockers on
 the Linear issue; keep source code and code-level review in GitHub.
 
+All branches are commit-forward. Never force-push. Once a commit is published, correct it
+with a new commit or an explicit revert commit; do not amend, reset, rebase, or otherwise
+replace published history.
+
 The feature worktree remains open for the life of the feature. It may produce several
 staging deployments as successive coherent groups of commits become ready for integrated
 validation.
@@ -164,6 +168,6 @@ Git and Linear must then be reconciled promptly so they again describe productio
 - Only `staging` advances `main`.
 - Production promotion is fast-forward-only.
 - Direct commits and pushes to `main` are forbidden.
-- Force pushes to `staging` and `main` are forbidden.
+- Force pushes are forbidden on every branch; published history is commit-forward.
 - The small-fix exception applies only to direct commits on `staging`.
 - Staging and production deployments receive corresponding Linear updates.

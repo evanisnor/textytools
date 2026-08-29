@@ -107,6 +107,9 @@ Report any check that was not run and why. Do not claim verification based only 
   its history intact, validate staging, then fast-forward `main` from `staging` for
   production. Never commit or push directly to `main`; never squash, rebase, or
   cherry-pick changes during integration or promotion.
+- Never force-push any branch. Published history is commit-forward: correct prior work
+  with a new commit or revert commit, never by amending, resetting, rebasing, or replacing
+  published commits.
 - A small, self-contained, single-commit fix may be committed directly to `staging` after
   proportional validation. This exception never applies to `main`.
 - Use Linear as the system of record for planning, issues, tasks, assignments, and work
@@ -124,7 +127,7 @@ Report any check that was not run and why. Do not claim verification based only 
   when they provide a useful review or recovery boundary; do not commit merely because a
   cycle or agent turn ended.
 - Use concise imperative commit messages that describe the outcome.
-- Do not amend, rewrite, reset, or discard existing history or user changes unless explicitly requested.
+- Do not amend, rewrite, reset, or discard existing history or user changes.
 - Merge or publish only when the change is stable enough for the target environment. Push
   commits to `origin` when deployment, collaboration, backup, or remote delivery requires
   it. Production deployment occurs only by fast-forwarding `main` from validated
