@@ -73,8 +73,13 @@ jobs:
             ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}-
       - name: Install dependencies
         run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
+      - name: Lint
+        run: npm run lint
+      - name: Type check
+        run: npm run typecheck
       - name: Build with Next.js
         env:
+          NEXT_PUBLIC_GOOGLE_TAG_ID: ${{ vars.GOOGLE_TAG_ID }}
           NEXT_PUBLIC_GOOGLE_ID: ${{ vars.GOOGLE_ID }}
           MAILGUN_API_KEY: ${{secrets.MAILGUN_API_KEY}}
           MAILGUN_DOMAIN: ${{vars.MAILGUN_DOMAIN}}

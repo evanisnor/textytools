@@ -12,6 +12,28 @@ After cloning the repository, configure git hooks:
 git config core.hooksPath .githooks
 ```
 
+### Google Analytics
+
+Set `NEXT_PUBLIC_GOOGLE_TAG_ID` to the Google tag ID installed for the site
+(for example, `GT-WV3GVH8P`). Textytools deliberately uses the `gtag/js`
+installation path and does not mount a Google Tag Manager (`gtm.js`) container.
+
+For older deployments, `NEXT_PUBLIC_GOOGLE_ID` remains a temporary fallback.
+Do not configure both variables; migrate the value to
+`NEXT_PUBLIC_GOOGLE_TAG_ID` and remove the old variable after deployment.
+
+The application emits these acquisition events in addition to GA4's automatic
+events:
+
+- `tool_view`: a public tool page was opened
+- `tool_activation`: the visitor first interacted with a tool input
+- `copy_button_click`, `tool_conversion`, `clear_button_click`
+- `feedback_open`, `feedback_submit`, `toggle_all_click`
+
+Custom event parameters such as `tool_name`, `source_tool`, and
+`destination_tool` must be registered as event-scoped custom dimensions in GA4
+before they appear in standard reports.
+
 ## Live Utilities
 
 ### Text Counter
