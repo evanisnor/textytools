@@ -579,6 +579,138 @@ These are candidate interaction patterns, not requirements in isolation. Each mu
 - Offline and installation behavior is useful, optional, and clearly communicated.
 - The redesign demonstrates measurable workflow improvement beyond aesthetic preference.
 
+## Strategic horizon beyond Phase 6: TextyToolsMCP
+
+TextyToolsMCP is a future product hypothesis: expose Textytools’ proven deterministic text and data capabilities as tools that LLM applications and agent workflows can discover and invoke through the Model Context Protocol.
+
+This is intentionally not Phase 7. Work should begin only after the browser product has validated which transformations are valuable, dependable, understandable, and composable. The web product remains the proving ground and human-facing reference experience; TextyToolsMCP becomes another way to access the capabilities that have earned trust.
+
+### Why this extension fits
+
+LLMs are good at interpreting intent but often use generation for mechanical work that should have a deterministic result. TextyToolsMCP could let an LLM delegate exact operations—validation, formatting, extraction, conversion, counting, encoding, decoding, sanitization, and comparison—to tools with explicit behavior.
+
+The value proposition is:
+
+- Deterministic output for deterministic jobs.
+- Fewer hallucinated transformations and malformed results.
+- Clear validation failures, warnings, counts, and conversion-loss reporting.
+- Repeatable behavior across prompts, models, and agent hosts.
+- Smaller prompts because models do not need to be taught common text-processing procedures repeatedly.
+- Composable operations that can participate in larger coding, data, content, and operations workflows.
+
+MCP defines model-discoverable tools as callable functions with described inputs and outputs. That makes tools the relevant initial product surface for TextyToolsMCP; stored documents and contextual resources are not required to prove the concept. See the [MCP server overview](https://modelcontextprotocol.io/specification/2025-03-26/server) and [MCP tools specification](https://modelcontextprotocol.io/specification/2025-06-18/server/tools).
+
+### Future personas and use cases
+
+#### Noor, the developer using an AI coding agent
+
+Noor asks an agent to migrate configuration, inspect an API response, extract fields from logs, or compare generated output with an existing file.
+
+Noor needs the agent to:
+
+1. Validate content before modifying it.
+2. Use the correct rules for JSON, YAML, TOML, CSV, encodings, and tokens.
+3. Report warnings and rejected records instead of silently producing plausible output.
+4. Preserve the original when a conversion may lose meaning.
+5. Return structured results the agent can reason about and present clearly.
+
+TextyToolsMCP creates value when the agent can delegate these operations instead of generating an ad hoc script or guessing at the transformed output.
+
+#### Imani, the automation engineer building an LLM workflow
+
+Imani is building a workflow that receives inconsistent reports or messages, extracts structured records, validates them, and prepares downstream data.
+
+Imani needs:
+
+1. Small, well-defined text-processing operations that can be combined safely.
+2. Stable inputs, outputs, errors, and warnings.
+3. A clear distinction between no match, invalid input, partial success, and lossy conversion.
+4. Repeatable results suitable for automated evaluation.
+5. Freedom to choose an LLM without rebuilding the deterministic parts of the workflow.
+
+TextyToolsMCP creates value as a dependable transformation layer inside a larger probabilistic workflow.
+
+#### Rafael, extending incident investigation into an agent workflow
+
+Rafael asks an operations agent to identify a log format, extract request and trace identifiers, summarize error groups, and compare incidents across two time periods.
+
+TextyToolsMCP should perform the log recognition, pattern matching, field extraction, counting, and comparison. The LLM can then interpret the deterministic evidence rather than inventing the evidence itself.
+
+### Candidate MCP capability families
+
+The MCP catalog should reflect meaningful operations, not mirror every button in the web interface.
+
+- Validate and format JSON, YAML, and TOML.
+- Convert among structured-data formats with fidelity warnings.
+- Parse and convert CSV with explicit tabular decisions.
+- Match, extract, replace, and split text using regular expressions.
+- Extract named fields from common log formats and return unmatched records.
+- Apply ordered text-sanitization operations.
+- Convert identifier and prose casing with explicit word-boundary behavior.
+- Encode, decode, and hash text or bytes with clearly separated semantics.
+- Decode and inspect JWTs while distinguishing inspection from verification.
+- Compare text or structured data and return machine-readable changes.
+- Count text properties and model tokens, distinguishing exact results from estimates.
+- Inspect Unicode, bytes, timestamps, and invisible characters when those browser capabilities have been validated.
+
+The initial MCP product should expose a small curated set of high-confidence operations. New tools should be added based on agent workflow demand, evaluation performance, and the clarity with which a model can choose and use them.
+
+### Product requirements before validation
+
+TextyToolsMCP is worth validating only when:
+
+- The corresponding web capabilities are mature and have documented behavior.
+- Operations produce consistent results for the same input and choices.
+- Errors, partial results, assumptions, and lossy conversions are represented explicitly.
+- Representative evaluations cover ordinary, invalid, ambiguous, adversarial, and large inputs.
+- Tool descriptions make overlapping capabilities distinguishable to an LLM.
+- Results are useful both to the calling model and to the person reviewing the workflow.
+- Sensitive input handling can be explained honestly for each way the MCP product is used.
+
+### Validation sequence
+
+1. Interview developers already using LLM coding and automation tools to identify repeated deterministic text-processing failures.
+2. Test whether a small TextyToolsMCP catalog improves task correctness compared with prompting alone or generated scripts.
+3. Measure correct tool selection, valid invocation, deterministic result quality, warning comprehension, and recovery from invalid input.
+4. Validate multi-step workflows such as logs to structured records, YAML to JSON with warnings, and extracted data to validated CSV.
+5. Determine whether users prefer a locally operated MCP product, a managed remote service, or both.
+6. Decide whether the product deserves a committed delivery phase based on demonstrated correctness and recurring use.
+
+### Boundaries
+
+- TextyToolsMCP should not invoke an LLM of its own to perform deterministic transformations.
+- It should not require Textytools accounts or cloud storage to prove the core value.
+- It should not expose browser-local documents or history to an LLM by default.
+- It should not silently modify files, external systems, or stored documents.
+- It should not turn every narrow formatting option into a separate discoverable tool.
+- It should not claim exactness where the underlying operation is heuristic or model-specific.
+- It should not become a general automation platform or agent framework.
+
+### Cloud storage remains out of scope
+
+MCP distribution and cloud storage are separate decisions. A managed MCP service might eventually execute stateless transformations remotely, but that does not create a requirement to retain documents, histories, or user content.
+
+Cloud storage should be reconsidered only after the browser workspace, local documents, history, UX redesign, and MCP hypothesis have each demonstrated durable user value. Any future evaluation must begin with a specific cross-device or collaboration problem that local ownership cannot solve—not with storage as a presumed marker of product maturity.
+
+### Risks to resolve
+
+- Tool sprawl may make correct model selection worse as the catalog expands.
+- Large or adversarial inputs may create unpredictable cost or latency for users and hosts.
+- Models may ignore warnings or present lossy results as exact.
+- Remote operation could weaken the privacy position that differentiates the browser product.
+- Different agent hosts may present permissions, errors, and structured results inconsistently.
+- Maintaining behavioral parity across web and MCP products could slow improvement if the capability contract is unclear.
+- A protocol-led launch could attract curiosity without creating repeat workflow value.
+
+### Evidence required to promote TextyToolsMCP into a committed phase
+
+- Multiple validated workflows perform materially better with the tools than without them.
+- Users repeat those workflows in real development, data, content, or operations work.
+- Tool-selection and invocation success remain acceptable with a curated catalog.
+- Users understand the privacy boundary and can review consequential results.
+- The product can be supported without introducing cloud document storage.
+- TextyToolsMCP reinforces the Textytools promise of dependable text work instead of becoming a disconnected developer product.
+
 ## Measurement framework
 
 Measurement should reflect completed work, not raw activity.
