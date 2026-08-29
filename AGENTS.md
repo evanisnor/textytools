@@ -107,11 +107,15 @@ Report any check that was not run and why. Do not claim verification based only 
   its history intact, validate staging, then fast-forward `main` from `staging` for
   production. Never commit or push directly to `main`; never squash, rebase, or
   cherry-pick changes during integration or promotion.
+- Deploy to `staging` only when the user explicitly requests it, and perform the integration
+  from a dedicated staging worktree. If staging validation is needed without an existing
+  deployment request, stop after local validation and ask the user for approval.
 - Never force-push any branch. Published history is commit-forward: correct prior work
   with a new commit or revert commit, never by amending, resetting, rebasing, or replacing
   published commits.
-- A small, self-contained, single-commit fix may be committed directly to `staging` after
-  proportional validation. This exception never applies to `main`.
+- A small, self-contained, single-commit fix may be committed directly to `staging` from
+  the dedicated staging worktree after proportional validation and only at the user's
+  explicit request. This exception never applies to `main`.
 - Use Linear as the system of record for planning, issues, tasks, assignments, and work
   status. Textytools work belongs to the `textytools` Linear team and uses the `TEXT`
   issue identifier. Follow the operating practice in the private
@@ -120,13 +124,14 @@ Report any check that was not run and why. Do not claim verification based only 
 - Perform GitHub interactions with the authenticated `gh` CLI against the `tidalsoft`
   organization.
 - Preserve unrelated user changes in a dirty worktree. Stage only files belonging to the requested task.
-- Isolate feature implementation in a scoped worktree and DNS-safe branch. Pushing the
-  branch publishes its branch Preview; pushing `staging` publishes the integrated staging
-  environment at `staging.textytools.dev`.
+- Isolate feature implementation in a scoped worktree and DNS-safe branch. Feature-branch
+  pushes do not deploy; pushing `staging` publishes the integrated staging environment at
+  `staging.textytools.dev`.
 - Never commit unverified implementation changes. Commit coherent, verified checkpoints
   when they provide a useful review or recovery boundary; do not commit merely because a
   cycle or agent turn ended.
-- Use concise imperative commit messages that describe the outcome.
+- Use concise imperative commit subjects with the issue ID and structured `Changes` and
+  `Validation` sections as defined in `DEVELOPMENT.md`.
 - Do not amend, rewrite, reset, or discard existing history or user changes.
 - Merge or publish only when the change is stable enough for the target environment. Push
   commits to `origin` when deployment, collaboration, backup, or remote delivery requires

@@ -1,14 +1,13 @@
 # Development and deployment
 
 This document defines the required development and deployment path for Textytools. Linear
-tracks intent and status; Git preserves implementation history; Vercel publishes Git
-branches through its Git integration.
+tracks intent and status; Git preserves implementation history; Vercel deploys `staging`
+and `main` through its Git integration.
 
 ## Environments and branches
 
 | Purpose | Git ref | Deployment |
 |---|---|---|
-| Feature validation | DNS-safe feature branch | Vercel-generated Preview URL |
 | Integrated staging | `staging` | `https://staging.textytools.dev` |
 | Production | `main` | `https://textytools.dev` |
 
@@ -41,16 +40,18 @@ git worktree add -b text-42-improve-json-errors \
 ```
 
 Work, test, and commit inside that worktree. Commits should be coherent, verified review or
-recovery points. Push the feature branch to publish or update its branch Preview:
+recovery points. Push the feature branch when remote collaboration, review, or backup
+requires it:
 
 ```bash
 git -C ../textytools-text-42 push --set-upstream origin \
   text-42-improve-json-errors
 ```
 
-Pushing a feature branch does not deploy integrated staging or production. Validate the
-branch Preview before integrating it. Record material validation results and blockers on
-the Linear issue; keep source code and code-level review in GitHub.
+Pushing a feature branch does not create a deployment. Complete local validation before
+integration; production-like validation begins after the ready commits are merged and
+pushed to `staging`. Record material validation results and blockers on the Linear issue;
+keep source code and code-level review in GitHub.
 
 All branches are commit-forward. Never force-push. Once a commit is published, correct it
 with a new commit or an explicit revert commit; do not amend, reset, rebase, or otherwise
@@ -89,17 +90,23 @@ staging validation recorded in Linear as described below.
 `staging` without rewriting them, then pushing `staging`. It does not mean that the feature
 is finished or that its worktree should be removed.
 
-For a solo workflow, use the primary checkout as the integration checkout; a separate
-staging worktree is not required:
+Only deploy to staging when the user explicitly requests it. When production-like
+validation is needed and no such request has been made, the agent must stop after local
+validation and ask the user whether to deploy. Approval to implement, commit, push a
+feature branch, or run local checks does not authorize a staging deployment.
+
+Perform approved staging integration from a dedicated staging worktree, never by switching
+the primary checkout or the feature worktree to `staging`. Create or reuse the staging
+worktree, then integrate the feature branch there:
 
 ```bash
 git -C ../textytools-text-42 push origin text-42-improve-json-errors
 git fetch origin
-git switch staging
-git pull --ff-only origin staging
-git merge --no-ff origin/text-42-improve-json-errors \
+git worktree add ../textytools-staging staging # omit when it already exists
+git -C ../textytools-staging pull --ff-only origin staging
+git -C ../textytools-staging merge --no-ff origin/text-42-improve-json-errors \
   -m "Merge TEXT-42 into staging"
-git push origin staging
+git -C ../textytools-staging push origin staging
 ```
 
 Each staging deployment may promote one or more new feature commits. Continue working in
@@ -129,17 +136,18 @@ branch-specific validation is needed.
 ## Small single-commit fixes
 
 A small fix that can be completed, reviewed, and validated as one commit may be made directly
-on `staging` from the primary checkout. It still requires a `TEXT` issue, proportional checks,
-and staging validation. Assign the issue and move it to **In Progress** before beginning
+on `staging` only when the user explicitly requests a staging deployment. Perform the work in
+the dedicated staging worktree. It still requires a `TEXT` issue, proportional checks, and
+staging validation. Assign the issue and move it to **In Progress** before beginning
 implementation:
 
 ```bash
 git fetch origin
-git switch staging
-git pull --ff-only origin staging
+git worktree add ../textytools-staging staging # omit when it already exists
+git -C ../textytools-staging pull --ff-only origin staging
 # make and validate the small fix, then use the structured message above
-git commit
-git push origin staging
+git -C ../textytools-staging commit
+git -C ../textytools-staging push origin staging
 ```
 
 This is the only direct-branch exception. It never permits a direct commit or push to
@@ -184,6 +192,8 @@ Git and Linear must then be reconciled promptly so they again describe productio
 
 - Feature work is isolated in worktrees.
 - Linear issues are assigned and moved to **In Progress** before implementation begins.
+- Staging deployments occur from a dedicated staging worktree only after an explicit user
+  request; agents ask before deploying when staging validation is needed.
 - Feature branch names are DNS-safe and associated with a `TEXT` issue.
 - A feature worktree may remain active across multiple staging deployments.
 - Each staging deployment preserves and promotes a coherent series of feature commits.
