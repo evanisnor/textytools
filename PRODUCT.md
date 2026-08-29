@@ -579,6 +579,128 @@ These are candidate interaction patterns, not requirements in isolation. Each mu
 - Offline and installation behavior is useful, optional, and clearly communicated.
 - The redesign demonstrates measurable workflow improvement beyond aesthetic preference.
 
+## Strategic horizon beyond Phase 6: installed Textytools applications
+
+An installed Textytools application is a future distribution hypothesis: package the validated professional workspace as a signed application for desktop and, only where the use cases fit, mobile app stores.
+
+Tauri is a credible candidate because it supports platform stores and signed installers across macOS, Windows, Linux, iOS, and Android. See the [Tauri distribution overview](https://v2.tauri.app/distribute/), [Apple App Store guidance](https://v2.tauri.app/distribute/app-store/), and [Microsoft Store guidance](https://v2.tauri.app/distribute/microsoft-store/).
+
+This branch is not a committed phase and should not begin merely because the web interface can be packaged. The installed application must solve professional workflow problems that remain meaningfully constrained in the Phase 6 web experience.
+
+### Why an installed application could create value
+
+- Give professionals a durable place for frequent text work outside a browser tab.
+- Improve discovery and trust through familiar app store and signed-download channels.
+- Make offline availability predictable rather than dependent on prior web use.
+- Support deliberate work with local files and folders while preserving local processing.
+- Integrate with familiar operating-system actions such as Open With, file associations, recent files, native menus, and global shortcuts where appropriate.
+- Handle larger or longer-running local work with clearer expectations.
+- Provide a trusted installation and update path for a local TextyToolsMCP if that product hypothesis is validated.
+- Reach users and organizations that prefer managed application distribution over utility websites.
+
+The installed application should strengthen the privacy position: installation must not imply accounts, telemetry beyond the stated product policy, or cloud retention.
+
+### Future personas and use cases
+
+#### Alex, the developer who works with local configuration and data files
+
+Alex repeatedly opens JSON, YAML, TOML, CSV, log, and token files from repositories and temporary directories.
+
+Alex needs to:
+
+1. Open a file directly in its specialist Textytools experience.
+2. Validate, inspect, convert, or compare it without first copying it into a browser.
+3. Work with several related files while preserving their names and locations.
+4. Save or export deliberately without accidentally replacing the source.
+5. Continue working when offline or behind network restrictions.
+
+An installed application creates value if it reduces file-handling friction while retaining the safety and clarity established by the web product.
+
+#### Morgan, the operations professional processing local logs and exports
+
+Morgan receives large logs, report exports, and batches of similarly structured files. Browser paste-and-copy workflows become cumbersome even though the processing itself should remain local.
+
+Morgan needs to:
+
+1. Open large files without loading them into an unrelated remote service.
+2. Apply a validated log pattern or extraction preset.
+3. Review failed records and compare multiple files.
+4. Repeat the workflow across an explicitly selected group of files.
+5. Export results to a chosen local destination.
+
+The installed product creates value when it makes this bounded local workflow easier without turning Textytools into a general-purpose file manager.
+
+#### Noor, the developer installing local tools for an AI coding workflow
+
+If TextyToolsMCP is validated, Noor may want a trustworthy way to install, update, configure, and understand the local MCP capability alongside the human-facing Textytools workspace.
+
+An installed Textytools product could unify discovery and lifecycle expectations for both surfaces while keeping MCP access explicit and optional.
+
+### Channel strategy to validate
+
+Desktop should be evaluated before mobile because the priority workflows involve substantial text, comparison, files, and keyboard use.
+
+- macOS: compare Mac App Store distribution with a signed and notarized direct download.
+- Windows: compare Microsoft Store distribution with a signed installer.
+- Linux: evaluate direct package formats based on demonstrated user demand rather than attempting every channel initially.
+- iOS and Android: defer until mobile research identifies jobs that are more valuable than the responsive web experience.
+
+Store presence and direct distribution are not mutually exclusive. The appropriate mix should be determined by user trust, discovery, update expectations, organizational policy, review constraints, and operating cost.
+
+### Product requirements before validation
+
+The installed application is worth validating only when:
+
+- Phase 6 has produced a coherent workspace users already return to.
+- Research identifies recurring friction that installation or operating-system integration can remove.
+- The proposed app offers material value beyond bookmarking or installing the progressive web experience.
+- Local-file permissions and save behavior can be explained without surprising users.
+- The product can maintain consistent transformation behavior across web and installed experiences.
+- Store policies do not require weakening core workflows or privacy promises.
+- The support burden of multiple platforms is proportionate to demonstrated demand.
+
+### Validation sequence
+
+1. Measure demand for an installed application among returning professional users.
+2. Identify the specific jobs blocked or made cumbersome by the browser experience.
+3. Prototype the smallest desktop experience that addresses local-file, offline, or operating-system workflow friction.
+4. Compare task completion and user confidence with the Phase 6 web experience.
+5. Validate one desktop platform and distribution channel before expanding the matrix.
+6. Evaluate store discovery, direct-download demand, update behavior, review overhead, and support cost.
+7. Decide whether installed distribution deserves a committed phase and which channels have earned support.
+
+### Boundaries
+
+- The installed application should not be a store wrapper that offers no meaningful advantage over the web product.
+- It should not require cloud storage, an account, or continuous connectivity.
+- It should not receive unrestricted filesystem access when the user selected only a file or folder.
+- It should not silently watch, modify, upload, or index local files.
+- It should not become a general-purpose editor, file manager, or integrated development environment.
+- Desktop availability should not make the web product a second-class or abandoned experience.
+- Mobile applications should not be pursued solely to complete a platform checklist.
+- Platform-specific features should not fragment the meaning or results of core Textytools operations.
+
+### Risks to resolve
+
+- App stores may reject or constrain an application perceived as a repackaged website.
+- Signing, review, sandboxing, entitlement, and update requirements add ongoing operational work.
+- Platform differences may create inconsistent features or support expectations.
+- Direct filesystem access raises the consequence of transformation and overwrite mistakes.
+- A desktop application may split a small user base without improving retention.
+- Store reviews and release lead times may slow urgent fixes.
+- Mobile layouts may compromise professional workflows that require dense comparison and editing.
+- Installed distribution could distract from validating the browser product and TextyToolsMCP.
+
+### Evidence required to promote installed applications into a committed phase
+
+- Returning professionals demonstrate recurring browser constraints that installation can solve.
+- The installed experience measurably improves at least one priority workflow.
+- Users value offline certainty, local-file integration, store trust, or managed distribution enough to install and return.
+- The application remains useful without accounts or cloud storage.
+- One platform can be supported reliably before additional channels are added.
+- Store and direct-download requirements are sustainable for the product.
+- Installed distribution reinforces the same product identity and capability quality as the web workspace.
+
 ## Strategic horizon beyond Phase 6: TextyToolsMCP
 
 TextyToolsMCP is a future product hypothesis: expose Textytools’ proven deterministic text and data capabilities as tools that LLM applications and agent workflows can discover and invoke through the Model Context Protocol.
