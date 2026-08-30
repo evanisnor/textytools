@@ -48,6 +48,12 @@ git -C ../textytools-text-42 push --set-upstream origin \
   text-42-improve-json-errors
 ```
 
+A tightly scoped Linear project may share one cumulative worktree and feature branch when
+the user explicitly chooses to review its deliverables together. Name the branch for the
+first delivery issue, keep one coherent commit per issue, and reference the applicable
+issue in every commit and Linear update. Do not use this exception to combine unrelated
+work or to replace Linear with a branch-local task ledger.
+
 Pushing a feature branch does not create a deployment. Complete local validation before
 integration; production-like validation begins after the ready commits are merged and
 pushed to `staging`. Record material validation results and blockers on the Linear issue;
@@ -191,6 +197,8 @@ Git and Linear must then be reconciled promptly so they again describe productio
 ## Required invariants
 
 - Feature work is isolated in worktrees.
+- An explicitly approved, tightly scoped Linear project may use one cumulative feature
+  worktree and branch, with issue-specific commits and Linear updates.
 - Linear issues are assigned and moved to **In Progress** before implementation begins.
 - Staging deployments occur from a dedicated staging worktree only after an explicit user
   request; agents ask before deploying when staging validation is needed.

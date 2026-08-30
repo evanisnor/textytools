@@ -7,6 +7,9 @@ https://textytools.dev
 Development and deployment follow the worktree → staging → production process in
 [`DEVELOPMENT.md`](DEVELOPMENT.md).
 
+The verified behavior and boundaries of the nine public tools are recorded in
+[`CAPABILITIES.md`](CAPABILITIES.md).
+
 ## Setup
 
 After cloning the repository, configure git hooks:
