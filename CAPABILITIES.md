@@ -20,8 +20,11 @@ in the same change.
 
 Route reachability was checked separately from behavior. The behavioral baseline
 below was reconciled against the implementation at the source commit. The
-uncatalogued `/apogee` and `/blastoff` route families are outside this baseline
-pending an explicit product decision.
+uncatalogued `/apogee` and `/blastoff` route families are outside this baseline.
+They were identified as user-experience experiments and approved for removal in
+later, separately authorized work; see
+[`PRODUCT_BOUNDARIES.md`](PRODUCT_BOUNDARIES.md). They remain reachable until that
+delivery work occurs.
 
 ## Shared behavior and boundaries
 
