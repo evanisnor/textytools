@@ -1,6 +1,8 @@
 /**
- * Google Tag Manager event tracking utilities
+ * Google Analytics event tracking utilities
  */
+
+import { isAnalyticsEnabled } from "./analyticsConfig";
 
 interface BaseEventParams {
   tool: string;
@@ -18,9 +20,7 @@ interface ToolConversionParams {
  * By default only enabled in production, but can be forced on in development
  * by setting `NEXT_PUBLIC_ENABLE_ANALYTICS=true` in your environment.
  */
-const analyticsEnabled =
-  process.env.NODE_ENV === "production" ||
-  process.env.NEXT_PUBLIC_ENABLE_ANALYTICS === "true";
+const analyticsEnabled = isAnalyticsEnabled();
 
 /**
  * Send an event to gtag (GA4) when available.
