@@ -4,6 +4,9 @@ This document defines the information Textytools may emit through application
 analytics. It is a versioned data contract and measurement boundary, not a claim
 that every reserved event is implemented.
 
+Reproducible aggregates, evidence sufficiency, and promotion-gate rules are defined
+separately in [`MEASUREMENT.md`](MEASUREMENT.md).
+
 ## Contract status
 
 - Contract version: 1

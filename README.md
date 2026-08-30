@@ -26,6 +26,8 @@ git config core.hooksPath .githooks
 The approved content-free event and parameter boundary is defined in
 [`ANALYTICS.md`](ANALYTICS.md). The events listed below describe the current
 production baseline; they are not all approved outcome events under that contract.
+Baseline sufficiency and promotion-gate rules are defined in
+[`MEASUREMENT.md`](MEASUREMENT.md).
 
 Set `NEXT_PUBLIC_GOOGLE_TAG_ID` to the Google tag ID installed for the site
 (for example, `GT-WV3GVH8P`). Textytools deliberately uses the `gtag/js`
