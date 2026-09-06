@@ -39,6 +39,12 @@ git worktree add -b text-42-improve-json-errors \
   ../textytools-text-42 origin/staging
 ```
 
+Create active worktrees as durable sibling directories within the Tidalsoft workspace,
+as shown above. Do not put an active feature, project, or staging worktree in `/tmp`,
+`/private/tmp`, or another operating-system temporary directory. A worktree is another
+checkout of this repository: its committed files belong to its branch even though they do
+not appear in the primary checkout until that branch is integrated.
+
 Work, test, and commit inside that worktree. Commits should be coherent, verified review or
 recovery points. Push the feature branch when remote collaboration, review, or backup
 requires it:
