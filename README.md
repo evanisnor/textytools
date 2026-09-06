@@ -10,6 +10,9 @@ Development and deployment follow the worktree → staging → production proces
 The verified behavior and boundaries of the nine public tools are recorded in
 [`CAPABILITIES.md`](CAPABILITIES.md).
 
+The synthetic test-data boundary and required scenario catalog are defined in
+[`FIXTURES.md`](FIXTURES.md).
+
 Approved product surfaces and the disposition of historical experiments are
 recorded in [`PRODUCT_BOUNDARIES.md`](PRODUCT_BOUNDARIES.md).
 
