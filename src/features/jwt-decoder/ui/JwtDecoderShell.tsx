@@ -187,9 +187,9 @@ export function JwtDecoderShell() {
             <strong className="text-zinc-900 dark:text-zinc-50">
               Security Note:
             </strong>{" "}
-            This decoder runs entirely in your browser. No tokens are sent to
-            any server. However, avoid pasting production tokens containing
-            sensitive data.
+            Token decoding is processed in this browser. The token is not sent
+            to a server for decoding or signature verification. Avoid pasting
+            production tokens containing sensitive data.
           </p>
         </div>
       </div>

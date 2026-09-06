@@ -2,24 +2,26 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy - Data practices & no user data collection",
+  title: "Privacy Policy - Textytools data practices",
   description:
-    "Privacy policy for textytools.dev. We do not collect, store, or share any user data.",
+    "How Textytools processes tool content, browser storage, analytics, and feedback.",
   keywords: [
     "privacy policy",
     "privacy",
     "textytools",
-    "data collection",
-    "cookies",
-    "gdpr",
+    "browser storage",
+    "analytics",
+    "feedback",
     "data protection",
-    "no user data",
-    "privacy practices",
   ],
   alternates: {
     canonical: "https://textytools.dev/privacy",
   },
 };
+
+const sectionClass = "space-y-3";
+const headingClass = "text-xl font-semibold text-zinc-900 dark:text-zinc-50";
+const paragraphClass = "text-zinc-600 dark:text-zinc-400 leading-relaxed";
 
 export default function PrivacyPolicy() {
   return (
@@ -39,285 +41,197 @@ export default function PrivacyPolicy() {
             Privacy Policy
           </h1>
           <p className="text-sm text-zinc-600 dark:text-zinc-400">
-            Last updated: November 16, 2025
+            Last updated: September 6, 2026
           </p>
         </div>
 
-        <div className="prose prose-zinc dark:prose-invert max-w-none">
-          <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-8 space-y-6">
-            <section>
-              <h2 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50 mb-3">
-                Overview
+        <main className="prose prose-zinc dark:prose-invert max-w-none">
+          <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-8 space-y-8">
+            <section className={sectionClass}>
+              <h2 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
+                What this policy covers
               </h2>
-              <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                Welcome to <strong>textytools.dev</strong> (“we,” “our,” or
-                “us”). This Privacy Policy describes how we handle information
-                when you visit our website{" "}
+              <p className={paragraphClass}>
+                Tidalsoft operates <strong>textytools.dev</strong>. This policy
+                explains the data handling built into the site as of the date
+                above, including browser-based tools, site analytics, hosting,
+                and the feedback form.
+              </p>
+              <p className={paragraphClass}>
+                The catalogued tools process their inputs in your browser, but
+                that does not mean the whole site operates without storage or
+                network services. The specific boundaries are described below.
+              </p>
+            </section>
+
+            <section className={sectionClass}>
+              <h2 className={headingClass}>
+                1. Tool content and browser storage
+              </h2>
+              <p className={paragraphClass}>
+                The nine tools listed on the home page perform their text and
+                data transformations in client-side browser code. Their current
+                inputs and settings are written to same-origin{" "}
+                <code>sessionStorage</code> so work can survive a reload in the
+                same tab.
+              </p>
+              <p className={paragraphClass}>
+                This state is kept in that tab for the browser session. A
+                browser&apos;s session-restore behavior may extend that
+                lifetime, so Textytools does not promise an exact automatic
+                deletion time. Supported cross-tool actions use a one-time
+                session-storage key; the destination removes that transfer key
+                after reading it and may then keep the content as its own
+                temporary tool state.
+              </p>
+              <p className={paragraphClass}>
+                Use a tool&apos;s Clear control where provided to remove its
+                current content. Use your browser&apos;s site-data controls to
+                remove all temporary tool content and settings. Browser
+                extensions, device backups, synchronization, and clipboard
+                history are controlled by your browser or device rather than by
+                Textytools.
+              </p>
+              <p className={paragraphClass}>
+                A small number of directly reachable, non-catalogued
+                experimental pages currently save documents in same-origin{" "}
+                <code>localStorage</code>. Those browser-local records remain
+                until they are deleted in the page where a delete control is
+                available or removed with browser site-data controls. They are
+                not account data and are not synchronized by Textytools.
+              </p>
+            </section>
+
+            <section className={sectionClass}>
+              <h2 className={headingClass}>2. Hosting and request data</h2>
+              <p className={paragraphClass}>
+                Vercel hosts the site. Loading a page or calling the feedback
+                endpoint sends ordinary request information to that hosting
+                service, such as an IP address, requested URL, time, browser or
+                device information, and technical data needed to deliver and
+                protect the service. Provider-controlled logs and security
+                systems may retain that information under the provider&apos;s
+                own practices.
+              </p>
+            </section>
+
+            <section className={sectionClass}>
+              <h2 className={headingClass}>3. Google Analytics</h2>
+              <p className={paragraphClass}>
+                The production site uses Google Analytics to understand site and
+                tool usage. Google Analytics can set or read analytics cookies
+                and receive browser, device, approximate location, referral,
+                page-view, and interaction information. Preview and staging
+                deployments do not load production analytics by default.
+              </p>
+              <p className={paragraphClass}>
+                Textytools application events may include the page URL and path,
+                tool name, interaction type, selected modes or options, source
+                and destination tools, and some exact interaction counts. The
+                application does not intentionally attach raw editor input,
+                transformed output, clipboard contents, or feedback fields to
+                those events. Google may collect additional information through
+                its own automatic measurement and cookies.
+              </p>
+              <p className={paragraphClass}>
+                You can restrict or remove analytics cookies and site data using
+                your browser settings or content-blocking controls. Textytools
+                does not currently display a separate cookie-consent manager.
+              </p>
+            </section>
+
+            <section className={sectionClass}>
+              <h2 className={headingClass}>4. Feedback</h2>
+              <p className={paragraphClass}>
+                Submitting the feedback form sends the name, email address, and
+                message you enter to the Textytools feedback endpoint. The
+                endpoint passes that information to Resend for email delivery
+                and then to the configured Textytools mailbox. Tool content is
+                not attached automatically, but it becomes part of the feedback
+                if you put it in the message.
+              </p>
+              <p className={paragraphClass}>
+                Resend and the receiving email service process delivery metadata
+                and may retain the submission and related operational records.
+                Tidalsoft may keep received feedback to respond, operate the
+                service, and maintain a record of the conversation. Do not
+                submit secrets or tool content you do not want included in that
+                record.
+              </p>
+            </section>
+
+            <section className={sectionClass}>
+              <h2 className={headingClass}>
+                5. How information is used and shared
+              </h2>
+              <p className={paragraphClass}>
+                Tidalsoft uses the information described above to deliver and
+                secure the site, understand aggregate usage, improve the tools,
+                and respond to feedback. Information is shared with service
+                providers only as needed for hosting, analytics, email delivery,
+                and related service operations.
+              </p>
+              <p className={paragraphClass}>
+                Textytools does not currently run an advertising network or
+                serve targeted advertising. The deployed application has no
+                advertising or data-sale integration. Links to other sites are
+                governed by those sites&apos; own practices.
+              </p>
+            </section>
+
+            <section className={sectionClass}>
+              <h2 className={headingClass}>
+                6. Retention, deletion, and choices
+              </h2>
+              <p className={paragraphClass}>
+                Browser-held tool content can be removed as described in section
+                1. Analytics and infrastructure data follow the settings and
+                retention practices of the applicable provider. Feedback is not
+                covered by a promised automatic deletion schedule.
+              </p>
+              <p className={paragraphClass}>
+                Depending on where you live, you may have rights concerning
+                personal information Tidalsoft controls. You may ask about,
+                correct, or request deletion of feedback or other identifiable
+                information by emailing{" "}
                 <a
                   className="underline cursor-pointer"
-                  href="https://textytools.dev"
+                  href="mailto:contact@textytools.dev"
                 >
-                  https://textytools.dev
-                </a>{" "}
-                (the “Site”).
-              </p>
-              <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                By using the Site you agree to the practices described in this
-                policy.
+                  contact@textytools.dev
+                </a>
+                . We may need enough information to locate the relevant record
+                and may retain information where required or permitted for
+                legal, security, or operational reasons.
               </p>
             </section>
 
-            <section>
-              <h3 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
-                1. Information We Collect
-              </h3>
-
-              <h4 className="font-medium text-zinc-900 dark:text-zinc-50">
-                1.1 Personal Information
-              </h4>
-              <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                We do <strong>not</strong> collect, store, or process personally
-                identifiable information (PII). The Site does not require
-                accounts, sign-ins, or user uploads.
-              </p>
-
-              <h4 className="font-medium text-zinc-900 dark:text-zinc-50 mt-4">
-                1.2 Automatically Collected Data
-              </h4>
-              <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                Although we do not collect personal data directly, third-party
-                analytics and advertising services used on the Site may
-                automatically collect limited data via cookies and similar
-                technologies. This may include:
-              </p>
-              <ul>
-                <li>IP address (often anonymized by providers)</li>
-                <li>Browser and device type</li>
-                <li>Pages visited and time on site</li>
-                <li>Referring website</li>
-                <li>General usage patterns</li>
-              </ul>
-            </section>
-
-            <section>
-              <h3 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
-                2. Cookies &amp; Tracking Technologies
-              </h3>
-              <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                We use cookies and similar tracking technologies for analytics
-                and advertising purposes.
-              </p>
-
-              <h4 className="font-medium text-zinc-900 dark:text-zinc-50 mt-3">
-                2.1 Analytics
-              </h4>
-              <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                We use analytics providers to understand how visitors use the
-                Site and to improve the Site experience. Analytics cookies
-                typically store anonymized usage data and do not provide us with
-                personally identifiable information.
-              </p>
-
-              <h4 className="font-medium text-zinc-900 dark:text-zinc-50 mt-3">
-                2.2 Advertising
-              </h4>
-              <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                We work with advertising networks that may use cookies to
-                deliver targeted ads, measure ad performance, and prevent
-                repeated displays. These third-party ad partners may track
-                browsing behavior across websites to provide personalized
-                advertising.
-              </p>
-
-              <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                You can manage or disable cookies through your browser settings
-                or via cookie preference controls where provided.
+            <section className={sectionClass}>
+              <h2 className={headingClass}>7. Children</h2>
+              <p className={paragraphClass}>
+                Textytools is not directed to children under 13. If you believe
+                a child submitted personal information through the feedback
+                form, contact us so we can review the request.
               </p>
             </section>
 
-            <section>
-              <h3 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
-                3. How We Use Data
-              </h3>
-              <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                Any data collected by third-party analytics or advertising
-                partners is used for:
-              </p>
-              <ul>
-                <li>Understanding Site usage</li>
-                <li>Improving Site functionality</li>
-                <li>Supporting ad-based revenue</li>
-                <li>Measuring and improving ad performance</li>
-              </ul>
-              <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                We do not combine or cross-reference data to identify individual
-                visitors.
+            <section className={sectionClass}>
+              <h2 className={headingClass}>8. Changes and contact</h2>
+              <p className={paragraphClass}>
+                We may update this policy when the site&apos;s data practices
+                change. The date at the top identifies the current version.
+                Questions or requests can be sent to{" "}
+                <a
+                  className="underline cursor-pointer"
+                  href="mailto:contact@textytools.dev"
+                >
+                  contact@textytools.dev
+                </a>
+                .
               </p>
             </section>
-
-            <section>
-              <h3 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
-                4. Third-Party Services
-              </h3>
-              <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                We may use third-party services for analytics, advertising, and
-                cookie consent management. These third parties have their own
-                privacy policies and may store or process data on servers
-                located outside your country.
-              </p>
-              <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                We do not sell or directly share personal data. However,
-                third-party partners may collect information independently for
-                their own purposes consistent with applicable law.
-              </p>
-            </section>
-
-            <section>
-              <h3 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
-                5. GDPR (EU/EEA Users)
-              </h3>
-              <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                If you are located in the EU or EEA, you have the following
-                rights with respect to personal data processed by third-party
-                providers:
-              </p>
-              <ul>
-                <li>Access any personal data held about you</li>
-                <li>Request correction or deletion of inaccurate data</li>
-                <li>Object to or restrict processing</li>
-                <li>Withdraw consent to cookie-based tracking</li>
-                <li>
-                  File a complaint with your local data protection authority
-                </li>
-              </ul>
-              <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                We provide cookie consent controls to help you exercise your
-                rights.
-              </p>
-            </section>
-
-            <section>
-              <h3 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
-                6. CCPA (California Residents)
-              </h3>
-              <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                Under the California Consumer Privacy Act (CCPA), California
-                residents have rights including:
-              </p>
-              <ul>
-                <li>
-                  Knowing what categories of personal data third parties may
-                  collect
-                </li>
-                <li>
-                  Opting out of the “sale” or “sharing” of personal data, where
-                  applicable
-                </li>
-                <li>
-                  Requesting deletion of personal data held by third parties
-                </li>
-                <li>
-                  Not being discriminated against for exercising privacy rights
-                </li>
-              </ul>
-              <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                Although we do not collect personal data directly, our
-                advertising partners may collect data subject to CCPA. We
-                provide mechanisms to opt out of targeted advertising where
-                required.
-              </p>
-            </section>
-
-            <section>
-              <h3 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
-                7. Children’s Privacy
-              </h3>
-              <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                The Site is not intended for children under 13. We do not
-                knowingly collect personal information from children under 13.
-                If you believe a child has provided personal information to a
-                third-party provider via the Site, please contact us and we will
-                work with providers to address the issue.
-              </p>
-            </section>
-
-            <section>
-              <h3 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
-                8. Data Security
-              </h3>
-              <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                We do not store user data directly. Third-party providers
-                implement their own security measures; we select providers that
-                comply with GDPR, CCPA, and industry standards wherever
-                possible.
-              </p>
-            </section>
-
-            <section>
-              <h3 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
-                9. International Data Transfers
-              </h3>
-              <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                Third-party analytics and advertising partners may transfer data
-                across international borders. Such transfers are governed by
-                mechanisms like Standard Contractual Clauses (SCCs), adequacy
-                decisions, or other GDPR-compliant measures when applicable.
-              </p>
-            </section>
-
-            <section>
-              <h3 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
-                10. Changes to This Privacy Policy
-              </h3>
-              <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                We may update this Privacy Policy from time to time. The “Last
-                updated” date at the top reflects the most recent version.
-                Continued use of the Site constitutes acceptance of any changes.
-              </p>
-            </section>
-
-            <section>
-              <h3 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
-                11. Contact Us
-              </h3>
-              <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                If you have questions or concerns about this Privacy Policy or
-                your privacy rights, please contact us at:
-              </p>
-              <ul>
-                <li>
-                  <strong>Website:</strong>{" "}
-                  <a
-                    className="underline cursor-pointer"
-                    href="https://textytools.dev"
-                  >
-                    https://textytools.dev
-                  </a>
-                </li>
-                <li>
-                  <strong>Email:</strong>{" "}
-                  <a
-                    className="underline cursor-pointer"
-                    href="mailto:contact@textytools.dev"
-                  >
-                    contact@textytools.dev
-                  </a>
-                </li>
-                <li>
-                  <strong>Site name:</strong> textytools.dev
-                </li>
-              </ul>
-            </section>
-
-            <footer className="pt-4 border-t border-zinc-100 dark:border-zinc-800">
-              <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                This Privacy Policy applies only to the Site and does not govern
-                the practices of third-party websites, services, or platforms
-                linked from or used on the Site.
-              </p>
-            </footer>
           </div>
-        </div>
+        </main>
       </div>
     </div>
   );

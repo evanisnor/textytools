@@ -160,6 +160,82 @@ test("tool state survives a same-session reload", async ({ page }) => {
   await expect(page.getByLabel("Input Text")).toHaveValue(fixture.input);
 });
 
+test("a representative tool explains and honors its browser-data boundary", async ({
+  page,
+}) => {
+  await openTool(page, "text-counter", "Text Counter");
+
+  const dataNotice = page.getByLabel("Tool data handling");
+  await expect(dataNotice).toContainText("Processed in this browser");
+  await expect(dataNotice).toContainText(
+    "kept in this tab for this browser session",
+  );
+  await expect(
+    dataNotice.getByRole("link", { name: "Privacy details" }),
+  ).toHaveAttribute("href", "/privacy");
+
+  const syntheticContent = "private-boundary-fixture-2048";
+  await page.getByLabel("Input Text").fill(syntheticContent);
+  await expect
+    .poll(() =>
+      page.evaluate(() => sessionStorage.getItem("text-counter-state")),
+    )
+    .toContain(syntheticContent);
+  await expect(
+    page.evaluate(
+      (value) => JSON.stringify(localStorage).includes(value),
+      syntheticContent,
+    ),
+  ).resolves.toBe(false);
+
+  await page.getByRole("button", { name: "Clear", exact: true }).click();
+  await expect
+    .poll(() =>
+      page.evaluate(() => sessionStorage.getItem("text-counter-state")),
+    )
+    .not.toContain(syntheticContent);
+
+  await page.getByRole("button", { name: "Send Feedback" }).click();
+  await expect(
+    page.getByText(/submitting sends your name, email/i),
+  ).toBeVisible();
+  await expect(page.getByText(/tool content is not attached/i)).toBeVisible();
+});
+
+test("the privacy page names the deployed storage and network services", async ({
+  page,
+}) => {
+  const response = await page.goto("/privacy");
+
+  expect(response?.ok()).toBe(true);
+  await expect(page).toHaveTitle(/Privacy Policy - Textytools data practices/);
+  await expect(
+    page.getByRole("heading", {
+      level: 2,
+      name: /tool content and browser storage/i,
+    }),
+  ).toBeVisible();
+  await expect(page.getByText("sessionStorage", { exact: true })).toBeVisible();
+  await expect(page.getByText("localStorage", { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { level: 2, name: /Google Analytics/i }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { level: 2, name: /Feedback/i }),
+  ).toBeVisible();
+  await expect(
+    page.getByText(/passes that information to Resend/i),
+  ).toBeVisible();
+  await expect(
+    page.getByText(/does not currently run an advertising network/i),
+  ).toBeVisible();
+  await expect(
+    page.getByText(
+      /does not currently display a separate cookie-consent manager/i,
+    ),
+  ).toBeVisible();
+});
+
 test("a cross-tool continuation consumes its one-time transfer", async ({
   page,
 }) => {

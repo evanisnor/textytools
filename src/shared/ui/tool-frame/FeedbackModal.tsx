@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, FormEvent } from "react";
 
 import { Modal } from "../modal/Modal";
@@ -83,7 +84,7 @@ export function FeedbackModal({
             Send Feedback
           </h2>
 
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} aria-describedby="feedback-data-notice">
             <div className="space-y-4">
               {/* Name field */}
               <div>
@@ -143,6 +144,22 @@ export function FeedbackModal({
                   placeholder="Your feedback..."
                 />
               </div>
+
+              <p
+                id="feedback-data-notice"
+                className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400"
+              >
+                Submitting sends your name, email, and message to Textytools
+                through its email provider. Tool content is not attached unless
+                you put it in this message.{" "}
+                <Link
+                  href="/privacy"
+                  className="underline hover:text-zinc-900 dark:hover:text-zinc-50"
+                >
+                  Privacy details
+                </Link>
+                .
+              </p>
 
               {/* Action buttons */}
               <div className="flex gap-3 justify-end pt-2">

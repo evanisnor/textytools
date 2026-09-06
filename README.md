@@ -144,7 +144,7 @@ Decode and inspect JSON Web Tokens (JWT) with syntax highlighting and automatic 
   - Toggle between formatted and raw JSON output
   - Real-time decoding with error messages
   - Copy decoded output to clipboard
-- **Implementation**: Client-side base64url decoding, RFC 7519 compliant parsing, no server communication for security
+- **Implementation**: Client-side base64url decoding and RFC 7519 claim inspection without signature verification. Tokens are not sent to a server for decoding.
 
 ### Regex Tester
 
@@ -244,13 +244,14 @@ textytools/
 Modern features use React Context to avoid prop drilling and keep pages minimal:
 
 **Example: diff-viewer**
+
 ```tsx
 // app/diff-viewer/page.tsx (composition only)
 <DiffViewerProvider>
   <ToolFrame headerRight={<DiffViewerHeader />}>
     <DiffViewerShell />
   </ToolFrame>
-</DiffViewerProvider>
+</DiffViewerProvider>;
 
 // src/features/diff-viewer/model/DiffViewerProvider.tsx
 export function DiffViewerProvider({ children }) {
@@ -263,6 +264,7 @@ const { stats } = useDiffViewerContext();
 ```
 
 **Benefits**:
+
 - Pages stay thin (just composition)
 - No prop drilling through `ToolFrame`
 - Components access only what they need
@@ -575,7 +577,9 @@ Open [http://localhost:3000](http://localhost:3000) to view the application.
 
 ### Browser Compatibility
 
-All utilities run entirely in the browser with no backend dependencies. Modern browser features used:
+The nine catalogued utilities perform their primary transformations in the browser.
+The separate analytics and feedback paths use network services as documented in the
+[privacy policy](app/privacy/page.tsx). Modern browser features used:
 
 - ES2017+ JavaScript
 - CSS Grid & Flexbox

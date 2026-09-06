@@ -157,7 +157,7 @@ export const TOOL_CATALOG = [
     description: "Decode and inspect JSON Web Tokens with validation",
     metadataTitle: "JWT Decoder - Inspect, validate, and decode tokens",
     metadataDescription:
-      "Decode and inspect JSON Web Tokens (JWT) with syntax highlighting and automatic validation. View header, payload, signature, algorithm, expiration, and standard claims. Free browser-based JWT decoder with no server communication.",
+      "Decode and inspect JSON Web Tokens (JWT) in your browser with syntax highlighting and automatic claim checks. View header, payload, signature text, algorithm, expiration, and standard claims without signature verification.",
     keywords: [
       "jwt decoder",
       "decode jwt",

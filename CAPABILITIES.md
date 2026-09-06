@@ -30,14 +30,18 @@ delivery work occurs.
 
 The nine tools execute their primary transformations in the browser. Their tool
 state is stored in same-origin `sessionStorage`, so entered content can survive a
-reload in the same browser session but is not durable account data. A supported
+reload or browser session restoration but is not durable account data. The tools'
+Clear controls replace their current content with empty state but can retain tool
+preferences; browser site-data controls can remove all origin storage. A supported
 cross-tool action writes output to a one-time `sessionStorage` transfer key and
 navigates to the destination route. The destination consumes and removes that key.
 
-Production analytics emits interaction metadata, including the route, tool name,
+Production loads Google Analytics, which can use analytics cookies and automatic
+browser, device, referral, page-view, and approximate-location signals. Application
+events emit interaction metadata, including the full page URL and path, tool name,
 selected modes or options for some actions, match counts for regex handoffs, and
 conversion source and destination. The application does not intentionally attach
-raw editor contents to these events. All tools can emit `tool_view`,
+raw editor contents, clipboard contents, or feedback fields to these events. All tools can emit `tool_view`,
 `tool_activation`, `feedback_open`, and `feedback_submit`; additional events are
 listed below. Analytics is disabled by default outside the Vercel Production
 environment.
@@ -46,21 +50,24 @@ The feedback form is a separate network path available from every tool. When a
 visitor submits it, their name, email address, and message are sent to the
 `/api/send-feedback` route and then to the configured Resend email recipient.
 Tool editor contents are not automatically included. Clipboard actions use the
-browser Clipboard API.
+browser Clipboard API. The deployed application has no advertising-network or
+cookie-consent-manager integration. The reachable, non-catalogued Apogee and
+Blastoff experiments use durable same-origin `localStorage` as separately recorded
+in [`PRODUCT_BOUNDARIES.md`](PRODUCT_BOUNDARIES.md).
 
 ## Capability matrix
 
-| Tool | Primary job | State key | Supported handoffs | Additional analytics |
-|---|---|---|---|---|
-| [Text Counter](#text-counter) | Count properties of text | `text-counter-state` | None | None |
-| [Diff Viewer](#diff-viewer) | Compare two texts line by line | `diff-viewer-state` | Receives `cross-tool-input-diff-viewer` | `clear_button_click` |
-| [Case Converter](#case-converter) | Apply one of 11 case transformations | `case-converter-state` | None | `copy_button_click`, `clear_button_click` |
-| [Text Sanitizer](#text-sanitizer) | Apply an ordered set of 12 cleanup operations | `text-sanitizer-state` | None | `copy_button_click`, `clear_button_click`, `toggle_all_click` |
-| [JSON Wizard](#json-wizard) | Validate, search, and render JSON | `json-wizard-state` | Receives JSON; sends to Text Encoder or CSV / JSON Converter | `copy_button_click`, `clear_button_click`, `tool_conversion` |
-| [CSV / JSON Converter](#csv--json-converter) | Convert CSV to JSON or JSON to CSV | `csv-json-converter-state` | Receives CSV or JSON; sends converted JSON to JSON Wizard | `copy_button_click`, `clear_button_click`, `tool_conversion` |
-| [Text Encoder](#text-encoder) | Encode, decode, or hash text | `text-encoder-state` | Receives `cross-tool-input-text-encoder` | `copy_button_click` |
-| [JWT Decoder](#jwt-decoder) | Decode and inspect a three-part JWT | `jwt-decoder-state` | Receives a token; sends decoded JSON to JSON Wizard | `copy_button_click`, `clear_button_click`, `tool_conversion` |
-| [Regex Tester](#regex-tester) | Execute JavaScript regex patterns and inspect matches | `regex-tester-state` | Receives test text; sends captured matches to JSON Wizard or CSV / JSON Converter | `copy_button_click`, `clear_button_click`, `tool_conversion` |
+| Tool                                         | Primary job                                           | State key                  | Supported handoffs                                                                | Additional analytics                                          |
+| -------------------------------------------- | ----------------------------------------------------- | -------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| [Text Counter](#text-counter)                | Count properties of text                              | `text-counter-state`       | None                                                                              | None                                                          |
+| [Diff Viewer](#diff-viewer)                  | Compare two texts line by line                        | `diff-viewer-state`        | Receives `cross-tool-input-diff-viewer`                                           | `clear_button_click`                                          |
+| [Case Converter](#case-converter)            | Apply one of 11 case transformations                  | `case-converter-state`     | None                                                                              | `copy_button_click`, `clear_button_click`                     |
+| [Text Sanitizer](#text-sanitizer)            | Apply an ordered set of 12 cleanup operations         | `text-sanitizer-state`     | None                                                                              | `copy_button_click`, `clear_button_click`, `toggle_all_click` |
+| [JSON Wizard](#json-wizard)                  | Validate, search, and render JSON                     | `json-wizard-state`        | Receives JSON; sends to Text Encoder or CSV / JSON Converter                      | `copy_button_click`, `clear_button_click`, `tool_conversion`  |
+| [CSV / JSON Converter](#csv--json-converter) | Convert CSV to JSON or JSON to CSV                    | `csv-json-converter-state` | Receives CSV or JSON; sends converted JSON to JSON Wizard                         | `copy_button_click`, `clear_button_click`, `tool_conversion`  |
+| [Text Encoder](#text-encoder)                | Encode, decode, or hash text                          | `text-encoder-state`       | Receives `cross-tool-input-text-encoder`                                          | `copy_button_click`                                           |
+| [JWT Decoder](#jwt-decoder)                  | Decode and inspect a three-part JWT                   | `jwt-decoder-state`        | Receives a token; sends decoded JSON to JSON Wizard                               | `copy_button_click`, `clear_button_click`, `tool_conversion`  |
+| [Regex Tester](#regex-tester)                | Execute JavaScript regex patterns and inspect matches | `regex-tester-state`       | Receives test text; sends captured matches to JSON Wizard or CSV / JSON Converter | `copy_button_click`, `clear_button_click`, `tool_conversion`  |
 
 Every tool also has a return-to-home action and the shared feedback path.
 
