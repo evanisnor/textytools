@@ -162,6 +162,13 @@ Run the required checks for each promoted group and validate the integrated resu
 Linear staging update with the deployed outcome, deployment or pull-request link,
 validation state, feature-flag state, risks, and production or rollback criteria.
 
+If Vercel SSO or another authenticated access boundary prevents the agent from exercising
+the staging application, the agent must report the automated checks and deployment state,
+then ask the user to perform the authenticated manual verification. A redirect to the SSO
+login page proves only that access control is active; it is not application validation.
+Do not promote to production until the user explicitly confirms the protected staging
+deployment is acceptable.
+
 Closing an owning issue or project as completed, canceled, or otherwise terminal includes
 cleaning up its worktree. Before closure, verify that the checkout is clean, push every
 required commit, and record the branch, final commit, validation, and upstream state in

@@ -117,7 +117,11 @@ Report any check that was not run and why. Do not claim verification based only 
   has diverged from `staging`, stop and request an explicit reconciliation decision.
 - Deploy to `staging` only when the user explicitly requests it, and perform the integration
   from a dedicated staging worktree. If staging validation is needed without an existing
-  deployment request, stop after local validation and ask the user for approval.
+  deployment request, stop after local validation and ask the user for approval. If Vercel
+  SSO prevents the agent from exercising the staging application, report the completed
+  automated evidence and ask the user for authenticated manual verification; do not treat
+  the SSO login response as application validation or promote to production without the
+  user's explicit verification.
 - Never force-push any branch. Published history is commit-forward: correct prior work
   with a new commit or revert commit, never by amending, resetting, rebasing, or replacing
   published commits.
