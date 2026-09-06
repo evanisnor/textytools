@@ -101,6 +101,13 @@ Report any check that was not run and why. Do not claim verification based only 
 
 ## Git, commits, and deployment
 
+- Treat the latest `origin/staging` state as the authority for active development.
+  Before scoping or implementing work, fetch `origin`, create the scoped worktree from
+  `origin/staging` or update its existing staging-based branch without rewriting history,
+  then reread `AGENTS.md` and `DEVELOPMENT.md` inside that worktree. The primary `main`
+  checkout represents production and may lag staging; do not use its files or guidance as
+  the basis for new development. If an existing worktree cannot incorporate
+  `origin/staging` by fast-forward, stop and request an explicit reconciliation decision.
 - Follow `DEVELOPMENT.md` for the required worktree, staging, and production workflow.
   Feature work happens in worktrees and a feature worktree may remain active across
   multiple staging deployments. Fast-forward each ready series of commits into `staging`,

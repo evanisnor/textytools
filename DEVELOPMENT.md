@@ -15,6 +15,27 @@ and `main` through its Git integration.
 Never commit or push directly to `main`. Every production change, including urgent fixes,
 must first exist on `staging` and be validated there.
 
+## Development authority
+
+The latest `origin/staging` state is authoritative for active development. The primary
+`main` checkout represents the current production release and may legitimately lag
+staging, so its files—including `AGENTS.md` and this document—must not be used to base or
+govern new development when the refs differ.
+
+Before scoping, implementing, reviewing, or integrating active work:
+
+1. Fetch `origin`.
+2. Create a new scoped worktree from `origin/staging`, or confirm that the existing
+   issue- or project-owned branch contains `origin/staging`. Fast-forward a clean branch
+   that is merely behind; if it has diverged, stop and request an explicit reconciliation
+   decision.
+3. Reread every applicable `AGENTS.md` and this `DEVELOPMENT.md` from that staging-based
+   worktree before running implementation or integration commands.
+
+Promoting `staging` to `main` publishes an already validated state; it is not how active
+development acquires current instructions. Never begin new work from `main` merely to make
+the primary checkout convenient.
+
 ## Linear and branch names
 
 Create or identify the `TEXT` Linear issue before starting meaningful work. Feature branch
@@ -31,12 +52,13 @@ Example: `text-42-improve-json-errors`.
 
 Before beginning implementation, assign the Linear issue to the person doing the work and
 move it to **In Progress**. Then create an isolated Git worktree from the latest remote
-`staging`:
+`staging` and read the repository guidance from that worktree:
 
 ```bash
 git fetch origin
 git worktree add -b text-42-improve-json-errors \
   ../textytools--text-42-improve-json-errors origin/staging
+# Read AGENTS.md and DEVELOPMENT.md in the new worktree before implementation.
 ```
 
 Create active worktrees as durable sibling directories within the Tidalsoft workspace,
