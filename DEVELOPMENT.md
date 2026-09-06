@@ -36,21 +36,23 @@ move it to **In Progress**. Then create an isolated Git worktree from the latest
 ```bash
 git fetch origin
 git worktree add -b text-42-improve-json-errors \
-  ../textytools-text-42 origin/staging
+  ../textytools--text-42-improve-json-errors origin/staging
 ```
 
 Create active worktrees as durable sibling directories within the Tidalsoft workspace,
-as shown above. Do not put an active feature, project, or staging worktree in `/tmp`,
-`/private/tmp`, or another operating-system temporary directory. A worktree is another
-checkout of this repository: its committed files belong to its branch even though they do
-not appear in the primary checkout until that branch is integrated.
+as shown above. Name each directory `<repository>--<branch>`, using the literal `--`
+sequence to distinguish the repository name from the complete branch name. Do not put an
+active feature, project, or staging worktree in `/tmp`, `/private/tmp`, or another
+operating-system temporary directory. A worktree is another checkout of this repository:
+its committed files belong to its branch even though they do not appear in the primary
+checkout until that branch is integrated.
 
 Work, test, and commit inside that worktree. Commits should be coherent, verified review or
 recovery points. Push the feature branch when remote collaboration, review, or backup
 requires it:
 
 ```bash
-git -C ../textytools-text-42 push --set-upstream origin \
+git -C ../textytools--text-42-improve-json-errors push --set-upstream origin \
   text-42-improve-json-errors
 ```
 
@@ -59,6 +61,10 @@ the user explicitly chooses to review its deliverables together. Name the branch
 first delivery issue, keep one coherent commit per issue, and reference the applicable
 issue in every commit and Linear update. Do not use this exception to combine unrelated
 work or to replace Linear with a branch-local task ledger.
+
+Record the worktree's Linear owner when it is created. A feature worktree is owned by its
+issue. An explicitly approved cumulative worktree is owned by the Linear project, so
+closing one child issue does not remove it while the project remains active.
 
 Pushing a feature branch does not create a deployment. Complete local validation before
 integration; production-like validation begins after the ready commits are merged and
@@ -69,9 +75,9 @@ All branches are commit-forward. Never force-push. Once a commit is published, c
 with a new commit or an explicit revert commit; do not amend, reset, rebase, or otherwise
 replace published history.
 
-The feature worktree remains open for the life of the feature. It may produce several
-staging deployments as successive coherent groups of commits become ready for integrated
-validation.
+The worktree remains open only for the active lifecycle of its Linear owner. It may produce
+several staging deployments as successive coherent groups of commits become ready for
+integrated validation, but it must not become an unowned persistent checkout.
 
 ## Commit messages
 
@@ -112,13 +118,13 @@ the primary checkout or the feature worktree to `staging`. Create or reuse the s
 worktree, then integrate the feature branch there:
 
 ```bash
-git -C ../textytools-text-42 push origin text-42-improve-json-errors
+git -C ../textytools--text-42-improve-json-errors push origin text-42-improve-json-errors
 git fetch origin
-git worktree add ../textytools-staging staging # omit when it already exists
-git -C ../textytools-staging pull --ff-only origin staging
-git -C ../textytools-staging merge --no-ff origin/text-42-improve-json-errors \
+git worktree add ../textytools--staging staging # omit when it already exists
+git -C ../textytools--staging pull --ff-only origin staging
+git -C ../textytools--staging merge --no-ff origin/text-42-improve-json-errors \
   -m "Merge TEXT-42 into staging"
-git -C ../textytools-staging push origin staging
+git -C ../textytools--staging push origin staging
 ```
 
 Each staging deployment may promote one or more new feature commits. Continue working in
@@ -135,15 +141,18 @@ Run the required checks for each promoted group and validate the integrated resu
 Linear staging update with the deployed outcome, deployment or pull-request link,
 validation state, feature-flag state, risks, and production or rollback criteria.
 
-Remove the feature worktree only after the feature is finished and promoted to production,
-or intentionally abandoned:
+Closing an owning issue or project as completed, canceled, or otherwise terminal includes
+cleaning up its worktree. Before closure, verify that the checkout is clean, push every
+required commit, and record the branch, final commit, validation, and upstream state in
+Linear. Then remove the worktree from the primary checkout:
 
 ```bash
-git worktree remove ../textytools-text-42
+git worktree remove ../textytools--text-42-improve-json-errors
 ```
 
-Delete its branch only after the required history is reachable from `staging` and no more
-branch-specific validation is needed.
+Do not close the Linear owner while its worktree remains registered. Removing the worktree
+does not require deleting its branch. Delete the branch only after the required history is
+reachable from `staging` and no more branch-specific validation is needed.
 
 ## Small single-commit fixes
 
@@ -155,11 +164,11 @@ implementation:
 
 ```bash
 git fetch origin
-git worktree add ../textytools-staging staging # omit when it already exists
-git -C ../textytools-staging pull --ff-only origin staging
+git worktree add ../textytools--staging staging # omit when it already exists
+git -C ../textytools--staging pull --ff-only origin staging
 # make and validate the small fix, then use the structured message above
-git -C ../textytools-staging commit
-git -C ../textytools-staging push origin staging
+git -C ../textytools--staging commit
+git -C ../textytools--staging push origin staging
 ```
 
 This is the only direct-branch exception. It never permits a direct commit or push to
