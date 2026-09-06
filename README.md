@@ -13,6 +13,9 @@ The verified behavior and boundaries of the nine public tools are recorded in
 The synthetic test-data boundary and required scenario catalog are defined in
 [`FIXTURES.md`](FIXTURES.md).
 
+The active test layers, supported browser matrix, local commands, and regression
+policy are defined in [`TESTING.md`](TESTING.md).
+
 Approved product surfaces and the disposition of historical experiments are
 recorded in [`PRODUCT_BOUNDARIES.md`](PRODUCT_BOUNDARIES.md).
 
@@ -535,7 +538,7 @@ Edit [app/page.tsx](app/page.tsx) to add your utility using the `ToolCard` compo
 
 ```bash
 # Install dependencies
-npm install
+npm ci
 
 # Run development server
 npm run dev
@@ -548,6 +551,12 @@ npm start
 
 # Lint code
 npm run lint
+
+# Run the complete Jest suite
+npm test -- --runInBand
+
+# Build and exercise the production app in Chromium
+npm run test:e2e
 
 # Format code
 npm run format

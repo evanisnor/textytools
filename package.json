@@ -11,6 +11,10 @@
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit",
     "test": "jest",
+    "test:unit": "jest --runInBand --testPathPatterns='\\.unit\\.test\\.'",
+    "test:component": "jest --runInBand --testPathPatterns='\\.component\\.test\\.'",
+    "test:integration": "jest --runInBand --testPathPatterns='\\.integration\\.test\\.'",
+    "test:e2e": "playwright test",
     "test:watch": "jest --watch"
   },
   "dependencies": {
@@ -36,6 +40,7 @@
   "devDependencies": {
     "@feature-sliced/eslint-config": "^0.1.1",
     "@next/third-parties": "^16.0.3",
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",

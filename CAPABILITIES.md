@@ -15,7 +15,7 @@ in the same change.
 - Production routes: the home page and all nine catalogued routes returned HTTP
   200 after redirecting to `https://www.textytools.dev`
 - Automated coverage: no test directly targets any of the nine catalogued tools
-  at this baseline; the only current Jest coverage targets analytics configuration
+  at this historical baseline; the only Jest coverage at that source commit targets analytics configuration
   and the uncatalogued Apogee implementation
 
 Route reachability was checked separately from behavior. The behavioral baseline
@@ -77,7 +77,7 @@ Every tool also has a return-to-home action and the shared feedback path.
 - Next actions: clear the input, return home, or submit feedback. There is no copy
   action or outgoing tool handoff.
 - Privacy: input is stored in `sessionStorage` under `text-counter-state`.
-- Current automated tests: none.
+- Current automated evidence: focused counter unit tests and a Playwright primary-job baseline.
 - Regression contract: empty and whitespace-only text; Unicode and line endings;
   paragraph boundaries; known `cl100k_base` examples; tokenization failure.
 - Known claim gap: the interface says “Tokens (GPT-4+)”, while the implementation
@@ -100,7 +100,7 @@ Every tool also has a return-to-home action and the shared feedback path.
   tool currently sends to it.
 - Privacy: both texts and the case-sensitivity setting are stored in
   `sessionStorage` under `diff-viewer-state`.
-- Current automated tests: none.
+- Current automated evidence: a Playwright comparison, search, route, and responsive baseline.
 - Regression contract: equal text; insertion, deletion, and replacement blocks;
   empty panes; trailing newlines; dual-pane search and case sensitivity.
 - Known claim gap: the public description accurately says side-by-side highlighting,
@@ -119,7 +119,7 @@ Every tool also has a return-to-home action and the shared feedback path.
   submit feedback. There is no cross-tool handoff.
 - Privacy: input and selected case are stored in `sessionStorage` under
   `case-converter-state`.
-- Current automated tests: none.
+- Current automated evidence: Playwright conversion and keyboard-operation baselines.
 - Regression contract: all 11 formats; acronyms and existing camel case; punctuation,
   whitespace, Unicode, and multi-line input; clipboard failure.
 - Known claim gap: the advertised count of 11 formats matches the implementation,
@@ -140,7 +140,7 @@ Every tool also has a return-to-home action and the shared feedback path.
   clear input, return home, or submit feedback. There is no cross-tool handoff.
 - Privacy: input and the complete option set are stored in `sessionStorage` under
   `text-sanitizer-state`.
-- Current automated tests: none.
+- Current automated evidence: a Playwright cleanup and option-interaction baseline.
 - Regression contract: every operation alone; order-sensitive combinations;
   Unicode, emoji, punctuation, duplicate lines, and whitespace; enable/disable all.
 - Known claim gap: the advertised count of 12 operations matches the implementation,
@@ -167,7 +167,7 @@ Every tool also has a return-to-home action and the shared feedback path.
   Converter, return home, or submit feedback.
 - Privacy: input and render options are stored in `sessionStorage` under
   `json-wizard-state`; inbound handoffs use `cross-tool-input-json-wizard`.
-- Current automated tests: none.
+- Current automated evidence: Playwright formatting, validation, route, and handoff baselines.
 - Regression contract: all JSON scalar and container types; invalid syntax and
   position reporting; recursive sorting; escaped JSON; all views and indentation;
   search mapping; both outgoing handoffs.
@@ -193,7 +193,7 @@ Every tool also has a return-to-home action and the shared feedback path.
 - Privacy: input and conversion options are stored in `sessionStorage` under
   `csv-json-converter-state`; inbound handoffs use
   `cross-tool-input-csv-json-converter`.
-- Current automated tests: none.
+- Current automated evidence: focused conversion unit tests, a feature failure/recovery test, and a Playwright primary-job baseline.
 - Regression contract: each direction and delimiter; headers on and off; quoted
   delimiters and quotes; empty values and inferred types; nested values; malformed
   JSON; uneven CSV rows; cross-tool transfer.
@@ -218,7 +218,7 @@ Every tool also has a return-to-home action and the shared feedback path.
   submit feedback. It accepts JSON Wizard handoffs but has no outgoing handoff.
 - Privacy: input, format, and mode are stored in `sessionStorage` under
   `text-encoder-state`; inbound handoffs use `cross-tool-input-text-encoder`.
-- Current automated tests: none.
+- Current automated evidence: a Playwright Base64 primary-job and responsive baseline.
 - Regression contract: round trips for every reversible format; published standard
   vectors where applicable; Unicode and binary boundaries; malformed input; four
   hash vectors; one-way mode behavior; inbound transfer.
@@ -240,7 +240,7 @@ Every tool also has a return-to-home action and the shared feedback path.
   home, or submit feedback.
 - Privacy: the token is stored in `sessionStorage` under `jwt-decoder-state`;
   inbound handoffs use `cross-tool-input-jwt-decoder`.
-- Current automated tests: none.
+- Current automated evidence: focused decoder unit tests plus Playwright decode and JSON Wizard handoff baselines.
 - Regression contract: valid and malformed compact JWTs; Unicode JSON; missing and
   malformed claims; expired and not-yet-valid times; copy and JSON handoff.
 - Known claim gap: the tool does **not** cryptographically verify the signature,
@@ -264,7 +264,7 @@ Every tool also has a return-to-home action and the shared feedback path.
   or submit feedback.
 - Privacy: pattern, flags, and test text are stored in `sessionStorage` under
   `regex-tester-state`; inbound handoffs use `cross-tool-input-regex-tester`.
-- Current automated tests: none.
+- Current automated evidence: focused execution unit tests and a Playwright named-capture baseline.
 - Regression contract: all flags; named and unnamed captures; zero and many matches;
   Unicode; generated JSON and CSV escaping; invalid and guarded patterns; both
   outgoing handoffs.

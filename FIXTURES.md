@@ -10,8 +10,9 @@ is defined in [`CAPABILITIES.md`](CAPABILITIES.md).
 - Contract version: 1
 - Decision authority: Linear issue `TEXT-9`
 - Approved: 2026-09-01
-- Implementation status: decision only; no fixture files, generators, or tests are
-  delivered by `TEXT-9`
+- Implementation status: `TEXT-12` materializes one reviewed primary-job record
+  for each public tool. The wider required scenario catalog remains an inventory,
+  not a claim of complete coverage.
 
 ## Data boundary
 
@@ -81,7 +82,7 @@ not depend on that path.
 | `oracle_status` | `approved`, `characterization`, or `decision_required` |
 | `expected_outcome` | `valid`, `partial`, `ambiguous`, or `failure`, using the analytics outcome definitions |
 | `assertions` | Semantic properties and user-visible states; never only an undifferentiated snapshot |
-| `test_layers` | Intended unit, integration, regression, accessibility, performance, Playwright, or usability consumers |
+| `test_layers` | Intended unit, component, integration, regression, accessibility, performance, Playwright, or usability consumers |
 | `provenance` | Author, creation date, and `synthetic`; an approved exception must include its review record |
 | `licence` | Repository licence for original synthetic material, or the approved source licence for an exception |
 | `sensitive_data` | Must be `none`; any other value rejects the fixture |
