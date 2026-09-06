@@ -212,13 +212,21 @@ test("the privacy page names the deployed storage and network services", async (
   await expect(
     page.getByRole("heading", {
       level: 2,
-      name: /tool content and browser storage/i,
+      name: /Information We Process/i,
     }),
   ).toBeVisible();
-  await expect(page.getByText("sessionStorage", { exact: true })).toBeVisible();
-  await expect(page.getByText("localStorage", { exact: true })).toBeVisible();
+  const browserStorageSection = page
+    .getByRole("heading", { level: 2, name: /Browser Storage/i })
+    .locator("..");
+  await expect(browserStorageSection).toBeVisible();
   await expect(
-    page.getByRole("heading", { level: 2, name: /Google Analytics/i }),
+    browserStorageSection.getByText("sessionStorage", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    browserStorageSection.getByText("localStorage", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { level: 2, name: /Analytics and Cookies/i }),
   ).toBeVisible();
   await expect(
     page.getByRole("heading", { level: 2, name: /Feedback/i }),
@@ -227,12 +235,35 @@ test("the privacy page names the deployed storage and network services", async (
     page.getByText(/passes that information to Resend/i),
   ).toBeVisible();
   await expect(
-    page.getByText(/does not currently run an advertising network/i),
+    page.getByText(
+      /does not currently run an advertising-network integration/i,
+    ),
   ).toBeVisible();
   await expect(
     page.getByText(
       /does not currently display a separate cookie-consent manager/i,
     ),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { level: 2, name: /Information Security/i }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", {
+      level: 2,
+      name: /International Data Transfers/i,
+    }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { level: 2, name: /Canadian Privacy Rights/i }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", {
+      level: 2,
+      name: /European Economic Area and United Kingdom Rights/i,
+    }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { level: 2, name: /California Privacy Rights/i }),
   ).toBeVisible();
 });
 
