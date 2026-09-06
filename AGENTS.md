@@ -127,6 +127,10 @@ Report any check that was not run and why. Do not claim verification based only 
 - Isolate feature implementation in a scoped worktree and DNS-safe branch. Feature-branch
   pushes do not deploy; pushing `staging` publishes the integrated staging environment at
   `staging.textytools.dev`.
+- Give each feature branch the same Linear issue or approved project owner as its worktree.
+  At owner closure, require its history to be reachable from `origin/staging`, remove its
+  registered worktree, and delete its local and remote branches. A cumulative project branch
+  remains active until the project—not an individual child issue—becomes terminal.
 - Never commit unverified implementation changes. Commit coherent, verified checkpoints
   when they provide a useful review or recovery boundary; do not commit merely because a
   cycle or agent turn ended.

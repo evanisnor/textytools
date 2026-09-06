@@ -6,10 +6,10 @@ and `main` through its Git integration.
 
 ## Environments and branches
 
-| Purpose | Git ref | Deployment |
-|---|---|---|
+| Purpose            | Git ref   | Deployment                       |
+| ------------------ | --------- | -------------------------------- |
 | Integrated staging | `staging` | `https://staging.textytools.dev` |
-| Production | `main` | `https://textytools.dev` |
+| Production         | `main`    | `https://textytools.dev`         |
 
 `main` is production and `staging` is its only permitted upstream integration branch.
 Never commit or push directly to `main`. Every production change, including urgent fixes,
@@ -150,9 +150,16 @@ Linear. Then remove the worktree from the primary checkout:
 git worktree remove ../textytools--text-42-improve-json-errors
 ```
 
-Do not close the Linear owner while its worktree remains registered. Removing the worktree
-does not require deleting its branch. Delete the branch only after the required history is
-reachable from `staging` and no more branch-specific validation is needed.
+The branch has the same Linear owner and lifecycle as its worktree. Do not close the Linear
+owner while its worktree remains registered or its owned branch remains active. Once the
+owner's required history is reachable from `origin/staging` and no branch-specific
+validation or planned change remains, remove the worktree and delete both the remote and
+local branch as part of closure. Do not retain closed-ticket branches on `origin` merely as
+archives; the reachable Git history and Linear delivery record provide that history.
+
+An approved cumulative branch is project-owned, like its worktree. Closing one child issue
+does not retire that branch while the project remains active. Retire it only when the project
+becomes terminal and the same integration and validation conditions are satisfied.
 
 ## Small single-commit fixes
 
