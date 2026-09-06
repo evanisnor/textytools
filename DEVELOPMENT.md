@@ -99,8 +99,6 @@ Validation:
 
 Use a concise imperative subject. Include `Changes` and `Validation` sections in the body;
 add a `Risks` or `Follow-up` section when relevant. Do not list checks that were not run.
-Merge commit subjects remain `Merge TEXT-42 into staging`, with the promoted outcome and
-staging validation recorded in Linear as described below.
 
 ## Deploy to staging
 
@@ -122,19 +120,20 @@ git -C ../textytools--text-42-improve-json-errors push origin text-42-improve-js
 git fetch origin
 git worktree add ../textytools--staging staging # omit when it already exists
 git -C ../textytools--staging pull --ff-only origin staging
-git -C ../textytools--staging merge --no-ff origin/text-42-improve-json-errors \
-  -m "Merge TEXT-42 into staging"
+git -C ../textytools--staging merge --ff-only origin/text-42-improve-json-errors
 git -C ../textytools--staging push origin staging
 ```
 
 Each staging deployment may promote one or more new feature commits. Continue working in
 the same feature worktree afterward. When another coherent group is ready, push the feature
-branch and repeat the merge into `staging`; Git will merge only the commits not already
+branch and repeat the fast-forward into `staging`; Git will advance only to commits not already
 reachable from staging.
 
-Use merge commits for feature integration. Do not squash, rebase, cherry-pick, or recreate
-feature changes. If the feature needs changes that landed on staging after its branch point,
-merge `origin/staging` into the feature branch; do not rebase published commits.
+Do not add merge commits to `staging` or `main`; both branches must retain linear history and
+advance only by fast-forward. Do not squash, rebase, cherry-pick, or recreate feature changes
+during routine integration. If the feature branch and `origin/staging` have diverged, stop:
+fast-forward integration cannot preserve the existing commits, and reconciling them requires
+an explicit decision before history is changed or recreated.
 
 Run the required checks for each promoted group and validate the integrated result at
 `https://staging.textytools.dev` after Vercel reports the deployment ready. Publish the
@@ -196,8 +195,8 @@ git push origin main
 
 Promotion must fast-forward. This preserves the exact staged commit graph and tree without
 inventing a production-only merge, squash, rebase, or cherry-pick. If `main` and `staging`
-have diverged, stop: merge `main` into `staging`, redeploy and revalidate staging, then retry
-the fast-forward promotion.
+have diverged, stop and investigate the invariant violation; do not add a reconciliation
+merge to either protected branch.
 
 After Vercel reports production ready, verify `https://textytools.dev` and publish the
 Linear production update with what shipped, exposure or feature-flag state, verification
@@ -228,6 +227,7 @@ Git and Linear must then be reconciled promptly so they again describe productio
 - A feature worktree may remain active across multiple staging deployments.
 - Each staging deployment preserves and promotes a coherent series of feature commits.
 - Only `staging` advances `main`.
+- `staging` and `main` receive no new merge commits and advance only by fast-forward.
 - Production promotion is fast-forward-only.
 - Direct commits and pushes to `main` are forbidden.
 - Force pushes are forbidden on every branch; published history is commit-forward.

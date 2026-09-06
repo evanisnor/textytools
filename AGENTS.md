@@ -103,10 +103,11 @@ Report any check that was not run and why. Do not claim verification based only 
 
 - Follow `DEVELOPMENT.md` for the required worktree, staging, and production workflow.
   Feature work happens in worktrees and a feature worktree may remain active across
-  multiple staging deployments. Merge each ready series of commits into `staging` with
-  its history intact, validate staging, then fast-forward `main` from `staging` for
-  production. Never commit or push directly to `main`; never squash, rebase, or
-  cherry-pick changes during integration or promotion.
+  multiple staging deployments. Fast-forward each ready series of commits into `staging`,
+  validate staging, then fast-forward `main` from `staging` for production. Do not add merge
+  commits to either protected branch. Never commit or push directly to `main`; never squash,
+  rebase, or cherry-pick changes during routine integration or promotion. If a feature branch
+  has diverged from `staging`, stop and request an explicit reconciliation decision.
 - Deploy to `staging` only when the user explicitly requests it, and perform the integration
   from a dedicated staging worktree. If staging validation is needed without an existing
   deployment request, stop after local validation and ask the user for approval.
