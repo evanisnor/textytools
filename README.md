@@ -10,6 +10,9 @@ Development and deployment follow the worktree → staging → production proces
 The verified behavior and boundaries of the nine public tools are recorded in
 [`CAPABILITIES.md`](CAPABILITIES.md).
 
+Result certainty, safety, processing, persistence, and recovery language is
+defined in [`TRUST.md`](TRUST.md).
+
 The synthetic test-data boundary and required scenario catalog are defined in
 [`FIXTURES.md`](FIXTURES.md).
 
